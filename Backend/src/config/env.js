@@ -62,6 +62,20 @@ const env = {
 
   // Refresh Token (Remember Me)
   refreshTokenExpiresDays: parseInt(process.env.REFRESH_TOKEN_EXPIRES_DAYS, 10) || 30,
+
+  // Payment gateway (Razorpay) — project.md §10 Decision 3.
+  //
+  // keySecret NEVER leaves the backend. It signs and verifies; the frontend
+  // only ever sees keyId, which is public by design. If keySecret is ever
+  // exposed to a client bundle, every payment on the account becomes forgeable.
+  razorpay: {
+    keyId: process.env.RAZORPAY_KEY_ID,
+    keySecret: process.env.RAZORPAY_KEY_SECRET,
+    currency: process.env.RAZORPAY_CURRENCY || 'INR',
+    // A ceiling on a single order, in paise. Bounds the damage if a caller
+    // ever manages to influence the amount. Default 10,00,000.00.
+    maxOrderPaise: parseInt(process.env.RAZORPAY_MAX_ORDER_PAISE, 10) || 100000000,
+  },
 };
 
 /**
@@ -79,6 +93,11 @@ function validateEnv() {
 
   if (!env.smtp.user) warnings.push('SMTP_USER');
   if (!env.smtp.pass) warnings.push('SMTP_PASS');
+
+  // Not critical: the rest of the system runs fine without a gateway
+  // configured. The gateway routes refuse to act when it is missing.
+  if (!env.razorpay.keyId) warnings.push('RAZORPAY_KEY_ID');
+  if (!env.razorpay.keySecret) warnings.push('RAZORPAY_KEY_SECRET');
 
   if (critical.length > 0) {
     console.error(`[ENV] FATAL: Missing critical environment variables: ${critical.join(', ')}`);

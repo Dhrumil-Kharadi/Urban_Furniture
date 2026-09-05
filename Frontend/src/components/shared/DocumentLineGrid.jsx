@@ -7,7 +7,7 @@ import TaxPicker from '../pickers/TaxPicker';
 import AccountPicker from '../pickers/AccountPicker';
 import AnalyticAccountPicker from '../pickers/AnalyticAccountPicker';
 import { formatMoney } from '@/utils/format';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 /**
  * DocumentLineGrid Component
@@ -23,7 +23,14 @@ import { useLocale } from 'next-intl';
  * - priceField: 'costPrice' | 'salesPrice'
  * - taxScope: 'purchase' | 'sales'
  * - showAccount: boolean (requires GL account selection per line)
+ * - accountField: 'expense_account_id' | 'income_account_id'
  * - readOnly: boolean
+ *
+ * accountField exists because the two sides post to different columns: a
+ * purchase line debits an expense account, a sales line credits an income
+ * account. Emitting expense_account_id on a sales line would send the server
+ * a field it does not read, and the invoice would fail to post with no
+ * income account on any line.
  */
 export default function DocumentLineGrid({
   lines = [],
@@ -36,7 +43,15 @@ export default function DocumentLineGrid({
   },
 }) {
   const locale = useLocale();
-  const { priceField = 'costPrice', taxScope = 'purchase', showAccount = false, readOnly = false } = config;
+  const t = useTranslations('documentLines');
+  const {
+    priceField = 'costPrice',
+    taxScope = 'purchase',
+    showAccount = false,
+    readOnly = false,
+    // Defaults to the purchase column so existing callers are unaffected.
+    accountField = priceField === 'salesPrice' ? 'income_account_id' : 'expense_account_id',
+  } = config;
 
   const handleAddRow = () => {
     if (readOnly) return;
@@ -51,7 +66,7 @@ export default function DocumentLineGrid({
       tax_amount: '0.00',
       total_amount: '0.00',
       analytic_account_id: null,
-      expense_account_id: null,
+      [accountField]: null,
     };
     onChange([...lines, newLine]);
   };
@@ -105,7 +120,7 @@ export default function DocumentLineGrid({
       description: lines[index].description || product.name,
       unit_price: parseFloat(price) || 0,
       tax_id: defaultTaxId || lines[index].tax_id,
-      expense_account_id: defaultAccount || lines[index].expense_account_id,
+      [accountField]: defaultAccount || lines[index][accountField],
     };
 
     const updatedLine = recalculateLine(line);
@@ -128,29 +143,29 @@ export default function DocumentLineGrid({
   };
 
   return (
-    <div className="w-full space-y-3">
-      <div className="overflow-x-auto rounded-xl border border-gray-700/60 bg-gray-900/50 shadow-inner">
-        <table className="w-full text-left text-sm text-gray-300 border-collapse min-w-[750px]">
+    <div className="line-grid-container">
+      <div className="doc-table-wrap">
+        <table className="line-grid-table">
           <thead>
-            <tr className="border-b border-gray-700/80 bg-gray-800/60 text-xs font-semibold uppercase tracking-wider text-gray-400">
-              <th className="py-3 px-3 w-10 text-center">#</th>
-              <th className="py-3 px-3 min-w-[200px]">Product / Item</th>
-              <th className="py-3 px-3 min-w-[180px]">Description</th>
-              {showAccount && <th className="py-3 px-3 min-w-[170px]">Account</th>}
-              <th className="py-3 px-3 w-24">Qty</th>
-              <th className="py-3 px-3 w-32">Unit Price</th>
-              <th className="py-3 px-3 min-w-[150px]">Tax</th>
-              <th className="py-3 px-3 min-w-[150px]">Cost Center</th>
-              <th className="py-3 px-3 w-28 text-right">Subtotal</th>
-              {!readOnly && <th className="py-3 px-2 w-12 text-center"></th>}
+            <tr>
+              <th className="line-grid-th">#</th>
+              <th className="line-grid-th">{t('product')}</th>
+              <th className="line-grid-th">{t('description')}</th>
+              {showAccount && <th className="line-grid-th">Account</th>}
+              <th className="line-grid-th">{t('quantity')}</th>
+              <th className="line-grid-th">{t('unitPrice')}</th>
+              <th className="line-grid-th">{t('tax')}</th>
+              <th className="line-grid-th">{t('analytic')}</th>
+              <th className="line-grid-th">{t('subtotal')}</th>
+              {!readOnly && <th className="line-grid-th"></th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-800/80">
+          <tbody>
             {lines.length === 0 ? (
               <tr>
                 <td
                   colSpan={showAccount ? 10 : 9}
-                  className="py-8 text-center text-gray-500 italic bg-gray-900/30"
+                  className="doc-cell-muted"
                 >
                   No items added yet. Click &quot;Add Line Item&quot; below to add products.
                 </td>
@@ -159,14 +174,14 @@ export default function DocumentLineGrid({
               lines.map((line, idx) => (
                 <tr
                   key={idx}
-                  className="hover:bg-gray-800/40 transition-colors duration-150"
+
                 >
-                  <td className="py-3 px-3 text-center text-xs font-mono text-gray-500">
+                  <td className="line-grid-td">
                     {idx + 1}
                   </td>
-                  <td className="py-2 px-2">
+                  <td className="line-grid-td">
                     {readOnly ? (
-                      <span className="font-medium text-gray-200">
+                      <span >
                         {line.product_name || line.description || 'Custom Item'}
                       </span>
                     ) : (
@@ -178,13 +193,13 @@ export default function DocumentLineGrid({
                       />
                     )}
                   </td>
-                  <td className="py-2 px-2">
+                  <td className="line-grid-td">
                     {readOnly ? (
-                      <span className="text-gray-300 text-xs">{line.description}</span>
+                      <span >{line.description}</span>
                     ) : (
                       <input
                         type="text"
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-gray-800/90 border border-gray-700 text-xs text-gray-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                        
                         placeholder="Item description…"
                         value={line.description || ''}
                         onChange={(e) => handleFieldChange(idx, 'description', e.target.value)}
@@ -193,14 +208,14 @@ export default function DocumentLineGrid({
                     )}
                   </td>
                   {showAccount && (
-                    <td className="py-2 px-2">
+                    <td className="line-grid-td">
                       {readOnly ? (
-                        <span className="text-xs text-gray-300">{line.account_name || '—'}</span>
+                        <span className="doc-cell-muted">{line.account_name || '—'}</span>
                       ) : (
                         <AccountPicker
-                          value={line.expense_account_id}
+                          value={line[accountField]}
                           onChange={(acc) =>
-                            handleFieldChange(idx, 'expense_account_id', acc ? acc.id : null)
+                            handleFieldChange(idx, accountField, acc ? acc.id : null)
                           }
                           type={priceField === 'costPrice' ? 'expense' : 'income'}
                           disabled={readOnly}
@@ -208,24 +223,24 @@ export default function DocumentLineGrid({
                       )}
                     </td>
                   )}
-                  <td className="py-2 px-2">
+                  <td className="line-grid-td">
                     {readOnly ? (
-                      <span className="font-mono text-xs">{line.quantity}</span>
+                      <span className="doc-cell-code">{line.quantity}</span>
                     ) : (
                       <input
                         type="number"
                         min="0.0001"
                         step="any"
-                        className="w-full px-2 py-1.5 rounded-lg bg-gray-800/90 border border-gray-700 text-xs font-mono text-gray-200 focus:outline-none focus:border-indigo-500"
+                        className="form-input line-grid-input"
                         value={line.quantity || ''}
                         onChange={(e) => handleFieldChange(idx, 'quantity', e.target.value)}
                         disabled={readOnly}
                       />
                     )}
                   </td>
-                  <td className="py-2 px-2">
+                  <td className="line-grid-td">
                     {readOnly ? (
-                      <span className="font-mono text-xs text-gray-200">
+                      <span className="doc-cell-code">
                         {formatMoney(line.unit_price, locale)}
                       </span>
                     ) : (
@@ -233,16 +248,16 @@ export default function DocumentLineGrid({
                         type="number"
                         min="0"
                         step="0.01"
-                        className="w-full px-2 py-1.5 rounded-lg bg-gray-800/90 border border-gray-700 text-xs font-mono text-gray-200 focus:outline-none focus:border-indigo-500"
+                        className="form-input line-grid-input"
                         value={line.unit_price || ''}
                         onChange={(e) => handleFieldChange(idx, 'unit_price', e.target.value)}
                         disabled={readOnly}
                       />
                     )}
                   </td>
-                  <td className="py-2 px-2">
+                  <td className="line-grid-td">
                     {readOnly ? (
-                      <span className="text-xs text-gray-300">
+                      <span className="doc-cell-muted">
                         {line.tax_rate ? `${line.tax_rate}%` : '0%'}
                       </span>
                     ) : (
@@ -254,9 +269,9 @@ export default function DocumentLineGrid({
                       />
                     )}
                   </td>
-                  <td className="py-2 px-2">
+                  <td className="line-grid-td">
                     {readOnly ? (
-                      <span className="text-xs text-gray-400">
+                      <span className="doc-cell-muted">
                         {line.analytic_account_name || '—'}
                       </span>
                     ) : (
@@ -269,18 +284,18 @@ export default function DocumentLineGrid({
                       />
                     )}
                   </td>
-                  <td className="py-2 px-3 text-right font-mono text-xs font-medium text-emerald-400">
+                  <td className="line-grid-td">
                     {formatMoney(line.untaxed_amount || 0, locale)}
                   </td>
                   {!readOnly && (
-                    <td className="py-2 px-2 text-center">
+                    <td className="line-grid-td">
                       <button
                         type="button"
                         onClick={() => handleRemoveRow(idx)}
-                        className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                        
                         title="Delete line"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2  />
                       </button>
                     </td>
                   )}
@@ -292,16 +307,16 @@ export default function DocumentLineGrid({
       </div>
 
       {!readOnly && (
-        <div className="flex items-center justify-between pt-1">
+        <div className="line-grid-actions">
           <button
             type="button"
             onClick={handleAddRow}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg text-indigo-300 bg-indigo-950/50 border border-indigo-700/50 hover:bg-indigo-900/60 hover:border-indigo-600 transition-all shadow-sm"
+            className="line-grid-actions-btn"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus  />
             Add Line Item
           </button>
-          <span className="text-xs text-gray-500">
+          <span className="doc-cell-muted">
             {lines.length} {lines.length === 1 ? 'item' : 'items'}
           </span>
         </div>

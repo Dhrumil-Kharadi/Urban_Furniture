@@ -18,7 +18,9 @@
     "test:phase5:unit": "jest tests/phase5-validation.test.js",
     "test:phase7": "jest tests/phase7-ledger-unit.test.js tests/phase7-ledger.test.js --runInBand",
     "test:phase7:unit": "jest tests/phase7-ledger-unit.test.js",
-    "test:units": "jest tests/phase5-validation.test.js tests/phase6-validation.test.js tests/phase7-ledger-unit.test.js"
+    "test:units": "jest tests/phase5-validation.test.js tests/phase6-validation.test.js tests/phase7-ledger-unit.test.js tests/phase9-10-unit.test.js tests/gateway-razorpay.test.js",
+    "test:phase9": "jest tests/phase9-10-unit.test.js tests/phase9-10-integration.test.js --runInBand",
+    "test:phase10": "jest tests/phase9-10-unit.test.js tests/phase9-10-integration.test.js --runInBand"
   },
   "keywords": [],
   "author": "",
@@ -36,7 +38,8 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "nodemailer": "^9.0.5",
-    "pg": "^8.23.0"
+    "pg": "^8.23.0",
+    "razorpay": "^2.9.8"
   },
   "devDependencies": {
     "jest": "^30.5.1",

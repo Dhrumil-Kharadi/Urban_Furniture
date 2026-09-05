@@ -1,20 +1,67 @@
+'use client';
+
 /**
- * @file New Customer Invoice Form Page
+ * @file Create Customer Invoice
  * @route /dashboard/customer-invoices/new
- * @spec Doc/project.md §5.2, Doc/phase.md Phase 9
- * 
- * REQUIREMENTS & SPECIFICATION:
- * - Create a Customer Invoice manually or from an approved Sales Order.
- * - Header Fields: Customer, Invoice Date, Due Date, Payment Reference.
- * - Lines Grid: Product, Income Account, Qty, Price, Tax (Output GST), Analytic Account.
- * - Validation: Customer required, balanced pricing, valid accounts.
+ * @spec Doc/project.md §5.2, Doc/phase.md Phase 9, Doc/strict.md
+ *
+ * Creates a DRAFT. Posting is separate and deliberate — it writes to the
+ * ledger, and cannot be undone, only reversed.
  */
 
+import React, { useState } from 'react';
+import { ArrowLeft, Receipt } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useRouter, Link } from '@/i18n/navigation';
+import { useToast } from '@/components/shared';
+import CustomerInvoiceForm from '@/components/customer-invoices/CustomerInvoiceForm';
+import { customerInvoicesService } from '@/services/sales.service';
+
 export default function NewCustomerInvoicePage() {
+  const t = useTranslations('customerInvoices');
+  const tc = useTranslations('common');
+  const router = useRouter();
+  const { showSuccess, showError } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (formData) => {
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      const { invoice } = await customerInvoicesService.create(formData);
+      showSuccess(t('toast.created'));
+      router.push(`/dashboard/customer-invoices/${invoice.id}`);
+    } catch (err) {
+      showError(err.message || tc('toast.error'));
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">New Customer Invoice</h1>
-      <p className="text-gray-500 mt-2">Create customer invoice with automatic output tax calculation.</p>
+    <div className="doc-page">
+      <div className="doc-page-head-left">
+        <Link
+          href="/dashboard/customer-invoices"
+          className="doc-btn doc-btn-icon"
+          aria-label={tc('actions.back')}
+        >
+          <ArrowLeft size={15} aria-hidden="true" />
+        </Link>
+        <div>
+          <h1 className="doc-page-title">
+            <Receipt size={19} className="doc-icon-accent" aria-hidden="true" />
+            {t('new.title')}
+          </h1>
+          <p className="doc-page-sub">{t('new.subtitle')}</p>
+        </div>
+      </div>
+
+      <CustomerInvoiceForm
+        onSubmit={handleSubmit}
+        onCancel={() => router.push('/dashboard/customer-invoices')}
+        isSubmitting={loading}
+      />
     </div>
   );
 }

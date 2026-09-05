@@ -144,3 +144,396 @@
     gap: 0.5rem;
   }
 }
+
+/* ============================================================
+   Document page chrome — list headers, tables, action buttons.
+
+   Added so the transaction pages can drop their Tailwind utility classes.
+   Every colour is a var(--*) from globals.css :root; fonts are Orbitron
+   (headings, numbers, codes) and Sora (body, labels, controls) only.
+   ============================================================ */
+
+.doc-page {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.doc-page-narrow {
+  max-width: 860px;
+}
+
+.doc-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.doc-page-head-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.doc-page-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.doc-page-sub {
+  font-family: 'Sora', sans-serif;
+  font-weight: 300;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 0.15rem 0 0;
+}
+
+.doc-page-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* ── Buttons ── */
+
+.doc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-raised);
+  color: var(--text-primary);
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: box-shadow 160ms ease, background 160ms ease;
+  box-shadow: 4px 4px 10px var(--nm-shadow-dark),
+              -2px -2px 6px var(--nm-shadow-light);
+}
+
+.doc-btn:hover:not(:disabled) {
+  box-shadow: inset 3px 3px 7px var(--nm-inset-dark),
+              inset -2px -2px 5px var(--nm-inset-light);
+}
+
+.doc-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.doc-btn-primary {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--dash-nav-active-solid-text);
+  box-shadow: 0 8px 18px -8px var(--glow-strong);
+}
+
+.doc-btn-primary:hover:not(:disabled) {
+  box-shadow: 0 12px 24px -8px var(--glow-strong);
+}
+
+.doc-btn-icon {
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+/* ── Filter row ── */
+
+.doc-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.doc-filter-grow {
+  flex: 1 1 220px;
+  min-width: 180px;
+}
+
+.doc-filter-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.doc-filter-check input {
+  accent-color: var(--accent-primary);
+}
+
+/* ── Data table ── */
+
+.doc-table-wrap {
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow-x: auto;
+  background: var(--bg-card);
+  box-shadow: 4px 4px 10px var(--nm-shadow-dark),
+              -2px -2px 6px var(--nm-shadow-light);
+}
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+}
+
+.doc-table thead th {
+  text-align: left;
+  padding: 0.8rem 1rem;
+  font-weight: 500;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  white-space: nowrap;
+}
+
+.doc-table tbody td {
+  padding: 0.8rem 1rem;
+  border-top: 1px solid var(--dash-divider);
+  color: var(--text-primary);
+}
+
+.doc-table tbody tr.is-clickable {
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.doc-table tbody tr.is-clickable:hover {
+  background: var(--dash-nav-hover-bg);
+}
+
+.doc-cell-code {
+  font-family: 'Orbitron', monospace;
+  font-weight: 400;
+  font-size: 0.76rem;
+  letter-spacing: 0.03em;
+  color: var(--text-secondary);
+}
+
+.doc-cell-muted {
+  color: var(--text-secondary);
+}
+
+/* Money right-aligned with tabular figures so decimal points line up. */
+.doc-cell-money {
+  font-family: 'Orbitron', monospace;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.doc-th-right {
+  text-align: right;
+}
+
+/* ── Summary strip ── */
+
+.doc-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--bg-raised);
+  box-shadow: 4px 4px 10px var(--nm-shadow-dark),
+              -2px -2px 6px var(--nm-shadow-light);
+}
+
+.doc-summary-label {
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 0.2rem;
+}
+
+.doc-summary-value {
+  font-family: 'Orbitron', monospace;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.doc-summary-value.is-strong {
+  font-weight: 700;
+}
+
+/* ── Inline panel (convert-to-invoice, etc.) ── */
+
+.doc-panel {
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.doc-panel-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.doc-panel-body {
+  font-family: 'Sora', sans-serif;
+  font-weight: 300;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.doc-panel-field {
+  max-width: 22rem;
+}
+
+/* ── Overdue marker — carried by weight and an icon, not by hue ── */
+
+.doc-overdue-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  font-size: 0.72rem;
+  color: var(--dash-danger-text);
+}
+
+/* ── Choice cards on the payment landing page ── */
+
+.doc-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.doc-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--bg-raised);
+  text-decoration: none;
+  transition: box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.doc-choice:hover {
+  border-color: var(--border-medium);
+  box-shadow: 4px 4px 10px var(--nm-shadow-dark),
+              -2px -2px 6px var(--nm-shadow-light);
+}
+
+.doc-choice-title {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.doc-choice-hint {
+  font-family: 'Sora', sans-serif;
+  font-weight: 300;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin: 0.15rem 0 0;
+}
+
+.doc-icon-accent {
+  color: var(--accent-primary);
+  flex: none;
+}
+
+.doc-loading {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 1.5rem;
+}
+
+.doc-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.doc-section-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.doc-section-error {
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--dash-danger-text);
+}
+
+.doc-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.doc-totals-right {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+}
+
+@media (max-width: 767px) {
+  .doc-page {
+    padding: 1rem;
+  }
+
+  .doc-page-head {
+    flex-direction: column;
+  }
+
+  .doc-summary {
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+}

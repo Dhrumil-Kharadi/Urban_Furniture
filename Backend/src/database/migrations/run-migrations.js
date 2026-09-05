@@ -47,6 +47,10 @@ const migrations = [
   require('./018_create_document_sequences'),
   require('./019_create_purchase_orders'),
   require('./020_create_vendor_bills'),
+  require('./021_create_sales_orders'),
+  require('./022_create_customer_invoices'),
+  require('./023_create_payments'),
+  require('./024_create_payment_allocations'),
   require('./026_create_audit_logs'),
   require('./028_ledger_integrity_triggers'),
 ];

@@ -12,6 +12,11 @@ const { money, toDb, mul, sum } = require('../shared/money');
 const { withTransaction } = require('../shared/withTransaction');
 const sequenceService = require('../shared/sequence.service');
 const auditService = require('../shared/audit.service');
+const {
+  computeLineTotals: sharedComputeLineTotals,
+  resolveAndComputeLines: sharedResolveAndComputeLines,
+  PURCHASE_CONFIG,
+} = require('../shared/documentLines');
 const purchasesRepository = require('./purchases.repository');
 const logger = require('../utils/logger');
 
@@ -23,99 +28,34 @@ function fail(message, statusCode = 400) {
 }
 
 /**
- * Compute line-level and header-level totals from raw lines.
- * Client-sent totals are never trusted.
+ * Line arithmetic for purchase documents.
  *
+ * The maths itself lives in shared/documentLines.js, which the sales side uses
+ * too — configured for the purchase fields (cost price, purchase tax, expense
+ * account). Keeping one engine is what stops a purchase bill and a sales
+ * invoice totalling differently for the same numbers.
+ *
+ * These wrappers keep the names vendorBills.service.js already imports.
+ */
+
+/**
  * @param {Array} rawLines
  * @returns {{ computedLines: Array, untaxed_amount: string, tax_amount: string, total_amount: string }}
  */
 function computeLineTotals(rawLines) {
-  const computedLines = rawLines.map((line, index) => {
-    const qty = money(line.quantity);
-    const unitPrice = money(line.unit_price);
-    const taxRate = money(line.tax_rate || 0);
-
-    const untaxed = qty.times(unitPrice).toFixed(2);
-    const taxAmt = money(untaxed).times(taxRate).dividedBy(100).toFixed(2);
-    const total = money(untaxed).plus(money(taxAmt)).toFixed(2);
-
-    return {
-      line_no: index + 1,
-      product_id: line.product_id || null,
-      description: (line.description || '').trim(),
-      quantity: toDb(qty),
-      unit_price: toDb(unitPrice),
-      tax_id: line.tax_id || null,
-      tax_rate: taxRate.toFixed(4),
-      untaxed_amount: untaxed,
-      tax_amount: taxAmt,
-      total_amount: total,
-      analytic_account_id: line.analytic_account_id || null,
-      expense_account_id: line.expense_account_id || null,
-    };
-  });
-
-  const headerUntaxed = sum(computedLines.map(l => l.untaxed_amount));
-  const headerTax = sum(computedLines.map(l => l.tax_amount));
-  const headerTotal = sum(computedLines.map(l => l.total_amount));
-
-  return {
-    computedLines,
-    untaxed_amount: headerUntaxed,
-    tax_amount: headerTax,
-    total_amount: headerTotal,
-  };
+  return sharedComputeLineTotals(rawLines, PURCHASE_CONFIG);
 }
 
 /**
- * Resolve product and tax metadata from database, then recompute totals.
+ * Resolve product and tax defaults, then recompute the totals.
+ *
+ * @param {object|null} client
+ * @param {string} organizationId
+ * @param {Array} rawLines
+ * @returns {Promise<{ computedLines: Array, untaxed_amount: string, tax_amount: string, total_amount: string }>}
  */
 async function resolveAndComputeLines(client, organizationId, rawLines) {
-  const { pool } = require('../config/db');
-  const db = client || pool;
-  const productIds = [...new Set(rawLines.map(l => l.product_id).filter(Boolean))];
-  const taxIds = [...new Set(rawLines.map(l => l.tax_id).filter(Boolean))];
-
-  let productMap = {};
-  if (productIds.length > 0) {
-    const pRes = await db.query(
-      `SELECT id, name, expense_account_id, purchase_tax_id FROM products WHERE id = ANY($1) AND organization_id = $2`,
-      [productIds, organizationId]
-    );
-    for (const row of pRes.rows) {
-      productMap[row.id] = row;
-    }
-  }
-
-  let taxMap = {};
-  if (taxIds.length > 0) {
-    const tRes = await db.query(
-      `SELECT id, rate FROM taxes WHERE id = ANY($1) AND organization_id = $2`,
-      [taxIds, organizationId]
-    );
-    for (const row of tRes.rows) {
-      taxMap[row.id] = row.rate;
-    }
-  }
-
-  const enrichedLines = rawLines.map((line) => {
-    const prod = line.product_id ? productMap[line.product_id] : null;
-    let taxId = line.tax_id || prod?.purchase_tax_id || null;
-    let taxRateVal = (line.tax_rate !== undefined && line.tax_rate !== null && line.tax_rate !== '')
-      ? line.tax_rate
-      : (taxId && taxMap[taxId] !== undefined ? taxMap[taxId] : 0);
-    let expenseAcc = line.expense_account_id || prod?.expense_account_id || null;
-
-    return {
-      ...line,
-      tax_id: taxId,
-      tax_rate: taxRateVal,
-      expense_account_id: expenseAcc,
-      description: line.description || prod?.name || '',
-    };
-  });
-
-  return computeLineTotals(enrichedLines);
+  return sharedResolveAndComputeLines(client, organizationId, rawLines, PURCHASE_CONFIG);
 }
 
 const purchaseOrdersService = {
