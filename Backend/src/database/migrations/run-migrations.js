@@ -36,7 +36,9 @@ const migrations = [
   require('./006_create_organizations'),
   require('./007_add_organization_to_users'),
   require('./008_create_accounts'),
+  require('./011_create_taxes'),
   require('./013_create_journals'),
+  require('./014_create_analytic_accounts'),
   require('./018_create_document_sequences'),
   require('./026_create_audit_logs'),
 ];
