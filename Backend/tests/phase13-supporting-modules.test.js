@@ -60,7 +60,7 @@ describe('Phase 13: Supporting Modules (Dashboard, Notifications, Attachments, A
     // 3. Create admin user
     const adminRes = await pool.query(
       `INSERT INTO users (name, email, password_hash, role, email_verified, organization_id)
-       VALUES ($1, $2, 'hash', 'admin', true, $3) RETURNING id`,
+       VALUES ($1, $2, 'hash', 'business_owner', true, $3) RETURNING id`,
       ['P13 Admin', `p13_admin_${suffix}@test.com`, orgId]
     );
     adminId = adminRes.rows[0].id;
@@ -68,7 +68,7 @@ describe('Phase 13: Supporting Modules (Dashboard, Notifications, Attachments, A
     // 4. Create manager user
     const managerRes = await pool.query(
       `INSERT INTO users (name, email, password_hash, role, email_verified, organization_id)
-       VALUES ($1, $2, 'hash', 'manager', true, $3) RETURNING id`,
+       VALUES ($1, $2, 'hash', 'accountant', true, $3) RETURNING id`,
       ['P13 Manager', `p13_manager_${suffix}@test.com`, orgId]
     );
     managerId = managerRes.rows[0].id;
@@ -76,7 +76,7 @@ describe('Phase 13: Supporting Modules (Dashboard, Notifications, Attachments, A
     // 5. Create Other Org admin
     const otherAdminRes = await pool.query(
       `INSERT INTO users (name, email, password_hash, role, email_verified, organization_id)
-       VALUES ($1, $2, 'hash', 'admin', true, $3) RETURNING id`,
+       VALUES ($1, $2, 'hash', 'business_owner', true, $3) RETURNING id`,
       ['Other Admin', `other_admin_${suffix}@test.com`, otherOrgId]
     );
     otherOrgAdminId = otherAdminRes.rows[0].id;
@@ -109,19 +109,19 @@ describe('Phase 13: Supporting Modules (Dashboard, Notifications, Attachments, A
 
     const cuRes = await pool.query(
       `INSERT INTO users (name, email, password_hash, role, email_verified, organization_id, contact_id)
-       VALUES ($1, $2, 'hash', 'user', true, $3, $4) RETURNING id`,
+       VALUES ($1, $2, 'hash', 'customer', true, $3, $4) RETURNING id`,
       ['Customer User', `c_user_p13_${suffix}@test.com`, orgId, customerContactId]
     );
     customerUserId = cuRes.rows[0].id;
 
     // 8. Generate sessions for privileged users and JWT for customer portal
-    adminSid = authSession.createSession(adminId, 'admin', false).sessionId;
-    managerSid = authSession.createSession(managerId, 'manager', false).sessionId;
-    otherOrgSid = authSession.createSession(otherOrgAdminId, 'admin', false).sessionId;
+    adminSid = authSession.createSession(adminId, 'business_owner', false).sessionId;
+    managerSid = authSession.createSession(managerId, 'accountant', false).sessionId;
+    otherOrgSid = authSession.createSession(otherOrgAdminId, 'business_owner', false).sessionId;
 
     customerToken = authJwt.generateToken({
       id: customerUserId,
-      role: 'user',
+      role: 'customer',
       token_version: 1,
     });
 
@@ -238,14 +238,14 @@ describe('Phase 13: Supporting Modules (Dashboard, Notifications, Attachments, A
       expect(parseFloat(otherRes.body.data.kpis.totalReceivable)).toBe(5000.00);
     });
 
-    test("Portal dashboard shows ONLY the contact's own figures (role 'user')", async () => {
+    test("Portal dashboard shows ONLY the contact's own figures (contact role)", async () => {
       const res = await asCustomer(
         request(app).get('/api/dashboard/summary')
       );
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.role).toBe('user');
+      expect(res.body.data.role).toBe('customer');
       expect(res.body.data.kpis).toHaveProperty('totalOutstanding');
       expect(res.body.data.kpis).toHaveProperty('totalOverdue');
       expect(res.body.data.kpis).toHaveProperty('paidThisYear');

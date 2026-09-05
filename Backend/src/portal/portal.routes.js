@@ -21,7 +21,7 @@ const { error } = require('../utils/response');
 const router = express.Router();
 
 /**
- * Guard asserting user has role 'user' and is linked to an active portal-enabled contact.
+ * Guard asserting the caller is a contact portal account linked to an active portal-enabled contact.
  */
 async function requirePortalContact(req, res, next) {
   if (!req.user || req.user.role !== 'customer' || !req.user.contact_id) {

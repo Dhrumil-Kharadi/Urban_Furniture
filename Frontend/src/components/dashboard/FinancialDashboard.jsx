@@ -28,6 +28,13 @@ import {
 } from '@/reusablefiles/graphs';
 import Button from '@/reusablefiles/button';
 
+const PERIODS = ['this_month', 'this_quarter', 'this_year'];
+
+/** Single currency — Phase 0 Decision 5 fixes the org to INR. */
+function money(value) {
+  return `₹${parseFloat(value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+}
+
 export default function FinancialDashboard() {
   const t = useTranslations('dashboard.summary');
   const tCommon = useTranslations('dashboard.common');
@@ -41,18 +48,19 @@ export default function FinancialDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get('/dashboard/summary', {
-        params: { period },
-      });
-      if (res.data?.success) {
-        setData(res.data.data);
+      // The API client returns the parsed envelope itself — `res.success` and
+      // `res.data`. Reading `res.data.success` here left `data` permanently
+      // null, which is why every KPI on this page rendered as zero.
+      const res = await api.get('/dashboard/summary', { params: { period } });
+      if (res.success) {
+        setData(res.data);
       }
     } catch (err) {
-      setError(err?.response?.data?.error?.message || err?.message || 'Failed to load financial dashboard');
+      setError(err?.message || t('loadError'));
     } finally {
       setLoading(false);
     }
-  }, [period]);
+  }, [period, t]);
 
   useEffect(() => {
     fetchSummary();
@@ -77,40 +85,46 @@ export default function FinancialDashboard() {
     const expenseData = raw.map((m) => parseFloat(m.expense) || 0);
 
     return {
-      categories: categories.length ? categories : ['No Data'],
+      categories: categories.length ? categories : ['—'],
       series: [
-        { name: 'Income', data: incomeData.length ? incomeData : [0], color: 'var(--graph-series-1)' },
-        { name: 'Expense', data: expenseData.length ? expenseData : [0], color: 'var(--graph-series-5)' },
+        { name: t('series.income'), data: incomeData.length ? incomeData : [0], color: 'var(--graph-series-1)' },
+        { name: t('series.expense'), data: expenseData.length ? expenseData : [0], color: 'var(--graph-series-5)' },
       ],
     };
-  }, [series.monthlyIncomeExpense]);
+  }, [series.monthlyIncomeExpense, t]);
 
   // 2. BarChart: Accounts Receivable Aging
-  const agingData = useMemo(() => {
-    return (series.receivableAging || []).map((a, idx) => ({
-      label: a.bucket,
-      value: parseFloat(a.amount) || 0,
-      color: seriesColor(idx * 2),
-    }));
-  }, [series.receivableAging]);
+  const agingData = useMemo(
+    () =>
+      (series.receivableAging || []).map((a, idx) => ({
+        label: a.bucket,
+        value: parseFloat(a.amount) || 0,
+        color: seriesColor(idx * 2),
+      })),
+    [series.receivableAging],
+  );
 
   // 3. BarChart: Top 5 Customers
-  const topCustomersData = useMemo(() => {
-    return (series.topCustomers || []).map((c, idx) => ({
-      label: c.name || 'Customer',
-      value: parseFloat(c.totalSales) || 0,
-      color: seriesColor(idx),
-    }));
-  }, [series.topCustomers]);
+  const topCustomersData = useMemo(
+    () =>
+      (series.topCustomers || []).map((c, idx) => ({
+        label: c.name || '—',
+        value: parseFloat(c.totalSales) || 0,
+        color: seriesColor(idx),
+      })),
+    [series.topCustomers],
+  );
 
   // 4. DonutChart: Expense Breakdown
-  const expenseDonutData = useMemo(() => {
-    return (series.expenseBreakdown || []).map((e, idx) => ({
-      label: e.label,
-      value: parseFloat(e.value) || 0,
-      color: seriesColor(idx * 2),
-    }));
-  }, [series.expenseBreakdown]);
+  const expenseDonutData = useMemo(
+    () =>
+      (series.expenseBreakdown || []).map((e, idx) => ({
+        label: e.label,
+        value: parseFloat(e.value) || 0,
+        color: seriesColor(idx * 2),
+      })),
+    [series.expenseBreakdown],
+  );
 
   // 5. Sparkline: Cash Movement Trend
   const cashTrendPoints = useMemo(() => {
@@ -124,35 +138,25 @@ export default function FinancialDashboard() {
       {/* Header & Period Selector */}
       <div className="fin-dash-header">
         <div className="fin-dash-header-content">
-          <span className="fin-dash-badge">Technical Recommendation</span>
+          <span className="fin-dash-badge">{t('badge')}</span>
           <h1 className="fin-dash-title">{t('title')}</h1>
           <p className="fin-dash-subtitle">{t('subtitle')}</p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div className="fin-dash-toolbar">
           {/* Unified Period Selector */}
           <div className="fin-dash-period-selector" role="group" aria-label={t('period')}>
-            <button
-              type="button"
-              className={`fin-dash-period-btn ${period === 'this_month' ? 'active' : ''}`}
-              onClick={() => setPeriod('this_month')}
-            >
-              {t('periods.this_month')}
-            </button>
-            <button
-              type="button"
-              className={`fin-dash-period-btn ${period === 'this_quarter' ? 'active' : ''}`}
-              onClick={() => setPeriod('this_quarter')}
-            >
-              {t('periods.this_quarter')}
-            </button>
-            <button
-              type="button"
-              className={`fin-dash-period-btn ${period === 'this_year' ? 'active' : ''}`}
-              onClick={() => setPeriod('this_year')}
-            >
-              {t('periods.this_year')}
-            </button>
+            {PERIODS.map((key) => (
+              <button
+                key={key}
+                type="button"
+                className={`fin-dash-period-btn ${period === key ? 'active' : ''}`}
+                onClick={() => setPeriod(key)}
+                aria-pressed={period === key}
+              >
+                {t(`periods.${key}`)}
+              </button>
+            ))}
           </div>
 
           <Button
@@ -169,7 +173,7 @@ export default function FinancialDashboard() {
       {loading && !data ? (
         <DashboardSkeleton count={4} />
       ) : error ? (
-        <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}>{error}</div>
+        <div className="fin-dash-state is-error">{error}</div>
       ) : (
         <>
           {/* 6 KPI Cards with tone="deep" on primary (Total Receivable) */}
@@ -177,35 +181,30 @@ export default function FinancialDashboard() {
             <StatCard
               tone="deep"
               title={t('kpis.totalReceivable')}
-              value={`₹${parseFloat(kpis.totalReceivable || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`}
+              value={money(kpis.totalReceivable)}
               icon={<Landmark size={18} />}
               spark={cashTrendPoints}
             />
-
             <StatCard
               title={t('kpis.totalPayable')}
-              value={`₹${parseFloat(kpis.totalPayable || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`}
+              value={money(kpis.totalPayable)}
               icon={<Receipt size={18} />}
             />
-
             <StatCard
               title={t('kpis.totalIncome')}
-              value={`₹${parseFloat(kpis.totalIncome || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`}
+              value={money(kpis.totalIncome)}
               icon={<TrendingUp size={18} />}
             />
-
             <StatCard
               title={t('kpis.totalExpenses')}
-              value={`₹${parseFloat(kpis.totalExpenses || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`}
+              value={money(kpis.totalExpenses)}
               icon={<Wallet size={18} />}
             />
-
             <StatCard
               title={t('kpis.netProfit')}
-              value={`₹${parseFloat(kpis.netProfit || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`}
+              value={money(kpis.netProfit)}
               icon={<DollarSign size={18} />}
             />
-
             <StatCard
               title={t('kpis.overdueCount')}
               value={kpis.overdueCount || 0}
@@ -218,7 +217,7 @@ export default function FinancialDashboard() {
             <Card>
               <CardHead
                 title={t('charts.incomeVsExpense')}
-                subtitle={`Monthly performance for ${t(`periods.${period}`)}`}
+                subtitle={t('hints.monthlyPerformance', { period: t(`periods.${period}`) })}
               />
               <CardBody>
                 <GroupedBarChart
@@ -231,12 +230,9 @@ export default function FinancialDashboard() {
             </Card>
 
             <Card>
-              <CardHead
-                title={t('charts.cashTrend')}
-                subtitle="6-Month Liquidity Trend"
-              />
-              <CardBody style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '270px' }}>
-                <div style={{ width: '100%', padding: '1rem 0' }}>
+              <CardHead title={t('charts.cashTrend')} subtitle={t('hints.liquidity')} />
+              <CardBody className="fin-dash-cash-body">
+                <div className="fin-dash-cash-spark">
                   <Sparkline
                     data={cashTrendPoints}
                     height={100}
@@ -245,25 +241,20 @@ export default function FinancialDashboard() {
                     color="var(--accent-primary)"
                   />
                 </div>
-                <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                  <span style={{ fontFamily: 'Orbitron', fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                <div className="fin-dash-cash-summary">
+                  <span className="fin-dash-cash-figure">
                     ₹{cashTrendPoints[cashTrendPoints.length - 1]?.toLocaleString('en-IN') || '0.00'}
                   </span>
-                  <div style={{ fontFamily: 'Sora', fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                    Latest Cash Position
-                  </div>
+                  <div className="fin-dash-cash-caption">{t('latestCashPosition')}</div>
                 </div>
               </CardBody>
             </Card>
           </div>
 
           {/* Charts Row 2: Aging, Top Customers & Expense Donut */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', width: '100%' }}>
+          <div className="fin-dash-triple-grid">
             <Card>
-              <CardHead
-                title={t('charts.receivableAging')}
-                subtitle="Accounts receivable bucket distribution"
-              />
+              <CardHead title={t('charts.receivableAging')} subtitle={t('hints.agingBuckets')} />
               <CardBody>
                 {agingData.length ? (
                   <BarChart
@@ -272,16 +263,13 @@ export default function FinancialDashboard() {
                     formatValue={(v) => `₹${Number(v).toLocaleString('en-IN')}`}
                   />
                 ) : (
-                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No aging data</div>
+                  <div className="fin-dash-state">{t('empty.aging')}</div>
                 )}
               </CardBody>
             </Card>
 
             <Card>
-              <CardHead
-                title={t('charts.topCustomers')}
-                subtitle="Revenue contributors for period"
-              />
+              <CardHead title={t('charts.topCustomers')} subtitle={t('hints.revenueContributors')} />
               <CardBody>
                 {topCustomersData.length ? (
                   <BarChart
@@ -291,17 +279,14 @@ export default function FinancialDashboard() {
                     formatValue={(v) => `₹${Number(v).toLocaleString('en-IN')}`}
                   />
                 ) : (
-                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No sales in period</div>
+                  <div className="fin-dash-state">{t('empty.sales')}</div>
                 )}
               </CardBody>
             </Card>
 
             <Card>
-              <CardHead
-                title={t('charts.expenseBreakdown')}
-                subtitle="Operating expenses by category"
-              />
-              <CardBody style={{ display: 'flex', justifyContent: 'center' }}>
+              <CardHead title={t('charts.expenseBreakdown')} subtitle={t('hints.opexByCategory')} />
+              <CardBody>
                 {expenseDonutData.length ? (
                   <DonutChart
                     data={expenseDonutData}
@@ -310,7 +295,7 @@ export default function FinancialDashboard() {
                     formatValue={(v) => `₹${Number(v).toLocaleString('en-IN')}`}
                   />
                 ) : (
-                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>No expense entries</div>
+                  <div className="fin-dash-state">{t('empty.expenses')}</div>
                 )}
               </CardBody>
             </Card>
@@ -318,50 +303,35 @@ export default function FinancialDashboard() {
 
           {/* Recent Activity Section */}
           <Card>
-            <CardHead
-              title={t('charts.recentActivity')}
-              subtitle="Latest state-changing financial and compliance actions"
-            />
+            <CardHead title={t('charts.recentActivity')} subtitle={t('hints.recentActions')} />
             <CardBody>
               {data?.recentActivity?.length ? (
                 <table className="fin-dash-activity-table">
                   <thead>
                     <tr>
-                      <th>Action</th>
-                      <th>Entity</th>
-                      <th>Actor</th>
-                      <th>Timestamp</th>
+                      <th>{t('activity.action')}</th>
+                      <th>{t('activity.entity')}</th>
+                      <th>{t('activity.actor')}</th>
+                      <th>{t('activity.timestamp')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {data.recentActivity.map((act) => (
                       <tr key={act.id}>
                         <td>
-                          <span style={{
-                            fontFamily: 'Orbitron',
-                            fontSize: '0.72rem',
-                            fontWeight: 700,
-                            textTransform: 'uppercase',
-                            padding: '3px 8px',
-                            borderRadius: '4px',
-                            background: 'var(--bg-surface)',
-                            border: '1px solid var(--border-subtle)',
-                            color: 'var(--accent-primary)',
-                          }}>
-                            {act.action}
+                          <span className="fin-dash-activity-tag">{act.action}</span>
+                        </td>
+                        <td>
+                          <span className="fin-dash-activity-code">
+                            {act.entity_type} ({act.entity_id ? `${act.entity_id.slice(0, 8)}…` : '—'})
                           </span>
                         </td>
                         <td>
-                          <code style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                            {act.entity_type} ({act.entity_id ? act.entity_id.slice(0, 8) + '…' : '—'})
-                          </code>
-                        </td>
-                        <td>
-                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                            {act.actor_name || act.actor_email || 'System'}
+                          <span className="fin-dash-activity-actor">
+                            {act.actor_name || act.actor_email || t('activity.system')}
                           </span>
                         </td>
-                        <td style={{ fontFamily: 'Orbitron', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                        <td className="fin-dash-activity-time">
                           {act.created_at ? new Date(act.created_at).toLocaleString() : '—'}
                         </td>
                       </tr>
@@ -369,9 +339,7 @@ export default function FinancialDashboard() {
                   </tbody>
                 </table>
               ) : (
-                <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  No recent activity recorded
-                </div>
+                <div className="fin-dash-state">{t('empty.activity')}</div>
               )}
             </CardBody>
           </Card>

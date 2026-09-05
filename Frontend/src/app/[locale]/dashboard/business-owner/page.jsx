@@ -1,9 +1,9 @@
 'use client';
 
 // ============================================================
-// FILE: src/app/[locale]/dashboard/admin/page.jsx
+// FILE: src/app/[locale]/dashboard/business-owner/page.jsx
 //
-// Administrator dashboard. Read-only view of the platform directory —
+// Business owner control center. Read-only view of the platform directory —
 // role changes stay exclusive to the super-admin console.
 //
 // Every number and chart on this page is DERIVED FROM THE REAL user
@@ -37,7 +37,7 @@ import FinancialDashboard from '@/components/dashboard/FinancialDashboard';
 const Icon = ({ as: C, size = ICON_SM }) =>
   C ? <C size={size} strokeWidth={2} aria-hidden="true" /> : null;
 
-export default function AdminDashboard() {
+export default function BusinessOwnerDashboard() {
   const t = useTranslations('dashboard');
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('financial');
@@ -139,44 +139,24 @@ export default function AdminDashboard() {
       />
 
       {/* View Switcher: Financial Overview vs Directory */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', padding: '0 0.5rem' }}>
+      <div className="fin-dash-tabs" role="tablist">
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === 'financial'}
           onClick={() => setActiveTab('financial')}
-          style={{
-            fontFamily: 'Orbitron, monospace',
-            fontSize: '0.78rem',
-            fontWeight: 700,
-            padding: '0.6rem 1.25rem',
-            borderRadius: '8px',
-            border: activeTab === 'financial' ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
-            background: activeTab === 'financial' ? 'var(--bg-surface)' : 'transparent',
-            color: activeTab === 'financial' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-            boxShadow: activeTab === 'financial' ? '4px 4px 8px var(--nm-shadow-dark), -2px -2px 6px var(--nm-shadow-light)' : 'none',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
+          className={`fin-dash-tab ${activeTab === 'financial' ? 'active' : ''}`}
         >
-          Financial Overview
+          {t('tabs.financial')}
         </button>
         <button
           type="button"
+          role="tab"
+          aria-selected={activeTab === 'directory'}
           onClick={() => setActiveTab('directory')}
-          style={{
-            fontFamily: 'Orbitron, monospace',
-            fontSize: '0.78rem',
-            fontWeight: 700,
-            padding: '0.6rem 1.25rem',
-            borderRadius: '8px',
-            border: activeTab === 'directory' ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
-            background: activeTab === 'directory' ? 'var(--bg-surface)' : 'transparent',
-            color: activeTab === 'directory' ? 'var(--accent-primary)' : 'var(--text-secondary)',
-            boxShadow: activeTab === 'directory' ? '4px 4px 8px var(--nm-shadow-dark), -2px -2px 6px var(--nm-shadow-light)' : 'none',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
+          className={`fin-dash-tab ${activeTab === 'directory' ? 'active' : ''}`}
         >
-          Directory & Roles
+          {t('tabs.directory')}
         </button>
       </div>
 

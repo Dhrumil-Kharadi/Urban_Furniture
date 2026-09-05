@@ -11,9 +11,9 @@ async function getSummary(req, res, next) {
   try {
     const orgId = req.organizationId || req.user.organization_id;
 
-    // PORTAL DASHBOARD (role 'user'): Total Outstanding, Overdue, Paid This Year,
+    // PORTAL DASHBOARD (contact roles): Total Outstanding, Overdue, Paid This Year,
     // own recent documents — NO ORG-WIDE FIGURES WHATSOEVER.
-    if (req.user.role === 'customer') {
+    if (req.user.role === 'customer' || req.user.role === 'vendor') {
       if (!req.user.contact_id) {
         return error(res, 'Access restricted to contact portal accounts', 403);
       }
@@ -40,7 +40,7 @@ async function getSummary(req, res, next) {
       );
     }
 
-    // Role 'admin' or 'manager': Full unified org-wide summary
+    // Business owner / accountant: full unified org-wide summary
     const summary = await dashboardService.getSummary(orgId, req.query);
     return success(res, 'Dashboard summary retrieved successfully', summary);
   } catch (err) {

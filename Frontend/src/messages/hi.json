@@ -211,18 +211,12 @@
       "forgotPasswordLink": "पासवर्ड भूल गए?",
       "submitButton": "साइन इन",
       "submittingButton": "साइन इन हो रहा है…",
-      "orContinueWith": "या इसके साथ जारी रखें",
-      "facebook": "Facebook",
-      "x": "X",
-      "google": "Google",
-      "noAccountNote": "लेखाकार और संपर्क व्यवसाय स्वामी द्वारा जोड़े जाते हैं — आप स्वयं पंजीकरण नहीं कर सकते।"
+      "switchPrompt": "अभी तक आपका संगठन नहीं है?"
     },
     "register": {
       "title": "अपना संगठन बनाएँ",
       "subtitle": "पहले से खाता है?",
       "switchAction": "साइन इन करें",
-      "ownerOnlyBadge": "व्यवसाय स्वामी",
-      "ownerOnlyNote": "पंजीकरण से एक नया संगठन बनता है जिसमें आप व्यवसाय स्वामी होते हैं। लेखाकार और संपर्क संगठन के भीतर से जोड़े जाते हैं — वे यहाँ पंजीकरण नहीं कर सकते।",
       "organizationLabel": "संगठन का नाम",
       "organizationPlaceholder": "Urban Furniture",
       "fullNameLabel": "पूरा नाम",
@@ -311,6 +305,19 @@
       "verifySub": "आपके वित्तीय अभिलेख, ग्राहक चालान और विक्रेता बिल बहुस्तरीय सुरक्षा से संरक्षित।",
       "resetTitle": "नया पासवर्ड\nसेट करें।",
       "resetSub": "अपनी खाता बही, चालान और वित्तीय रिपोर्ट सुरक्षित रखने हेतु अपनी साख अद्यतन कीजिए।"
+    },
+    "setPassword": {
+      "title": "अपना पासवर्ड सेट करें",
+      "subtitle": "अपना खाता सक्रिय करने के लिए पासवर्ड चुनें।",
+      "passwordLabel": "नया पासवर्ड",
+      "passwordPlaceholder": "••••••••",
+      "confirmPasswordLabel": "पासवर्ड की पुष्टि करें",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submitButton": "पासवर्ड सेट करें",
+      "submittingButton": "सहेजा जा रहा है…",
+      "successTitle": "पासवर्ड सेट हुआ",
+      "successMessage": "आपका खाता सक्रिय है। जारी रखने के लिए साइन इन करें।",
+      "goToLogin": "साइन इन पर जाएँ"
     }
   },
   "dashboard": {
@@ -434,7 +441,8 @@
       "productCategories": "उत्पाद श्रेणियाँ",
       "taxes": "कर",
       "analyticAccounts": "विश्लेषणात्मक खाते",
-      "journalEntries": "जर्नल प्रविष्टियाँ"
+      "journalEntries": "जर्नल प्रविष्टियाँ",
+      "auditLogs": "ऑडिट लॉग"
     },
     "promo": {
       "title": "आपकी बहियाँ",
@@ -573,12 +581,74 @@
       "user": "संपर्क",
       "manager": "लेखाकार",
       "admin": "व्यवसाय स्वामी",
-      "super_admin": "प्लेटफ़ॉर्म एडमिन"
+      "super_admin": "प्लेटफ़ॉर्म एडमिन",
+      "business_owner": "व्यवसाय स्वामी",
+      "accountant": "लेखाकार",
+      "customer": "ग्राहक",
+      "vendor": "विक्रेता"
     },
     "statusLabels": {
       "verified": "सत्यापित",
       "pending": "लंबित",
       "protectedRoot": "संरक्षित मूल"
+    },
+    "tabs": {
+      "financial": "वित्तीय अवलोकन",
+      "directory": "निर्देशिका और भूमिकाएँ"
+    },
+    "summary": {
+      "badge": "कार्यकारी अवलोकन",
+      "title": "वित्तीय नियंत्रण केंद्र",
+      "subtitle": "चयनित अवधि के लिए प्राप्य, देय और लाभ — सीधे बहीखाते से।",
+      "period": "अवधि",
+      "periods": {
+        "this_month": "इस माह",
+        "this_quarter": "इस तिमाही",
+        "this_year": "इस वर्ष"
+      },
+      "kpis": {
+        "totalReceivable": "कुल प्राप्य",
+        "totalPayable": "कुल देय",
+        "totalIncome": "कुल आय",
+        "totalExpenses": "कुल व्यय",
+        "netProfit": "शुद्ध लाभ",
+        "overdueCount": "अतिदेय दस्तावेज़"
+      },
+      "charts": {
+        "incomeVsExpense": "आय बनाम व्यय",
+        "cashTrend": "नकदी प्रवाह",
+        "receivableAging": "प्राप्य आयु",
+        "topCustomers": "शीर्ष ग्राहक",
+        "expenseBreakdown": "व्यय विश्लेषण",
+        "recentActivity": "हालिया गतिविधि"
+      },
+      "series": {
+        "income": "आय",
+        "expense": "व्यय"
+      },
+      "hints": {
+        "monthlyPerformance": "{period} का मासिक प्रदर्शन",
+        "liquidity": "छह माह का तरलता रुझान",
+        "agingBuckets": "प्राप्य श्रेणीवार वितरण",
+        "revenueContributors": "अवधि के राजस्व योगदानकर्ता",
+        "opexByCategory": "श्रेणीवार परिचालन व्यय",
+        "recentActions": "नवीनतम स्थिति-परिवर्तक वित्तीय क्रियाएँ"
+      },
+      "latestCashPosition": "नवीनतम नकदी स्थिति",
+      "empty": {
+        "aging": "कोई आयु डेटा नहीं",
+        "sales": "इस अवधि में कोई बिक्री नहीं",
+        "expenses": "कोई व्यय प्रविष्टि नहीं",
+        "activity": "कोई हालिया गतिविधि दर्ज नहीं"
+      },
+      "loadError": "वित्तीय डैशबोर्ड लोड नहीं हो सका।",
+      "activity": {
+        "action": "क्रिया",
+        "entity": "इकाई",
+        "actor": "कर्ता",
+        "timestamp": "समय",
+        "system": "सिस्टम"
+      }
     }
   },
   "masterData": {
@@ -802,7 +872,56 @@
     "subtitle": "आपके खाते के लिए बनाए गए चालान और बिल।",
     "welcome": "स्वागत है, {name}",
     "comingSoon": "आपके चालान, बिल और ऑनलाइन भुगतान यहाँ दिखाई देंगे।",
-    "signOut": "साइन आउट"
+    "signOut": "साइन आउट",
+    "tabs": {
+      "invoices": "चालान",
+      "bills": "बिल"
+    },
+    "kpi": {
+      "outstanding": "बकाया",
+      "overdue": "अतिदेय",
+      "paidThisYear": "इस वर्ष चुकाया"
+    },
+    "invoices": {
+      "title": "आपके चालान",
+      "subtitle": "आपके खाते पर बने सभी चालान और शेष देय राशि।",
+      "invoiceNumber": "चालान #",
+      "date": "तिथि",
+      "dueDate": "देय तिथि",
+      "total": "कुल",
+      "paid": "चुकाया",
+      "due": "देय",
+      "status": "स्थिति",
+      "payNow": "अभी भुगतान करें",
+      "paidInFull": "पूर्ण भुगतान",
+      "empty": "अभी कोई चालान नहीं।"
+    },
+    "bills": {
+      "title": "आपके बिल",
+      "subtitle": "आपके विरुद्ध दर्ज हर बिल, पुराने से नए तक।",
+      "billNumber": "बिल #",
+      "date": "तिथि",
+      "dueDate": "देय तिथि",
+      "total": "कुल",
+      "paid": "चुकाया",
+      "due": "देय",
+      "status": "स्थिति",
+      "empty": "अभी कोई बिल दर्ज नहीं।",
+      "notice": "बिल आपके रिकॉर्ड के लिए दिखाए गए हैं। संगठन इन्हें आपके साथ सीधे निपटाता है।"
+    },
+    "payment": {
+      "modalTitle": "चालान का भुगतान",
+      "amountToPay": "देय राशि",
+      "nameOnCard": "कार्ड पर नाम",
+      "cardNumber": "कार्ड नंबर",
+      "expiry": "समाप्ति",
+      "cvv": "CVV",
+      "cardNotice": "कार्ड विवरण भुगतान गेटवे द्वारा संभाले जाते हैं; यह ऐप उन्हें कभी संग्रहीत नहीं करता।",
+      "success": "भुगतान प्राप्त हुआ। आपका चालान अद्यतन कर दिया गया है।",
+      "failure": "भुगतान पूरा नहीं हो सका।",
+      "cancel": "रद्द करें",
+      "close": "बंद करें"
+    }
   },
   "accounts": {
     "badge": "लेखा केंद्र",
@@ -896,7 +1015,15 @@
       "title": "अभी कोई जर्नल नहीं",
       "body": "पहला जर्नल जोड़ें।"
     },
-    "lastOfTypeNote": "अपने प्रकार का एकमात्र सक्रिय जर्नल संग्रहित नहीं किया जा सकता — उस प्रकार के दस्तावेज़ दर्ज नहीं हो पाएंगे।"
+    "lastOfTypeNote": "अपने प्रकार का एकमात्र सक्रिय जर्नल संग्रहित नहीं किया जा सकता — उस प्रकार के दस्तावेज़ दर्ज नहीं हो पाएंगे।",
+    "entries": {
+      "title": "इस जर्नल की प्रविष्टियाँ",
+      "subtitle": "इस जर्नल से दर्ज हर पोस्टिंग, नवीनतम पहले।",
+      "empty": "इस जर्नल से अभी तक कुछ दर्ज नहीं हुआ।",
+      "loadError": "इस जर्नल की प्रविष्टियाँ लोड नहीं हो सकीं।",
+      "viewAll": "सभी प्रविष्टियाँ देखें",
+      "openEntry": "प्रविष्टि खोलें"
+    }
   },
   "taxes": {
     "badge": "लेखा केंद्र",
@@ -1103,7 +1230,8 @@
       "search": "खोजें",
       "clearFilters": "फ़िल्टर हटाएँ",
       "close": "बंद करें",
-      "view": "देखें"
+      "view": "देखें",
+      "searchPlaceholder": "खोजें…"
     },
     "status": {
       "draft": "मसौदा",
@@ -1135,7 +1263,14 @@
       "error": "कुछ गड़बड़ हो गई"
     },
     "allStatuses": "सभी स्थितियाँ",
-    "all": "सभी"
+    "all": "सभी",
+    "table": {
+      "loading": "लोड हो रहा है…",
+      "empty": "अभी यहाँ कुछ नहीं",
+      "emptyFiltered": "वर्तमान फ़िल्टरों से कोई रिकॉर्ड मेल नहीं खाता",
+      "showing": "{total} में से {start}–{end} दिखा रहे हैं",
+      "rowsPerPage": "प्रति पृष्ठ पंक्तियाँ"
+    }
   },
   "salesOrders": {
     "title": "बिक्री आदेश",
@@ -1371,5 +1506,236 @@
     "addLine": "पंक्ति जोड़ें",
     "removeLine": "पंक्ति हटाएँ",
     "noLines": "अभी कोई पंक्ति नहीं"
+  },
+  "audit": {
+    "badge": "अनुपालन और सुरक्षा",
+    "title": "ऑडिट लॉग",
+    "subtitle": "इस संगठन की हर स्थिति-परिवर्तक क्रिया, घटित क्रम में।",
+    "search": "रिकॉर्ड आईडी से खोजें",
+    "allTypes": "सभी रिकॉर्ड प्रकार",
+    "allActions": "सभी क्रियाएँ",
+    "timestamp": "समय",
+    "actor": "कर्ता",
+    "action": "क्रिया",
+    "entityType": "रिकॉर्ड प्रकार",
+    "entityId": "रिकॉर्ड आईडी",
+    "ipAddress": "आईपी पता",
+    "changes": "परिवर्तन",
+    "viewDiff": "परिवर्तन देखें",
+    "noLogs": "इन फ़िल्टरों से मेल खाती कोई ऑडिट प्रविष्टि नहीं।",
+    "loading": "ऑडिट ट्रेल लोड हो रहा है…",
+    "loadError": "ऑडिट ट्रेल लोड नहीं हो सका।",
+    "modalTitle": "परिवर्तन विवरण",
+    "before": "पहले",
+    "after": "बाद में",
+    "noChanges": "कोई दर्ज स्थिति नहीं",
+    "close": "बंद करें",
+    "systemActor": "सिस्टम",
+    "deniedTitle": "पहुँच अस्वीकृत",
+    "deniedBody": "ऑडिट लॉग केवल व्यवसाय स्वामी तक सीमित हैं।",
+    "showing": "{total} में से {from}–{to} दिखा रहे हैं",
+    "previous": "पिछला",
+    "next": "अगला",
+    "entityTypes": {
+      "customer_invoice": "ग्राहक चालान",
+      "vendor_bill": "विक्रेता बिल",
+      "payment": "भुगतान",
+      "journal_entry": "जर्नल प्रविष्टि",
+      "budget": "बजट",
+      "product": "उत्पाद",
+      "contact": "संपर्क",
+      "user": "उपयोगकर्ता"
+    },
+    "actions": {
+      "create": "बनाना",
+      "update": "अद्यतन",
+      "delete": "हटाना",
+      "post": "बहीखाते में दर्ज",
+      "reverse": "प्रतिवर्तन",
+      "cancel": "रद्द",
+      "upload_attachment": "संलग्नक अपलोड"
+    }
+  },
+  "users": {
+    "badge": "संगठन पहुँच",
+    "title": "उपयोगकर्ता",
+    "subtitle": "लेखाकारों को आमंत्रित करें और तय करें कि इस संगठन में कौन साइन इन कर सकता है।",
+    "inviteAccountant": "लेखाकार आमंत्रित करें",
+    "inviteTitle": "लेखाकार को आमंत्रित करें",
+    "inviteHint": "लेखाकार को अपना पासवर्ड सेट करने के लिंक सहित ईमेल मिलेगा। केवल लेखाकार भूमिका आमंत्रित की जा सकती है।",
+    "nameLabel": "पूरा नाम",
+    "namePlaceholder": "अमित वर्मा",
+    "emailLabel": "ईमेल पता",
+    "emailPlaceholder": "accountant@company.com",
+    "sendInvite": "आमंत्रण भेजें",
+    "sendingInvite": "भेजा जा रहा है…",
+    "cancel": "रद्द करें",
+    "inviteSent": "{email} को आमंत्रण भेजा गया।",
+    "inviteFailed": "आमंत्रण नहीं भेजा जा सका।",
+    "requiredFields": "नाम और ईमेल पता दोनों आवश्यक हैं।",
+    "loadError": "उपयोगकर्ता सूची लोड नहीं हो सकी।",
+    "empty": "अभी कोई उपयोगकर्ता नहीं। अपना पहला लेखाकार आमंत्रित करें।",
+    "searchPlaceholder": "नाम या ईमेल खोजें",
+    "table": {
+      "name": "नाम",
+      "email": "ईमेल",
+      "role": "भूमिका",
+      "status": "स्थिति",
+      "joined": "जोड़ा गया",
+      "actions": "क्रियाएँ"
+    },
+    "status": {
+      "active": "सक्रिय",
+      "inactive": "निष्क्रिय",
+      "invited": "आमंत्रित",
+      "suspended": "निलंबित"
+    },
+    "deactivate": "निष्क्रिय करें",
+    "activate": "सक्रिय करें",
+    "statusUpdated": "उपयोगकर्ता स्थिति अद्यतन हुई।",
+    "statusFailed": "उपयोगकर्ता स्थिति अद्यतन नहीं हो सकी।",
+    "ownerLocked": "व्यवसाय स्वामी खाता निष्क्रिय नहीं किया जा सकता।"
+  },
+  "reports": {
+    "badge": "वित्तीय विवरण",
+    "title": "रिपोर्ट",
+    "subtitle": "बहीखाते से सीधे बनने वाले विवरण — कुछ भी संग्रहीत या पुराना नहीं।",
+    "back": "रिपोर्ट पर लौटें",
+    "loading": "बहीखाता शेष की गणना हो रही है…",
+    "hub": {
+      "balanceSheetTitle": "तुलन पत्र",
+      "balanceSheetDesc": "आपकी चुनी हुई किसी भी तिथि तक संपत्ति, देनदारी और पूँजी।",
+      "profitLossTitle": "लाभ-हानि",
+      "profitLossDesc": "एक तिथि-सीमा में आय घटाकर खरीद और व्यय।",
+      "budgetReportTitle": "बजट रिपोर्ट",
+      "budgetReportDesc": "प्रति विश्लेषणात्मक खाता नियोजित बनाम वास्तविक, अंतर सहित।",
+      "viewReport": "रिपोर्ट खोलें"
+    },
+    "balanceSheet": {
+      "title": "तुलन पत्र",
+      "subtitle": "चयनित तिथि तक संपत्ति, देनदारी और पूँजी।",
+      "assets": "संपत्तियाँ",
+      "liabilities": "देनदारियाँ",
+      "equity": "पूँजी",
+      "equityAndProfit": "पूँजी और लाभ",
+      "liabilitiesAndEquity": "देनदारियाँ और पूँजी",
+      "netProfit": "अवधि का शुद्ध लाभ",
+      "totalAssets": "कुल संपत्तियाँ",
+      "totalLiabilitiesEquity": "कुल देनदारियाँ और पूँजी",
+      "balanced": "संतुलित — संपत्तियाँ, देनदारियों और पूँजी के बराबर हैं।",
+      "unbalanced": "असंतुलित",
+      "discrepancy": "अंतर: ₹{amount}",
+      "chartTitle": "संतुलन संरचना (₹)",
+      "exportCsv": "CSV निर्यात",
+      "asOfLabel": "इस तिथि तक",
+      "loadError": "तुलन पत्र नहीं बन सका।",
+      "noData": "चयनित तिथि के लिए कोई विवरण डेटा नहीं।",
+      "noAssets": "इस तिथि तक कोई संपत्ति गतिविधि नहीं।",
+      "noLiabilities": "इस तिथि तक कोई देनदारी गतिविधि नहीं।"
+    },
+    "profitLoss": {
+      "title": "लाभ-हानि",
+      "subtitle": "चयनित सीमा के लिए आय घटाकर खरीद और व्यय।",
+      "income": "आय",
+      "expenses": "व्यय",
+      "netProfit": "शुद्ध लाभ",
+      "netLoss": "शुद्ध हानि",
+      "profitTrend": "लाभ प्रवृत्ति",
+      "profitTrendHint": "मासिक राजस्व बनाम परिचालन व्यय",
+      "expenseBreakdown": "व्यय विश्लेषण",
+      "expenseBreakdownHint": "शीर्ष व्यय खातों में वितरण",
+      "exportCsv": "CSV निर्यात",
+      "loadError": "लाभ-हानि रिपोर्ट नहीं बन सकी।",
+      "noTrend": "इस सीमा के लिए कोई प्रवृत्ति डेटा नहीं।",
+      "noExpenses": "इस अवधि में कोई व्यय दर्ज नहीं।",
+      "noIncome": "इस अवधि में कोई आय दर्ज नहीं।",
+      "noData": "चयनित तिथियों के लिए कोई लेन-देन नहीं।"
+    },
+    "budgetReport": {
+      "title": "बजट रिपोर्ट",
+      "subtitle": "प्रति विश्लेषणात्मक खाता नियोजित बनाम वास्तविक, अंतर सहित।",
+      "budget": "बजट",
+      "analyticAccount": "विश्लेषणात्मक खाता",
+      "status": "स्थिति",
+      "planned": "नियोजित",
+      "actual": "वास्तविक",
+      "variance": "अंतर",
+      "percent": "प्रयुक्त %",
+      "overBudget": "बजट से अधिक",
+      "underBudget": "बजट के भीतर",
+      "allBudgets": "सभी बजट",
+      "chartTitle": "नियोजित बनाम वास्तविक (₹)",
+      "exportCsv": "CSV निर्यात",
+      "loadError": "बजट रिपोर्ट नहीं बन सकी।",
+      "noData": "तुलना के लिए अभी कोई बजट नहीं।"
+    },
+    "toolbar": {
+      "thisMonth": "इस माह",
+      "thisQuarter": "इस तिमाही",
+      "thisFY": "इस वित्त वर्ष",
+      "custom": "कस्टम सीमा"
+    }
+  },
+  "budgets": {
+    "badge": "योजना",
+    "title": "बजट",
+    "subtitle": "प्रति विश्लेषणात्मक खाता नियोजित राशि, बहीखाते के सापेक्ष।",
+    "newBudget": "नया बजट",
+    "editBudget": "बजट संपादित करें",
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "onTrack": "सही राह पर",
+    "overBudget": "बजट से अधिक",
+    "empty": {
+      "title": "अभी कोई बजट नहीं",
+      "body": "नियोजित व्यय की वास्तविक प्रविष्टियों से तुलना करने के लिए बजट बनाएँ।"
+    },
+    "fields": {
+      "name": "बजट नाम",
+      "analyticAccount": "विश्लेषणात्मक खाता",
+      "plannedAmount": "नियोजित राशि",
+      "periodStart": "अवधि प्रारंभ",
+      "periodEnd": "अवधि समाप्त",
+      "status": "स्थिति"
+    },
+    "placeholders": {
+      "name": "खुदरा स्टोर — अहमदाबाद",
+      "analyticAccount": "विश्लेषणात्मक खाता चुनें",
+      "plannedAmount": "0.00"
+    },
+    "status": {
+      "draft": "मसौदा",
+      "active": "सक्रिय",
+      "archived": "संग्रहीत",
+      "closed": "बंद"
+    },
+    "kpi": {
+      "totalPlanned": "कुल नियोजित",
+      "totalActual": "कुल वास्तविक",
+      "netVariance": "शुद्ध अंतर",
+      "activeBudgets": "सक्रिय बजट"
+    },
+    "table": {
+      "name": "बजट",
+      "analytic": "विश्लेषणात्मक खाता",
+      "planned": "नियोजित",
+      "actual": "वास्तविक",
+      "variance": "अंतर",
+      "usage": "प्रयुक्त %",
+      "status": "स्थिति"
+    },
+    "detail": {
+      "back": "बजट पर लौटें",
+      "overview": "अवलोकन",
+      "monthlyBreakdown": "मासिक विवरण",
+      "contributingTransactions": "योगदान करने वाली प्रविष्टियाँ",
+      "entry": "प्रविष्टि",
+      "date": "तिथि",
+      "account": "खाता",
+      "partner": "संपर्क",
+      "description": "विवरण",
+      "amount": "राशि",
+      "noLines": "बजट अवधि में इस विश्लेषणात्मक खाते पर कुछ भी दर्ज नहीं हुआ।"
+    }
   }
 }

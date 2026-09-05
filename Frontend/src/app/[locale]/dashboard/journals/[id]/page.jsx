@@ -15,6 +15,7 @@ import { useTranslations } from 'next-intl';
 
 import ResourceDetailPage from '@/components/masterdata/ResourceDetailPage';
 import JournalForm from '@/components/journals/JournalForm';
+import JournalEntriesPanel from '@/components/journals/JournalEntriesPanel';
 import { Fact, StatusPill } from '@/components/masterdata/Cells';
 import Pill from '@/reusablefiles/pill';
 import { journalsService } from '@/services/masterdata.service';
@@ -55,6 +56,10 @@ export default function JournalDetailPage() {
           </div>
 
           <p className="md-form-hint">{t('lastOfTypeNote')}</p>
+
+          {/* What has actually been posted through this journal — the reason
+              someone opens a journal in the first place. */}
+          <JournalEntriesPanel journalId={journal.id} />
         </>
       )}
       renderForm={({ record, ...rest }) => (

@@ -49,7 +49,7 @@ describe('Phase 12: Contact Portal & Card Payment Gateway', () => {
     // 3. Admin user for seeding
     const adminRes = await pool.query(
       `INSERT INTO users (name, email, password_hash, role, email_verified, organization_id)
-       VALUES ($1, $2, 'hash', 'admin', true, $3) RETURNING id`,
+       VALUES ($1, $2, 'hash', 'business_owner', true, $3) RETURNING id`,
       ['Admin P12', `admin_p12_${suffix}@test.com`, orgId]
     );
     adminId = adminRes.rows[0].id;
@@ -90,27 +90,27 @@ describe('Phase 12: Contact Portal & Card Payment Gateway', () => {
     // 5. User accounts for portal contacts
     const cuRes = await pool.query(
       `INSERT INTO users (name, email, password_hash, role, email_verified, organization_id, contact_id)
-       VALUES ($1, $2, 'hash', 'user', true, $3, $4) RETURNING id`,
+       VALUES ($1, $2, 'hash', 'customer', true, $3, $4) RETURNING id`,
       ['Customer User', `c_user_${suffix}@test.com`, orgId, customerContactId]
     );
     customerUserId = cuRes.rows[0].id;
 
     const vuRes = await pool.query(
       `INSERT INTO users (name, email, password_hash, role, email_verified, organization_id, contact_id)
-       VALUES ($1, $2, 'hash', 'user', true, $3, $4) RETURNING id`,
+       VALUES ($1, $2, 'hash', 'customer', true, $3, $4) RETURNING id`,
       ['Vendor User', `v_user_${suffix}@test.com`, orgId, vendorContactId]
     );
     vendorUserId = vuRes.rows[0].id;
 
     customerToken = authJwt.generateToken({
       id: customerUserId,
-      role: 'user',
+      role: 'customer',
       token_version: 1,
     });
 
     vendorToken = authJwt.generateToken({
       id: vendorUserId,
-      role: 'user',
+      role: 'customer',
       token_version: 1,
     });
 

@@ -15,8 +15,10 @@ import { useAuth, getDashboardPath } from '@/context/AuthContext';
 
 export default function DashboardIndexPage() {
   const t = useTranslations('dashboard');
+  const router = useRouter();
   const { role, loading, isAuthenticated } = useAuth();
   const router = useRouter();
+
   useEffect(() => {
     if (loading) return;
 

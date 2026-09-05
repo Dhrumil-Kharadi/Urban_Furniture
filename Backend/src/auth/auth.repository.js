@@ -48,10 +48,10 @@ const authRepository = {
    * @param {string} userData.name
    * @param {string} userData.email
    * @param {string} userData.passwordHash
-   * @param {string} [userData.role='user']
+   * @param {string} [userData.role='customer']
    * @returns {Promise<Object>} created user row
    */
-  async createUser({ name, email, passwordHash, role = 'user', organization_id = null, contact_id = null, must_change_password = false, status = 'active' }, client = null) {
+  async createUser({ name, email, passwordHash, role = 'customer', organization_id = null, contact_id = null, must_change_password = false, status = 'active' }, client = null) {
     const db = client || pool;
     const result = await db.query(
       `INSERT INTO users (name, email, password_hash, role, organization_id, contact_id, must_change_password, status)

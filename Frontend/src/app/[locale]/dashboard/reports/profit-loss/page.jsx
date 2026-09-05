@@ -42,12 +42,11 @@ export default function ProfitAndLossReportPage() {
       const res = await reportsService.getProfitLoss(dates);
       setData(res?.data || res);
     } catch (err) {
-      console.error('Failed to load P&L report', err);
-      setError(err?.message || 'Failed to generate profit and loss report');
+      setError(err?.message || t('loadError'));
     } finally {
       setLoading(false);
     }
-  }, [dates]);
+  }, [dates, t]);
 
   useEffect(() => {
     fetchReport();
@@ -69,9 +68,9 @@ export default function ProfitAndLossReportPage() {
     return {
       categories,
       series: [
-        { name: 'Income', color: '#000080', data: incomeData, area: true },
-        { name: 'Expense', color: '#6D8196', data: expenseData, area: true },
-        { name: 'Net Profit', color: '#ADD8E6', data: netProfitData, dashed: true },
+        { name: t('income'), color: 'var(--graph-series-1)', data: incomeData, area: true },
+        { name: t('expenses'), color: 'var(--graph-series-5)', data: expenseData, area: true },
+        { name: t('netProfit'), color: 'var(--graph-series-7)', data: netProfitData, dashed: true },
       ],
     };
   }, [data]);
@@ -178,12 +177,10 @@ export default function ProfitAndLossReportPage() {
             <h2 className="report-chart-title">
               {t('profitTrend')}
             </h2>
-            <p className="budget-subtitle" style={{ fontSize: '0.78rem', marginTop: '2px' }}>
-              Monthly movement of revenue vs operating expenses
-            </p>
+            <p className="report-chart-hint">{t('profitTrendHint')}</p>
           </div>
           {trendChartConfig ? (
-            <div style={{ width: '100%' }}>
+            <div className="report-chart-frame">
               <AreaChart
                 categories={trendChartConfig.categories}
                 series={trendChartConfig.series}
@@ -192,9 +189,7 @@ export default function ProfitAndLossReportPage() {
               />
             </div>
           ) : (
-            <div style={{ height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
-              No trend data available for this range
-            </div>
+            <div className="report-chart-empty">{t('noTrend')}</div>
           )}
         </div>
 
@@ -204,12 +199,10 @@ export default function ProfitAndLossReportPage() {
             <h2 className="report-chart-title">
               {t('expenseBreakdown')}
             </h2>
-            <p className="budget-subtitle" style={{ fontSize: '0.78rem', marginTop: '2px' }}>
-              Top expense accounts distribution
-            </p>
+            <p className="report-chart-hint">{t('expenseBreakdownHint')}</p>
           </div>
           {donutData.length > 0 ? (
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', padding: '0.5rem 0' }}>
+            <div className="report-chart-frame is-centered">
               <DonutChart
                 data={donutData}
                 size={220}
@@ -218,9 +211,7 @@ export default function ProfitAndLossReportPage() {
               />
             </div>
           ) : (
-            <div style={{ height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
-              No expenses recorded for this period
-            </div>
+            <div className="report-chart-empty">{t('noExpenses')}</div>
           )}
         </div>
       </div>
@@ -228,13 +219,9 @@ export default function ProfitAndLossReportPage() {
       {/* Itemized P&L Statement Table */}
       <div className="report-sheet-card">
         {loading ? (
-          <div style={{ padding: '3rem 1rem', textAlign: 'center', fontFamily: 'Sora, sans-serif', color: 'var(--text-secondary)' }}>
-            Generating statement from posted journal entries…
-          </div>
+          <div className="report-state">{tReports('loading')}</div>
         ) : !data ? (
-          <div style={{ padding: '3rem 1rem', textAlign: 'center', fontFamily: 'Sora, sans-serif', color: 'var(--text-secondary)' }}>
-            No transaction records found for the selected dates.
-          </div>
+          <div className="report-state">{t('noData')}</div>
         ) : (
           <div>
             {/* INCOME ACCOUNTS */}
@@ -257,9 +244,7 @@ export default function ProfitAndLossReportPage() {
                 ))}
                 {(!data.income || data.income.length === 0) && (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                      No income recorded in this period.
-                    </td>
+                    <td colSpan={3} className="report-empty-cell">{t('noIncome')}</td>
                   </tr>
                 )}
               </tbody>
@@ -278,16 +263,14 @@ export default function ProfitAndLossReportPage() {
                   <tr key={acc.code}>
                     <td className="report-code-col">[{acc.code}]</td>
                     <td className="report-name-col">{acc.name}</td>
-                    <td className="report-amount-col" style={{ color: '#dc2626' }}>
+                    <td className="report-amount-col report-amount-negative">
                       <MoneyText value={acc.amount} />
                     </td>
                   </tr>
                 ))}
                 {(!data.expenses || data.expenses.length === 0) && (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                      No operating expenses recorded in this period.
-                    </td>
+                    <td colSpan={3} className="report-empty-cell">{t('noExpenses')}</td>
                   </tr>
                 )}
               </tbody>
@@ -296,7 +279,7 @@ export default function ProfitAndLossReportPage() {
             {/* NET PROFIT / LOSS SUMMARY */}
             <div className="report-totals-footer">
               <span>{totals.isProfitable ? t('netProfit') : t('netLoss')}:</span>
-              <span style={{ color: totals.isProfitable ? '#16a34a' : '#dc2626', fontSize: '1.15rem' }}>
+              <span className={`report-net-figure ${totals.isProfitable ? 'is-positive' : 'is-negative'}`}>
                 <MoneyText value={totals.netProfit} />
               </span>
             </div>

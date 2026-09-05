@@ -75,9 +75,9 @@ describe('Phases 9 & 10: Sales and Payments', () => {
   beforeAll(async () => {
     orgA = await makeOrg('OrgA');
     orgB = await makeOrg('OrgB');
-    adminA = await makeUser(orgA, 'admin', 'adminA');
-    managerA = await makeUser(orgA, 'manager', 'managerA');
-    adminB = await makeUser(orgB, 'admin', 'adminB');
+    adminA = await makeUser(orgA, 'business_owner', 'adminA');
+    managerA = await makeUser(orgA, 'accountant', 'managerA');
+    adminB = await makeUser(orgB, 'business_owner', 'adminB');
 
     const client = await pool.connect();
     try {
@@ -92,9 +92,9 @@ describe('Phases 9 & 10: Sales and Payments', () => {
       client.release();
     }
 
-    adminASid = authSession.createSession(adminA, 'admin', false).sessionId;
-    managerASid = authSession.createSession(managerA, 'manager', false).sessionId;
-    adminBSid = authSession.createSession(adminB, 'admin', false).sessionId;
+    adminASid = authSession.createSession(adminA, 'business_owner', false).sessionId;
+    managerASid = authSession.createSession(managerA, 'accountant', false).sessionId;
+    adminBSid = authSession.createSession(adminB, 'business_owner', false).sessionId;
 
     salesJournalA = await journalByType(orgA, 'sales');
     bankJournalA = await journalByType(orgA, 'bank');
@@ -593,14 +593,14 @@ describe('Phases 9 & 10: Sales and Payments', () => {
     test('a Contact gets 403 on every payment endpoint — project.md §3', async () => {
       const contactUser = await pool.query(
         `INSERT INTO users (name, email, password_hash, role, email_verified, organization_id, contact_id)
-         VALUES ('Portal Contact', $1, 'hash', 'user', true, $2, $3) RETURNING id, token_version`,
+         VALUES ('Portal Contact', $1, 'hash', 'customer', true, $2, $3) RETURNING id, token_version`,
         [`p910_contact_${suffix}@example.com`, orgA, customerA]
       );
 
       // eslint-disable-next-line global-require
       const authJwt = require('../src/auth/auth.jwt');
       const token = authJwt.generateToken({
-        id: contactUser.rows[0].id, role: 'user', token_version: contactUser.rows[0].token_version,
+        id: contactUser.rows[0].id, role: 'customer', token_version: contactUser.rows[0].token_version,
       });
 
       for (const [method, path] of [['get', '/api/payments'], ['post', '/api/payments']]) {

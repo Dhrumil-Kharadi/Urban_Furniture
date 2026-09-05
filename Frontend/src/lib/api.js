@@ -74,17 +74,37 @@ async function performTokenRefresh() {
  * @param {string} [options.method='GET']
  * @param {object} [options.body]
  * @param {object} [options.headers]
+ * @param {object} [options.params] - Serialised onto the query string
  * @param {AbortSignal} [options.signal]
  * @param {boolean} [options._isRetry=false]
  * @returns {Promise<{ success: boolean, message: string, data?: any, errors?: string[] }>}
  */
+/**
+ * Append `params` to an endpoint as a query string.
+ *
+ * Callers pass filters as an object (`{ period, page }`) the way every other
+ * client in this app does; undefined, null and empty values are dropped so an
+ * unset filter never reaches the server as `?status=`.
+ */
+function buildUrl(endpoint, params) {
+  if (!params) return endpoint;
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') return;
+    search.append(key, String(value));
+  });
+  const qs = search.toString();
+  if (!qs) return endpoint;
+  return endpoint + (endpoint.includes('?') ? '&' : '?') + qs;
+}
+
 function getCookie(name) {
   if (typeof document === 'undefined') return null;
   const match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
   return match ? decodeURIComponent(match[3]) : null;
 }
 
-export async function apiFetch(endpoint, { method = 'GET', body, headers = {}, signal, _isRetry = false } = {}) {
+export async function apiFetch(endpoint, { method = 'GET', body, headers = {}, params, signal, _isRetry = false } = {}) {
   const upperMethod = method.toUpperCase();
   const config = {
     method: upperMethod,
@@ -117,7 +137,7 @@ export async function apiFetch(endpoint, { method = 'GET', body, headers = {}, s
     config.body = JSON.stringify(body);
   }
 
-  const res = await fetch(`${BASE_URL}${endpoint}`, config);
+  const res = await fetch(`${BASE_URL}${buildUrl(endpoint, params)}`, config);
 
   // Handle 401 with transparent refresh (once, unless this is already login/refresh/logout/retry)
   const isAuthEndpoint =
@@ -128,7 +148,7 @@ export async function apiFetch(endpoint, { method = 'GET', body, headers = {}, s
   if (res.status === 401 && !_isRetry && !isAuthEndpoint) {
     const newToken = await performTokenRefresh();
     if (newToken) {
-      return apiFetch(endpoint, { method, body, headers, signal, _isRetry: true });
+      return apiFetch(endpoint, { method, body, headers, params, signal, _isRetry: true });
     }
   }
 

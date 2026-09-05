@@ -33,6 +33,10 @@
   --text-primary: rgba(0, 0, 40, 0.92);
   --text-secondary: #6D8196;
   --text-muted: rgba(109, 129, 150, 0.5);
+  /* Text that sits ON a navy surface (filled buttons, hovered social pills).
+     Same value as --btn-primary-text; named for the role rather than the
+     component so any dark-surface label can reach for it. */
+  --text-inverse: #FFFFFF;
 
 
   /* ── Borders ── */

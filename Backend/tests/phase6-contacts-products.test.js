@@ -68,13 +68,13 @@ describe('Phase 6: Contacts, Products & Portal Provisioning', () => {
     orgA = await makeOrg('OrgA');
     orgB = await makeOrg('OrgB');
 
-    adminA = await makeUser(orgA, 'admin', 'adminA');
-    managerA = await makeUser(orgA, 'manager', 'managerA');
-    adminB = await makeUser(orgB, 'admin', 'adminB');
+    adminA = await makeUser(orgA, 'business_owner', 'adminA');
+    managerA = await makeUser(orgA, 'accountant', 'managerA');
+    adminB = await makeUser(orgB, 'business_owner', 'adminB');
 
-    adminASid = authSession.createSession(adminA, 'admin', false).sessionId;
-    managerASid = authSession.createSession(managerA, 'manager', false).sessionId;
-    adminBSid = authSession.createSession(adminB, 'admin', false).sessionId;
+    adminASid = authSession.createSession(adminA, 'business_owner', false).sessionId;
+    managerASid = authSession.createSession(managerA, 'accountant', false).sessionId;
+    adminBSid = authSession.createSession(adminB, 'business_owner', false).sessionId;
   });
 
   afterAll(async () => {
@@ -304,7 +304,7 @@ describe('Phase 6: Contacts, Products & Portal Provisioning', () => {
         [portalContactId]
       );
       expect(users.rowCount).toBe(1);
-      expect(users.rows[0].role).toBe('user');
+      expect(users.rows[0].role).toBe('customer');
       expect(users.rows[0].organization_id).toBe(orgA);
       expect(users.rows[0].must_change_password).toBe(true);
     });
@@ -340,7 +340,7 @@ describe('Phase 6: Contacts, Products & Portal Provisioning', () => {
       const live = await pool.query('SELECT token_version FROM users WHERE id = $1', [portalUser.id]);
 
       const token = authJwt.generateToken({
-        id: portalUser.id, role: 'user', token_version: live.rows[0].token_version,
+        id: portalUser.id, role: 'customer', token_version: live.rows[0].token_version,
       });
 
       // The token works before revocation.

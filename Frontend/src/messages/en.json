@@ -211,18 +211,12 @@
       "forgotPasswordLink": "Forgot password?",
       "submitButton": "Sign In",
       "submittingButton": "Signing in…",
-      "orContinueWith": "or continue with",
-      "facebook": "Facebook",
-      "x": "X",
-      "google": "Google",
-      "noAccountNote": "Accountants and contacts are added by the business owner — you cannot sign up on your own."
+      "switchPrompt": "Don't have an organization yet?"
     },
     "register": {
       "title": "Create Your Organization",
       "subtitle": "Already have an account?",
       "switchAction": "Sign in",
-      "ownerOnlyBadge": "Business Owner",
-      "ownerOnlyNote": "Registration creates a new organization with you as its business owner. Accountants and contacts are added from inside the organization — they cannot register here.",
       "organizationLabel": "Organization Name",
       "organizationPlaceholder": "Urban Furniture",
       "fullNameLabel": "Full Name",
@@ -311,6 +305,19 @@
       "verifySub": "Protecting your financial records, customer invoices and vendor bills with multi-layer security.",
       "resetTitle": "Set New\nPassword.",
       "resetSub": "Update your credentials to keep your ledger, invoices and financial reports safe."
+    },
+    "setPassword": {
+      "title": "Set your password",
+      "subtitle": "Choose a password to finish activating your account.",
+      "passwordLabel": "New password",
+      "passwordPlaceholder": "••••••••",
+      "confirmPasswordLabel": "Confirm password",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submitButton": "Set password",
+      "submittingButton": "Saving…",
+      "successTitle": "Password set",
+      "successMessage": "Your account is active. Sign in to continue.",
+      "goToLogin": "Go to sign in"
     }
   },
   "dashboard": {
@@ -434,7 +441,8 @@
       "productCategories": "Product categories",
       "taxes": "Taxes",
       "analyticAccounts": "Analytic accounts",
-      "journalEntries": "Journal entries"
+      "journalEntries": "Journal entries",
+      "auditLogs": "Audit logs"
     },
     "promo": {
       "title": "Your books on",
@@ -573,12 +581,74 @@
       "user": "Contact",
       "manager": "Accountant",
       "admin": "Business Owner",
-      "super_admin": "Platform Admin"
+      "super_admin": "Platform Admin",
+      "business_owner": "Business Owner",
+      "accountant": "Accountant",
+      "customer": "Customer",
+      "vendor": "Vendor"
     },
     "statusLabels": {
       "verified": "Verified",
       "pending": "Pending",
       "protectedRoot": "Protected root"
+    },
+    "tabs": {
+      "financial": "Financial Overview",
+      "directory": "Directory & Roles"
+    },
+    "summary": {
+      "badge": "Executive Overview",
+      "title": "Financial Control Center",
+      "subtitle": "Receivables, payables and profit for the selected period, straight from the ledger.",
+      "period": "Period",
+      "periods": {
+        "this_month": "This month",
+        "this_quarter": "This quarter",
+        "this_year": "This year"
+      },
+      "kpis": {
+        "totalReceivable": "Total receivable",
+        "totalPayable": "Total payable",
+        "totalIncome": "Total income",
+        "totalExpenses": "Total expenses",
+        "netProfit": "Net profit",
+        "overdueCount": "Overdue documents"
+      },
+      "charts": {
+        "incomeVsExpense": "Income vs expense",
+        "cashTrend": "Cash movement",
+        "receivableAging": "Receivable ageing",
+        "topCustomers": "Top customers",
+        "expenseBreakdown": "Expense breakdown",
+        "recentActivity": "Recent activity"
+      },
+      "series": {
+        "income": "Income",
+        "expense": "Expense"
+      },
+      "hints": {
+        "monthlyPerformance": "Monthly performance for {period}",
+        "liquidity": "Six-month liquidity trend",
+        "agingBuckets": "Receivable bucket distribution",
+        "revenueContributors": "Revenue contributors for the period",
+        "opexByCategory": "Operating expenses by category",
+        "recentActions": "Latest state-changing financial actions"
+      },
+      "latestCashPosition": "Latest cash position",
+      "empty": {
+        "aging": "No ageing data",
+        "sales": "No sales in this period",
+        "expenses": "No expense entries",
+        "activity": "No recent activity recorded"
+      },
+      "loadError": "Could not load the financial dashboard.",
+      "activity": {
+        "action": "Action",
+        "entity": "Entity",
+        "actor": "Actor",
+        "timestamp": "Timestamp",
+        "system": "System"
+      }
     }
   },
   "masterData": {
@@ -802,7 +872,56 @@
     "subtitle": "Invoices and bills raised for your account.",
     "welcome": "Welcome, {name}",
     "comingSoon": "Your invoices, bills and online payments will appear here.",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "tabs": {
+      "invoices": "Invoices",
+      "bills": "Bills"
+    },
+    "kpi": {
+      "outstanding": "Outstanding",
+      "overdue": "Overdue",
+      "paidThisYear": "Paid this year"
+    },
+    "invoices": {
+      "title": "Your invoices",
+      "subtitle": "Every invoice raised to your account, and what is still due.",
+      "invoiceNumber": "Invoice #",
+      "date": "Date",
+      "dueDate": "Due date",
+      "total": "Total",
+      "paid": "Paid",
+      "due": "Due",
+      "status": "Status",
+      "payNow": "Pay now",
+      "paidInFull": "Paid in full",
+      "empty": "No invoices yet."
+    },
+    "bills": {
+      "title": "Your bills",
+      "subtitle": "Every bill recorded against you, oldest to newest.",
+      "billNumber": "Bill #",
+      "date": "Date",
+      "dueDate": "Due date",
+      "total": "Total",
+      "paid": "Paid",
+      "due": "Due",
+      "status": "Status",
+      "empty": "No bills recorded yet.",
+      "notice": "Bills are shown for your records. The organization settles them with you directly."
+    },
+    "payment": {
+      "modalTitle": "Pay invoice",
+      "amountToPay": "Amount to pay",
+      "nameOnCard": "Name on card",
+      "cardNumber": "Card number",
+      "expiry": "Expiry",
+      "cvv": "CVV",
+      "cardNotice": "Card details are handled by the payment gateway; this application never stores them.",
+      "success": "Payment received. Your invoice has been updated.",
+      "failure": "The payment could not be completed.",
+      "cancel": "Cancel",
+      "close": "Close"
+    }
   },
   "accounts": {
     "badge": "Accounting core",
@@ -896,7 +1015,15 @@
       "title": "No journals yet",
       "body": "Add the first journal."
     },
-    "lastOfTypeNote": "The only active journal of its type cannot be archived — documents of that kind could not be posted."
+    "lastOfTypeNote": "The only active journal of its type cannot be archived — documents of that kind could not be posted.",
+    "entries": {
+      "title": "Entries in this journal",
+      "subtitle": "Every posting recorded through this journal, newest first.",
+      "empty": "Nothing has been posted through this journal yet.",
+      "loadError": "Could not load entries for this journal.",
+      "viewAll": "View all entries",
+      "openEntry": "Open entry"
+    }
   },
   "taxes": {
     "badge": "Accounting core",
@@ -1103,7 +1230,8 @@
       "search": "Search",
       "clearFilters": "Clear filters",
       "close": "Close",
-      "view": "View"
+      "view": "View",
+      "searchPlaceholder": "Search…"
     },
     "status": {
       "draft": "Draft",
@@ -1135,7 +1263,14 @@
       "error": "Something went wrong"
     },
     "allStatuses": "All statuses",
-    "all": "All"
+    "all": "All",
+    "table": {
+      "loading": "Loading…",
+      "empty": "Nothing here yet",
+      "emptyFiltered": "No records match the current filters",
+      "showing": "Showing {start}–{end} of {total}",
+      "rowsPerPage": "Rows per page"
+    }
   },
   "salesOrders": {
     "title": "Sales Orders",
@@ -1371,5 +1506,236 @@
     "addLine": "Add line",
     "removeLine": "Remove line",
     "noLines": "No lines yet"
+  },
+  "audit": {
+    "badge": "Compliance & Security",
+    "title": "Audit logs",
+    "subtitle": "Every state-changing action in this organization, in the order it happened.",
+    "search": "Search by record ID",
+    "allTypes": "All record types",
+    "allActions": "All actions",
+    "timestamp": "Timestamp",
+    "actor": "Actor",
+    "action": "Action",
+    "entityType": "Record type",
+    "entityId": "Record ID",
+    "ipAddress": "IP address",
+    "changes": "Changes",
+    "viewDiff": "View changes",
+    "noLogs": "No audit entries match these filters yet.",
+    "loading": "Loading audit trail…",
+    "loadError": "Could not load the audit trail.",
+    "modalTitle": "Change detail",
+    "before": "Before",
+    "after": "After",
+    "noChanges": "No recorded state",
+    "close": "Close",
+    "systemActor": "System",
+    "deniedTitle": "Access denied",
+    "deniedBody": "Audit logs are restricted to the business owner.",
+    "showing": "Showing {from}–{to} of {total}",
+    "previous": "Previous",
+    "next": "Next",
+    "entityTypes": {
+      "customer_invoice": "Customer invoice",
+      "vendor_bill": "Vendor bill",
+      "payment": "Payment",
+      "journal_entry": "Journal entry",
+      "budget": "Budget",
+      "product": "Product",
+      "contact": "Contact",
+      "user": "User"
+    },
+    "actions": {
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "post": "Post to ledger",
+      "reverse": "Reverse",
+      "cancel": "Cancel",
+      "upload_attachment": "Upload attachment"
+    }
+  },
+  "users": {
+    "badge": "Organization access",
+    "title": "Users",
+    "subtitle": "Invite accountants and control who can sign in to this organization.",
+    "inviteAccountant": "Invite accountant",
+    "inviteTitle": "Invite an accountant",
+    "inviteHint": "The accountant receives an email with a link to set their own password. Only the accountant role can be invited.",
+    "nameLabel": "Full name",
+    "namePlaceholder": "Amit Verma",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "accountant@company.com",
+    "sendInvite": "Send invitation",
+    "sendingInvite": "Sending…",
+    "cancel": "Cancel",
+    "inviteSent": "Invitation sent to {email}.",
+    "inviteFailed": "Could not send the invitation.",
+    "requiredFields": "A name and an email address are both required.",
+    "loadError": "Could not load the user list.",
+    "empty": "No users yet. Invite your first accountant.",
+    "searchPlaceholder": "Search name or email",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "joined": "Added",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "invited": "Invited",
+      "suspended": "Suspended"
+    },
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "statusUpdated": "User status updated.",
+    "statusFailed": "Could not update the user status.",
+    "ownerLocked": "The business owner account cannot be deactivated."
+  },
+  "reports": {
+    "badge": "Financial statements",
+    "title": "Reports",
+    "subtitle": "Statements generated live from the ledger — nothing is stored or stale.",
+    "back": "Back to reports",
+    "loading": "Calculating ledger balances…",
+    "hub": {
+      "balanceSheetTitle": "Balance sheet",
+      "balanceSheetDesc": "Assets, liabilities and capital as of any date you choose.",
+      "profitLossTitle": "Profit & loss",
+      "profitLossDesc": "Income less purchases and expenses over a date range.",
+      "budgetReportTitle": "Budget report",
+      "budgetReportDesc": "Planned against actual per analytic account, with variance.",
+      "viewReport": "Open report"
+    },
+    "balanceSheet": {
+      "title": "Balance sheet",
+      "subtitle": "Assets, liabilities and capital as of the selected date.",
+      "assets": "Assets",
+      "liabilities": "Liabilities",
+      "equity": "Capital",
+      "equityAndProfit": "Capital & profit",
+      "liabilitiesAndEquity": "Liabilities & capital",
+      "netProfit": "Net profit for the period",
+      "totalAssets": "Total assets",
+      "totalLiabilitiesEquity": "Total liabilities & capital",
+      "balanced": "Balanced — assets equal liabilities plus capital.",
+      "unbalanced": "Not balanced",
+      "discrepancy": "Difference: ₹{amount}",
+      "chartTitle": "Balance structure (₹)",
+      "exportCsv": "Export CSV",
+      "asOfLabel": "As of date",
+      "loadError": "Could not generate the balance sheet.",
+      "noData": "No statement data for the selected date.",
+      "noAssets": "No asset movements as of this date.",
+      "noLiabilities": "No liability movements as of this date."
+    },
+    "profitLoss": {
+      "title": "Profit & loss",
+      "subtitle": "Income less purchases and expenses for the selected range.",
+      "income": "Income",
+      "expenses": "Expenses",
+      "netProfit": "Net profit",
+      "netLoss": "Net loss",
+      "profitTrend": "Profit trend",
+      "profitTrendHint": "Monthly revenue against operating expenses",
+      "expenseBreakdown": "Expense breakdown",
+      "expenseBreakdownHint": "Distribution across top expense accounts",
+      "exportCsv": "Export CSV",
+      "loadError": "Could not generate the profit and loss report.",
+      "noTrend": "No trend data for this range.",
+      "noExpenses": "No expenses recorded in this period.",
+      "noIncome": "No income recorded in this period.",
+      "noData": "No transactions for the selected dates."
+    },
+    "budgetReport": {
+      "title": "Budget report",
+      "subtitle": "Planned against actual per analytic account, with variance.",
+      "budget": "Budget",
+      "analyticAccount": "Analytic account",
+      "status": "Status",
+      "planned": "Planned",
+      "actual": "Actual",
+      "variance": "Variance",
+      "percent": "Used %",
+      "overBudget": "Over budget",
+      "underBudget": "Within budget",
+      "allBudgets": "All budgets",
+      "chartTitle": "Planned vs actual (₹)",
+      "exportCsv": "Export CSV",
+      "loadError": "Could not generate the budget report.",
+      "noData": "No budgets to compare yet."
+    },
+    "toolbar": {
+      "thisMonth": "This month",
+      "thisQuarter": "This quarter",
+      "thisFY": "This financial year",
+      "custom": "Custom range"
+    }
+  },
+  "budgets": {
+    "badge": "Planning",
+    "title": "Budgets",
+    "subtitle": "Planned amounts per analytic account, measured against the ledger.",
+    "newBudget": "New budget",
+    "editBudget": "Edit budget",
+    "save": "Save",
+    "cancel": "Cancel",
+    "onTrack": "On track",
+    "overBudget": "Over budget",
+    "empty": {
+      "title": "No budgets yet",
+      "body": "Create a budget to compare planned spending against actual postings."
+    },
+    "fields": {
+      "name": "Budget name",
+      "analyticAccount": "Analytic account",
+      "plannedAmount": "Planned amount",
+      "periodStart": "Period start",
+      "periodEnd": "Period end",
+      "status": "Status"
+    },
+    "placeholders": {
+      "name": "Retail store — Ahmedabad",
+      "analyticAccount": "Select an analytic account",
+      "plannedAmount": "0.00"
+    },
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "archived": "Archived",
+      "closed": "Closed"
+    },
+    "kpi": {
+      "totalPlanned": "Total planned",
+      "totalActual": "Total actual",
+      "netVariance": "Net variance",
+      "activeBudgets": "Active budgets"
+    },
+    "table": {
+      "name": "Budget",
+      "analytic": "Analytic account",
+      "planned": "Planned",
+      "actual": "Actual",
+      "variance": "Variance",
+      "usage": "Used %",
+      "status": "Status"
+    },
+    "detail": {
+      "back": "Back to budgets",
+      "overview": "Overview",
+      "monthlyBreakdown": "Monthly breakdown",
+      "contributingTransactions": "Contributing postings",
+      "entry": "Entry",
+      "date": "Date",
+      "account": "Account",
+      "partner": "Contact",
+      "description": "Description",
+      "amount": "Amount",
+      "noLines": "Nothing has been posted against this analytic account in the budget period."
+    }
   }
 }

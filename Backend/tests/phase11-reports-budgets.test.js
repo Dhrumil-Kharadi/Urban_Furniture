@@ -41,14 +41,14 @@ describe('Phase 11: Budgets & Financial Reports', () => {
     // 2. Create users
     const adminRes = await pool.query(
       `INSERT INTO users (name, email, password_hash, role, email_verified, organization_id)
-       VALUES ($1, $2, 'hash', 'admin', true, $3) RETURNING id`,
+       VALUES ($1, $2, 'hash', 'business_owner', true, $3) RETURNING id`,
       ['Admin P11', `admin_p11_${suffix}@test.com`, orgId]
     );
     adminId = adminRes.rows[0].id;
 
     const mgrRes = await pool.query(
       `INSERT INTO users (name, email, password_hash, role, email_verified, organization_id)
-       VALUES ($1, $2, 'hash', 'manager', true, $3) RETURNING id`,
+       VALUES ($1, $2, 'hash', 'accountant', true, $3) RETURNING id`,
       ['Manager P11', `mgr_p11_${suffix}@test.com`, orgId]
     );
     managerId = mgrRes.rows[0].id;
@@ -63,20 +63,20 @@ describe('Phase 11: Budgets & Financial Reports', () => {
 
     const userRes = await pool.query(
       `INSERT INTO users (name, email, password_hash, role, email_verified, organization_id, contact_id)
-       VALUES ($1, $2, 'hash', 'user', true, $3, $4) RETURNING id`,
+       VALUES ($1, $2, 'hash', 'customer', true, $3, $4) RETURNING id`,
       ['User P11', `user_p11_${suffix}@test.com`, orgId, contactId]
     );
     contactUserId = userRes.rows[0].id;
 
     // Sessions
-    adminSid = authSession.createSession(adminId, 'admin', false).sessionId;
-    managerSid = authSession.createSession(managerId, 'manager', false).sessionId;
+    adminSid = authSession.createSession(adminId, 'business_owner', false).sessionId;
+    managerSid = authSession.createSession(managerId, 'accountant', false).sessionId;
 
     // JWT for user
     const authJwt = require('../src/auth/auth.jwt');
     userToken = authJwt.generateToken({
       id: contactUserId,
-      role: 'user',
+      role: 'customer',
       token_version: 1,
     });
 

@@ -4,7 +4,7 @@
  * Middleware chain:
  *   authenticate → resolveTenant → authorize('business_owner', 'accountant')
  *
- * Contacts (role 'user') have zero access to financial reports (project.md §3).
+ * Contacts (customer / vendor) have zero access to financial reports (project.md §3).
  */
 
 const express = require('express');

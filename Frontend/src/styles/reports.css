@@ -291,3 +291,91 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ─── Shared report states & cells ───────────────────────────
+   These replace inline styles (and the raw hex colours that came with them)
+   in the balance sheet, P&L and budget report pages — strict.md §1 requires
+   every colour to resolve through a :root variable. */
+
+.report-header-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.report-chart-frame {
+  width: 100%;
+}
+
+.report-chart-frame.is-centered {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0;
+}
+
+.report-chart-hint {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 2px 0 0;
+}
+
+.report-chart-empty {
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.report-state {
+  padding: 3rem 1rem;
+  text-align: center;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+}
+
+.report-empty-cell {
+  text-align: center;
+  font-family: 'Sora', sans-serif;
+  color: var(--text-secondary);
+}
+
+.report-total-positive {
+  color: var(--status-success);
+}
+
+.report-amount-negative {
+  color: var(--status-error);
+}
+
+.report-net-figure {
+  font-size: 1.15rem;
+}
+
+.report-net-figure.is-positive {
+  color: var(--status-success);
+}
+
+.report-net-figure.is-negative {
+  color: var(--status-error);
+}
+
+.budget-variance-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.budget-usage-cell {
+  width: 100%;
+}
+
+.budget-usage-legend {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+}

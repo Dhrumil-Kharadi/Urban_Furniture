@@ -140,21 +140,6 @@
   font-size: 0.686rem;
 }
 
-/* Explanatory note under a form heading. Used on the register screen to
-   state that self-registration is for business owners only — accountants
-   and contacts are added from inside the organization. */
-.form-note-auth {
-  margin: 0.6rem 0 0;
-  padding: 0.5rem 0.646rem;
-  color: var(--text-muted);
-  font-family: 'Sora', sans-serif;
-  font-size: 0.62rem;
-  line-height: 1.5;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-}
-
 /* Links */
 .link-auth {
   color: var(--accent-primary);
@@ -391,65 +376,6 @@
 .btn-primary-auth:focus-visible {
   outline: 3px solid rgba(0, 0, 128, 0.4);
   outline-offset: 2px;
-}
-
-/* Divider */
-.divider-auth {
-  display: flex;
-  align-items: center;
-  gap: 0.544rem;
-  margin: 1rem 0 0.75rem;
-  color: var(--text-secondary);
-  font-family: 'Sora', sans-serif;
-  font-size: 0.578rem;
-}
-
-.divider-auth::before,
-.divider-auth::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--auth-divider-line);
-}
-
-/* Social Login Row */
-.social-row-auth {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.544rem;
-}
-
-.btn-social-auth {
-  height: 34px;
-  border-radius: 999px;
-  border: 1.5px solid var(--auth-social-border);
-  background: var(--bg-raised);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.34rem;
-  font-family: 'Sora', sans-serif;
-  font-weight: 600;
-  font-size: 0.636rem;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: border-color 0.15s var(--ease-auth), transform 0.15s var(--ease-auth), background 0.15s var(--ease-auth), color 0.15s var(--ease-auth);
-}
-
-.btn-social-auth svg {
-  width: 17px;
-  height: 17px;
-}
-
-.btn-social-auth:hover {
-  transform: translateY(-1px);
-  border-color: transparent;
-  background: var(--accent-primary);
-  color: var(--text-inverse);
-}
-
-.btn-social-auth:hover svg path {
-  fill: var(--text-inverse);
 }
 
 /* RIGHT: Cross-line diagonal clip-path art panel */
@@ -839,12 +765,6 @@
   }
 }
 
-@media (max-width: 380px) {
-  .social-row-auth {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .form-wrap-auth,
   .art-copy-auth,
@@ -1188,6 +1108,112 @@
 }
 
 .form-action-row-auth .btn-primary-auth.is-cta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+/* ── Secondary CTA ───────────────────────────────────────────────────────────
+   "Create an organization" is a destination, not a footnote, so on the sign-in
+   screen it gets a button of its own rather than a word-sized link inside the
+   subtitle. Outline rather than filled, so it stays clearly subordinate to the
+   Sign In action directly above it.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.alt-action-auth {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.44rem;
+  margin-top: 1.1rem;
+}
+
+.alt-action-label-auth {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.636rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.btn-secondary-auth {
+  width: 100%;
+  height: 44px;
+  padding: 0 1.36rem;
+  border: 1.5px solid var(--accent-primary);
+  border-radius: 999px;
+  background: var(--bg-raised);
+  color: var(--accent-primary);
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.015em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-shadow: 4px 4px 10px var(--nm-shadow-dark), -3px -3px 8px var(--nm-shadow-light);
+  transition: transform 0.18s var(--ease-auth), box-shadow 0.18s var(--ease-auth),
+              background 0.18s var(--ease-auth), color 0.18s var(--ease-auth);
+}
+
+.btn-secondary-auth:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  box-shadow: var(--auth-btn-shadow);
+}
+
+.btn-secondary-auth:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: inset 4px 4px 8px var(--nm-inset-dark), inset -3px -3px 6px var(--nm-inset-light);
+}
+
+.btn-secondary-auth:focus-visible {
+  outline: 3px solid var(--glow-strong);
+  outline-offset: 2px;
+}
+
+.btn-secondary-auth:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* The primary button sits on a navy gradient; its label and any icon inside it
+   must stay white regardless of the colour the surrounding text inherits. */
+.btn-primary-auth,
+.btn-primary-auth span,
+.btn-primary-auth svg {
+  color: var(--text-inverse);
+}
+
+/* Standalone primary CTA — the sign-in submit, which is not inside the
+   register screen's action row but wants the same weight as the button it
+   sits above. */
+.btn-primary-auth.is-cta {
+  width: 100%;
+  min-width: 0;
+  align-self: stretch;
+  height: 50px;
+  margin-top: 0.68rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: var(--auth-btn-shadow), 0 0 0 1px var(--glow-primary);
+}
+
+.btn-primary-auth.is-cta:hover:not(:disabled) {
+  box-shadow: var(--auth-btn-hover-shadow), 0 0 0 1px var(--glow-strong);
+}
+
+.btn-primary-auth.is-cta:active:not(:disabled) {
+  box-shadow: var(--auth-btn-active-shadow);
+}
+
+.btn-primary-auth.is-cta:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;

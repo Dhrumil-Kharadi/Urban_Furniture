@@ -44,7 +44,7 @@ describe('Phase 3: Organization Signup, Seeding & User Invitations', () => {
         email: createdAdminEmail,
         password: 'Password123!',
         organizationName: orgName,
-        role: 'super_admin', // Must be ignored
+        role: 'business_owner', // Must be ignored
         organization_id: '00000000-0000-0000-0000-000000000000', // Must be ignored
       });
 
@@ -52,7 +52,7 @@ describe('Phase 3: Organization Signup, Seeding & User Invitations', () => {
       expect(result).toHaveProperty('organization');
 
       expect(result.user.email).toBe(createdAdminEmail);
-      expect(result.user.role).toBe('admin'); // Security: forced to admin, ignoring super_admin
+      expect(result.user.role).toBe('business_owner'); // Security: forced to admin, ignoring super_admin
       expect(result.organization.name).toBe(orgName);
       expect(result.user.organization_id).toBe(result.organization.id);
 
@@ -166,11 +166,11 @@ describe('Phase 3: Organization Signup, Seeding & User Invitations', () => {
     const invitedEmail = `accountant_${testSuffix}@example.com`;
 
     test('/users/invite may only create role="manager" (Admin cannot mint another Admin)', async () => {
-      // Validate validation prevents role='admin'
+      // Validate validation prevents role='business_owner'
       const invalidValidation = usersValidation.validateInvite({
         name: 'Malicious Admin Clone',
         email: 'malicious@example.com',
-        role: 'admin',
+        role: 'business_owner',
       });
       expect(invalidValidation.isValid).toBe(false);
       expect(invalidValidation.errors[0]).toMatch(/Only manager accounts/);
@@ -187,21 +187,21 @@ describe('Phase 3: Organization Signup, Seeding & User Invitations', () => {
         inviteResult = await usersService.inviteUser(createdOrgId, createdAdminUserId, {
           name: 'Rohit Mehta',
           email: invitedEmail,
-          role: 'manager',
+          role: 'accountant',
         });
       } finally {
         authEmail.sendInviteEmail = originalSendInvite;
       }
 
       expect(inviteResult).toHaveProperty('user');
-      expect(inviteResult.user.role).toBe('manager');
+      expect(inviteResult.user.role).toBe('accountant');
       expect(inviteResult.user.status).toBe('invited');
       expect(inviteResult.user.password).toBeUndefined(); // Random password is never returned
       invitedUserId = inviteResult.user.id;
 
       // Verify user in PostgreSQL
       const userInDb = await pool.query('SELECT role, must_change_password, status FROM users WHERE id = $1', [invitedUserId]);
-      expect(userInDb.rows[0].role).toBe('manager');
+      expect(userInDb.rows[0].role).toBe('accountant');
       expect(userInDb.rows[0].must_change_password).toBe(true);
       expect(userInDb.rows[0].status).toBe('invited');
 
@@ -225,7 +225,7 @@ describe('Phase 3: Organization Signup, Seeding & User Invitations', () => {
       });
       expect(enumResult).toHaveProperty('user');
       expect(enumResult.user.email).toBe(invitedEmail);
-      expect(enumResult.user.role).toBe('manager');
+      expect(enumResult.user.role).toBe('accountant');
     });
 
     test('Invite token is single-use and consumed by /auth/set-password', async () => {
@@ -265,7 +265,7 @@ describe('Phase 3: Organization Signup, Seeding & User Invitations', () => {
 
       expect(loginResult).toBeDefined();
       expect(loginResult.user.email).toBe(invitedEmail);
-      expect(loginResult.user.role).toBe('manager');
+      expect(loginResult.user.role).toBe('accountant');
     });
 
     test('User status update (activate / deactivate) works and guards against self-deactivation', async () => {
@@ -298,7 +298,7 @@ describe('Phase 3: Organization Signup, Seeding & User Invitations', () => {
       await pool.query('UPDATE users SET email_verified = true WHERE id = $1', [createdAdminUserId]);
 
       // Admin has privileged session cookie
-      const adminSession = authSession.createSession(createdAdminUserId, 'admin', false);
+      const adminSession = authSession.createSession(createdAdminUserId, 'business_owner', false);
       const res = await request(app)
         .get('/api/auth/me')
         .set('Cookie', [`sid=${adminSession.sessionId}`]);
@@ -316,14 +316,14 @@ describe('Phase 3: Organization Signup, Seeding & User Invitations', () => {
       const app = require('../src/app');
 
       // Manager has privileged session cookie
-      const managerSession = authSession.createSession(invitedUserId, 'manager', false);
+      const managerSession = authSession.createSession(invitedUserId, 'accountant', false);
       const res = await request(app)
         .post('/api/users/invite')
         .set('Cookie', [`sid=${managerSession.sessionId}`])
         .send({
           name: 'Unauthorized User',
           email: 'unauth@example.com',
-          role: 'manager',
+          role: 'accountant',
         });
 
       expect(res.status).toBe(403);
@@ -333,19 +333,19 @@ describe('Phase 3: Organization Signup, Seeding & User Invitations', () => {
       const request = require('supertest');
       const app = require('../src/app');
 
-      const adminSession = authSession.createSession(createdAdminUserId, 'admin', false);
+      const adminSession = authSession.createSession(createdAdminUserId, 'business_owner', false);
       const res = await request(app)
         .post('/api/users/invite')
         .set('Cookie', [`sid=${adminSession.sessionId}`])
         .send({
           name: 'Second Accountant',
           email: `second_${Date.now()}@example.com`,
-          role: 'manager',
+          role: 'accountant',
         });
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.user.role).toBe('manager');
+      expect(res.body.data.user.role).toBe('accountant');
       expect(res.body.data.user.status).toBe('invited');
     });
   });

@@ -71,7 +71,9 @@ const usersRepository = {
 
     return {
       items: dataRes.rows,
-      meta: buildMeta(total, page, limit),
+      // buildMeta takes (page, limit, total) — the arguments were transposed here,
+      // which made every page report a total of `limit` and a totalPages of 1.
+      meta: buildMeta(page, limit, total),
     };
   },
 

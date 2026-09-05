@@ -16,7 +16,7 @@
  *   validate(req.body)
  *     .field('name',     v => v.required().string().maxLength(150))
  *     .field('email',    v => v.required().email())
- *     .field('role',     v => v.required().oneOf(['admin','manager','user']))
+ *     .field('role',     v => v.required().oneOf(['business_owner','accountant','customer']))
  *     .field('phone',    v => v.optional().string().maxLength(20))
  *     .run();   // ← throws ValidationError if anything failed
  */

@@ -14,18 +14,18 @@ const router = express.Router();
  * project.md §3 is explicit that a Contact NEVER records a Cash/Bank payment —
  * those are entered internally by Admin or Accountant when money is received
  * offline. A Contact pays by card through the portal, which is the gateway
- * flow in src/gateway/, not this module. Hence 'user' appears nowhere here.
+ * flow in src/gateway/, not this module. Hence contact roles appear nowhere here.
  *
  * Cancellation is admin-only because it reverses a posted ledger entry.
  */
 
 router.use(authMiddleware.authenticate, resolveTenant);
 
-router.get('/', authMiddleware.authorize('admin', 'manager'), paymentsController.listPayments);
-router.post('/', authMiddleware.authorize('admin', 'manager'), paymentsController.createPayment);
+router.get('/', authMiddleware.authorize('business_owner', 'accountant'), paymentsController.listPayments);
+router.post('/', authMiddleware.authorize('business_owner', 'accountant'), paymentsController.createPayment);
 
-router.get('/:id', authMiddleware.authorize('admin', 'manager'), paymentsController.getPayment);
+router.get('/:id', authMiddleware.authorize('business_owner', 'accountant'), paymentsController.getPayment);
 
-router.post('/:id/cancel', authMiddleware.authorize('admin'), paymentsController.cancelPayment);
+router.post('/:id/cancel', authMiddleware.authorize('business_owner'), paymentsController.cancelPayment);
 
 module.exports = router;

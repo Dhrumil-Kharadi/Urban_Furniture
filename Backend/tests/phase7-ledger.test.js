@@ -83,9 +83,9 @@ describe('Phase 7: Ledger engine', () => {
     orgA = await makeOrg('OrgA');
     orgB = await makeOrg('OrgB');
 
-    adminA = await makeUser(orgA, 'admin', 'adminA');
-    managerA = await makeUser(orgA, 'manager', 'managerA');
-    adminB = await makeUser(orgB, 'admin', 'adminB');
+    adminA = await makeUser(orgA, 'business_owner', 'adminA');
+    managerA = await makeUser(orgA, 'accountant', 'managerA');
+    adminB = await makeUser(orgB, 'business_owner', 'adminB');
 
     const client = await pool.connect();
     try {
@@ -100,9 +100,9 @@ describe('Phase 7: Ledger engine', () => {
       client.release();
     }
 
-    adminASid = authSession.createSession(adminA, 'admin', false).sessionId;
-    managerASid = authSession.createSession(managerA, 'manager', false).sessionId;
-    adminBSid = authSession.createSession(adminB, 'admin', false).sessionId;
+    adminASid = authSession.createSession(adminA, 'business_owner', false).sessionId;
+    managerASid = authSession.createSession(managerA, 'accountant', false).sessionId;
+    adminBSid = authSession.createSession(adminB, 'business_owner', false).sessionId;
 
     // The seed makes no 'general' journal, and a manual entry wants one.
     const gj = await pool.query(

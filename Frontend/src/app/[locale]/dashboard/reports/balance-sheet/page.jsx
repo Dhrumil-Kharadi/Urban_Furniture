@@ -35,12 +35,11 @@ export default function BalanceSheetReportPage() {
       const res = await reportsService.getBalanceSheet({ asOfDate });
       setData(res?.data || res);
     } catch (err) {
-      console.error('Failed to load balance sheet', err);
-      setError(err?.message || 'Failed to generate balance sheet report');
+      setError(err?.message || t('loadError'));
     } finally {
       setLoading(false);
     }
-  }, [asOfDate]);
+  }, [asOfDate, t]);
 
   useEffect(() => {
     fetchReport();
@@ -59,21 +58,21 @@ export default function BalanceSheetReportPage() {
     const eqVal = Math.max(0, (Number(data.equity?.total) || 0) + (Number(data.currentPeriodNetProfit) || 0));
 
     return {
-      categories: ['Assets', 'Liabilities & Equity'],
+      categories: [t('assets'), t('liabilitiesAndEquity')],
       series: [
-        { name: 'Assets', color: '#000080', data: [assetsVal, 0] },
-        { name: 'Liabilities', color: '#6D8196', data: [0, liabVal] },
-        { name: 'Equity & Profit', color: '#c0ccd6', data: [0, eqVal] },
+        { name: t('assets'), color: 'var(--graph-series-1)', data: [assetsVal, 0] },
+        { name: t('liabilities'), color: 'var(--graph-series-5)', data: [0, liabVal] },
+        { name: t('equityAndProfit'), color: 'var(--graph-series-7)', data: [0, eqVal] },
       ],
     };
-  }, [data]);
+  }, [data, t]);
 
   return (
     <div className="report-container">
       {/* Top Header */}
       <div className="report-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link href="/dashboard/reports" className="budget-back-btn">
+        <div className="report-header-row">
+          <Link href="/dashboard/reports" className="budget-back-btn" aria-label={tReports('back')}>
             <ArrowLeft size={18} />
           </Link>
           <div className="report-header-content">
@@ -128,7 +127,7 @@ export default function BalanceSheetReportPage() {
           <span>
             {data.isBalanced
               ? t('balanced')
-              : `${t('unbalanced')} (Discrepancy: ₹${data.discrepancy})`}
+              : `${t('unbalanced')} — ${t('discrepancy', { amount: data.discrepancy })}`}
           </span>
         </div>
       )}
@@ -137,9 +136,9 @@ export default function BalanceSheetReportPage() {
       {chartConfig && (
         <div className="report-chart-card">
           <h2 className="report-chart-title">
-            Balance Structure (₹)
+            {t('chartTitle')}
           </h2>
-          <div style={{ width: '100%' }}>
+          <div className="report-chart-frame">
             <StackedBarChart
               categories={chartConfig.categories}
               series={chartConfig.series}
@@ -153,13 +152,9 @@ export default function BalanceSheetReportPage() {
       {/* Balance Sheet Statement */}
       <div className="report-sheet-card">
         {loading ? (
-          <div style={{ padding: '3rem 1rem', textAlign: 'center', fontFamily: 'Sora, sans-serif', color: 'var(--text-secondary)' }}>
-            Calculating real-time ledger balances…
-          </div>
+          <div className="report-state">{tReports('loading')}</div>
         ) : !data ? (
-          <div style={{ padding: '3rem 1rem', textAlign: 'center', fontFamily: 'Sora, sans-serif', color: 'var(--text-secondary)' }}>
-            No statement data available for the selected date.
-          </div>
+          <div className="report-state">{t('noData')}</div>
         ) : (
           <div>
             {/* ASSETS SECTION */}
@@ -182,9 +177,7 @@ export default function BalanceSheetReportPage() {
                 ))}
                 {(!data.assets?.accounts || data.assets.accounts.length === 0) && (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                      No asset movements recorded as of this date.
-                    </td>
+                    <td colSpan={3} className="report-empty-cell">{t('noAssets')}</td>
                   </tr>
                 )}
               </tbody>
@@ -210,9 +203,7 @@ export default function BalanceSheetReportPage() {
                 ))}
                 {(!data.liabilities?.accounts || data.liabilities.accounts.length === 0) && (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
-                      No liability movements recorded as of this date.
-                    </td>
+                    <td colSpan={3} className="report-empty-cell">{t('noLiabilities')}</td>
                   </tr>
                 )}
               </tbody>
@@ -259,7 +250,7 @@ export default function BalanceSheetReportPage() {
               </div>
               <div>
                 <span>{t('totalLiabilitiesEquity')}: </span>
-                <span style={{ color: '#16a34a' }}>
+                <span className="report-total-positive">
                   <MoneyText value={data.totalLiabilitiesAndEquity} />
                 </span>
               </div>

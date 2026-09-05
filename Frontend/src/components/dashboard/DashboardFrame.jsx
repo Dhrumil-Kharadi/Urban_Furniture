@@ -50,8 +50,11 @@ export default function DashboardFrame({
   const handleSearch = onSearchChange || setInternalSearch;
 
   const groups = useMemo(() => {
-    const navRole = user?.role || role;
-    const roleGroups = DASHBOARD_NAV[navRole] || DASHBOARD_NAV.customer;
+    // An unknown or not-yet-loaded role must still render a shell. The old
+    // fallback pointed at DASHBOARD_NAV.user, a key that no longer exists
+    // after the role rename, so any such render threw on `.map` and took the
+    // whole page down instead of degrading to an empty sidebar.
+    const roleGroups = DASHBOARD_NAV[role] || DASHBOARD_NAV.customer || [];
 
     // Only entries that actually go somewhere are shown. The config lists the
     // whole intended menu, including sections later phases will build, but a

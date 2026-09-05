@@ -54,13 +54,13 @@ describe('Phase 9: Sales Flow (SO → Customer Invoice → Ledger)', () => {
     orgA = await makeOrg('OrgA');
     orgB = await makeOrg('OrgB');
 
-    adminA = await makeUser(orgA, 'admin', 'adminA');
-    managerA = await makeUser(orgA, 'manager', 'mgrA');
-    adminB = await makeUser(orgB, 'admin', 'adminB');
+    adminA = await makeUser(orgA, 'business_owner', 'adminA');
+    managerA = await makeUser(orgA, 'accountant', 'mgrA');
+    adminB = await makeUser(orgB, 'business_owner', 'adminB');
 
-    adminASid = authSession.createSession(adminA, 'admin', false).sessionId;
-    managerASid = authSession.createSession(managerA, 'manager', false).sessionId;
-    adminBSid = authSession.createSession(adminB, 'admin', false).sessionId;
+    adminASid = authSession.createSession(adminA, 'business_owner', false).sessionId;
+    managerASid = authSession.createSession(managerA, 'accountant', false).sessionId;
+    adminBSid = authSession.createSession(adminB, 'business_owner', false).sessionId;
 
     // Seed master data in transactions
     const client = await pool.connect();

@@ -171,7 +171,7 @@ const authMiddleware = {
    * while allowing specified privileged roles (e.g. admin, super_admin) if requested.
    *
    * @param {function(import('express').Request): string} getOwnerIdFn Function extracting resource owner UUID from request
-   * @param {...string} privilegedRoles Optional roles that bypass ownership (e.g. 'admin', 'super_admin')
+   * @param {...string} privilegedRoles Optional roles that bypass ownership (e.g. 'business_owner')
    * @returns {import('express').RequestHandler}
    */
   authorizeOwnerOrRoles(getOwnerIdFn, ...privilegedRoles) {
