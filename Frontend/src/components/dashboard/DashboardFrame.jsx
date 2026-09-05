@@ -69,13 +69,13 @@ export default function DashboardFrame({
           return roleAllowed && (Boolean(item.href) || typeof item.onClick === 'function');
         })
         .map((item) => {
-          const Icon = item.icon;
+          const Icon = item.icon || SOLID_ICONS.overview;
           return {
             key: item.key,
             label: t(`nav.${item.key}`),
             href: item.href,
             // solid glyphs are fill-based — no stroke weight to set
-            icon: <Icon size={ICON} />,
+            icon: typeof Icon === 'function' ? <Icon size={ICON} /> : (Icon || null),
             active: item.key === activeKey,
             badge: item.badge,
             onClick: item.onClick,

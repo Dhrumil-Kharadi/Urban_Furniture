@@ -161,6 +161,11 @@ export const SOLID_ICONS = {
   settings: SettingsIcon,
   help: HelpIcon,
   logout: LogoutIcon,
+  invoices: FieldsIcon,
+  bills: DeploymentsIcon,
+  receipts: DeploymentsIcon,
+  creditNotes: FieldsIcon,
+  debitNotes: NodesIcon,
 };
 
 /** Render by key; falls back to the grid so a new key never renders blank. */
