@@ -22,7 +22,7 @@
     "titleParts": {
       "before": "संपूर्ण",
       "accent": "लेखांकन",
-        "after": "Furnova के साथ।"
+      "after": "Furnova के साथ।"
     },
     "description": "खरीद, बिक्री और भुगतान एक बार दर्ज करें — Furnova हर लेन-देन के पीछे दोहरी-प्रविष्टि जर्नल स्वयं बनाता है और आपके तुलन पत्र, लाभ-हानि खाते तथा बजट रिपोर्ट को वास्तविक समय में सटीक रखता है।",
     "surfaceLabel": "खातों का चार्ट — मूल स्तर",
@@ -274,6 +274,19 @@
       "submitButton": "पासवर्ड रीसेट करें",
       "submittingButton": "रीसेट किया जा रहा है…",
       "backToLogin": "साइन इन पर वापस"
+    },
+    "setPassword": {
+      "title": "अपना पासवर्ड सेट करें",
+      "subtitle": "टीम में आपका स्वागत है! अपने आमंत्रित खाते के लिए एक सुरक्षित पासवर्ड बनाएं।",
+      "passwordLabel": "नया पासवर्ड",
+      "passwordPlaceholder": "••••••••",
+      "confirmPasswordLabel": "पासवर्ड की पुष्टि करें",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submitButton": "पासवर्ड सेट करें और साइन इन करें",
+      "submittingButton": "पासवर्ड सेट किया जा रहा है…",
+      "successTitle": "पासवर्ड सफलतापूर्वक सेट हो गया",
+      "successMessage": "आपका खाता सक्रिय हो गया है। साइन इन पर पुनर्निर्देशित किया जा रहा है...",
+      "goToLogin": "साइन इन पर वापस जाएं"
     },
     "verifyResetOtp": {
       "title": "रीसेट कोड सत्यापित करें",
@@ -575,6 +588,456 @@
       "verified": "सत्यापित",
       "pending": "लंबित",
       "protectedRoot": "संरक्षित मूल"
+    }
+  },
+  "common": {
+    "actions": {
+      "save": "सुरक्षित करें",
+      "cancel": "रद्द करें",
+      "delete": "हटाएं",
+      "archive": "संग्रहीत करें",
+      "restore": "पुनर्स्थापित करें",
+      "create": "नया बनाएं",
+      "new": "नया",
+      "edit": "संपादित करें",
+      "view": "देखें",
+      "print": "प्रिंट करें",
+      "download": "डाउनलोड करें",
+      "export": "निर्यात (Export)",
+      "import": "आयात (Import)",
+      "confirm": "पुष्टि करें",
+      "close": "बंद करें",
+      "post": "प्रविष्ट करें (Post)",
+      "reset": "रीसेट करें",
+      "filter": "फ़िल्टर",
+      "clearFilters": "फ़िल्टर साफ़ करें",
+      "search": "खोजें",
+      "searchPlaceholder": "रिकॉर्ड खोजें…",
+      "refresh": "ताज़ा करें",
+      "back": "वापस",
+      "retry": "पुनः प्रयास करें",
+      "submit": "जमा करें",
+      "submitting": "जमा हो रहा है…",
+      "saving": "सुरक्षित हो रहा है…",
+      "loading": "लोड हो रहा है…",
+      "payNow": "अभी भुगतान करें",
+      "allocate": "आवंटित करें"
+    },
+    "status": {
+      "draft": "मसौदा (Draft)",
+      "posted": "प्रविष्ट (Posted)",
+      "cancelled": "रद्द (Cancelled)",
+      "unpaid": "अदत्त (Unpaid)",
+      "partiallyPaid": "आंशिक भुगतान",
+      "paid": "पूर्ण भुगतान (Paid)",
+      "overdue": "अतिदेय (Overdue)",
+      "active": "सक्रिय",
+      "inactive": "निष्क्रिय",
+      "archived": "संग्रहीत",
+      "open": "खुला",
+      "closed": "बंद",
+      "pending": "लंबित",
+      "confirmed": "पुष्टि की गई"
+    },
+    "table": {
+      "loading": "रिकॉर्ड लोड हो रहे हैं…",
+      "empty": "कोई रिकॉर्ड नहीं मिला।",
+      "emptyFiltered": "फ़िल्टर से मेल खाता कोई रिकॉर्ड नहीं मिला।",
+      "showing": "{total} में से {start} से {end} रिकॉर्ड प्रदर्शित",
+      "rowsPerPage": "प्रति पृष्ठ पंक्तियाँ",
+      "actions": "कार्रवाई",
+      "selectAll": "सभी चुनें"
+    },
+    "validation": {
+      "required": "यह फ़ील्ड आवश्यक है",
+      "invalidEmail": "अमान्य ईमेल पता",
+      "invalidNumber": "वैध संख्या दर्ज करें",
+      "invalidDate": "वैध तिथि दर्ज करें",
+      "positiveNumber": "संख्या शून्य से अधिक होनी चाहिए",
+      "nonNegative": "ऋणात्मक नहीं हो सकता"
+    },
+    "toast": {
+      "success": "कार्य सफलतापूर्वक संपन्न हुआ",
+      "error": "एक त्रुटि उत्पन्न हुई",
+      "saved": "परिवर्तन सहेजे गए",
+      "deleted": "रिकॉर्ड हटा दिया गया",
+      "created": "रिकॉर्ड सफलतापूर्वक बनाया गया"
+    }
+  },
+  "contacts": {
+    "title": "संपर्क (Contacts)",
+    "subtitle": "ग्राहकों, विक्रेताओं और व्यावसायिक भागीदारों का प्रबंधन",
+    "createContact": "नया संपर्क",
+    "editContact": "संपर्क संपादित करें",
+    "types": {
+      "customer": "ग्राहक (Customer)",
+      "vendor": "विक्रेता (Vendor)",
+      "both": "ग्राहक एवं विक्रेता दोनों"
+    },
+    "fields": {
+      "name": "संपर्क नाम",
+      "type": "संपर्क प्रकार",
+      "email": "ईमेल पता",
+      "mobile": "मोबाइल नंबर",
+      "address": "सड़क / पता",
+      "city": "शहर",
+      "state": "राज्य",
+      "pincode": "पिन कोड",
+      "taxId": "जीएसटीआईएन / कर पहचान",
+      "portalAccess": "पोर्टल एक्सेस की अनुमति दें",
+      "status": "स्थिति"
+    },
+    "tabs": {
+      "details": "विवरण",
+      "invoices": "ग्राहक चालान (Invoices)",
+      "bills": "विक्रेता बिल (Bills)",
+      "payments": "भुगतान एवं खाता बही"
+    }
+  },
+  "products": {
+    "title": "उत्पाद (Products)",
+    "subtitle": "बिक्री और खरीद के लिए वस्तुएं और सेवाएं",
+    "createProduct": "नया उत्पाद",
+    "editProduct": "उत्पाद संपादित करें",
+    "types": {
+      "goods": "भौतिक वस्तुएं (Goods)",
+      "service": "सेवा (Service)"
+    },
+    "fields": {
+      "name": "उत्पाद का नाम",
+      "sku": "एसकेयू / कोड",
+      "type": "उत्पाद प्रकार",
+      "category": "श्रेणी (Category)",
+      "salesPrice": "बिक्री मूल्य",
+      "costPrice": "लागत मूल्य",
+      "salesTax": "बिक्री कर",
+      "purchaseTax": "खरीद कर",
+      "incomeAccount": "आय खाता (Income Account)",
+      "expenseAccount": "व्यय खाता (Expense Account)",
+      "description": "विवरण",
+      "status": "स्थिति"
+    },
+    "categories": {
+      "title": "उत्पाद श्रेणियां",
+      "createCategory": "नई श्रेणी",
+      "name": "श्रेणी का नाम",
+      "parent": "मूल श्रेणी (Parent Category)"
+    }
+  },
+  "accounts": {
+    "title": "खातों की सूची (Chart of Accounts)",
+    "subtitle": "दोहरी प्रविष्टि बहीखाता पद्धति के लिए खाता बही",
+    "createAccount": "नया खाता",
+    "editAccount": "खाता संपादित करें",
+    "types": {
+      "asset": "परिसंपत्ति (Asset)",
+      "liability": "दायित्व (Liability)",
+      "equity": "पूंजी / इक्विटी (Equity)",
+      "income": "आय (Income)",
+      "expense": "व्यय (Expense)"
+    },
+    "fields": {
+      "code": "खाता कोड",
+      "name": "खाता नाम",
+      "type": "खाता वर्गीकरण",
+      "parent": "मूल खाता",
+      "openingBalance": "प्रारंभिक शेष (Opening Balance)",
+      "currentBalance": "वर्तमान शेष",
+      "isSystem": "प्रणाली खाता (System Account)",
+      "status": "स्थिति"
+    }
+  },
+  "journals": {
+    "title": "रोजनामचे (Journals)",
+    "subtitle": "लेन-देन संबंधी प्रविष्टियों को वर्गीकृत करने के रोजनामचे",
+    "createJournal": "नया रोजनामचा",
+    "editJournal": "रोजनामचा संपादित करें",
+    "types": {
+      "sales": "बिक्री रोजनामचा (Sales Journal)",
+      "purchase": "खरीद रोजनामचा (Purchase Journal)",
+      "bank": "बैंक रोजनामचा (Bank Journal)",
+      "cash": "रोकड़ रोजनामचा (Cash Journal)",
+      "general": "विविध रोजनामचा (General Journal)"
+    },
+    "fields": {
+      "code": "रोजनामचा कोड",
+      "name": "रोजनामचा का नाम",
+      "type": "प्रकार",
+      "defaultDebitAccount": "डिफ़ॉल्ट नामे खाता (Debit Account)",
+      "defaultCreditAccount": "डिफ़ॉल्ट जमा खाता (Credit Account)",
+      "sequencePrefix": "अनुक्रम उपसर्ग (Prefix)"
+    }
+  },
+  "journalEntries": {
+    "title": "रोजनामचा प्रविष्टियां (Journal Entries)",
+    "subtitle": "दोहरी प्रविष्टि सामान्य बहीखाता लेन-देन",
+    "createEntry": "नई रोजनामचा प्रविष्टि",
+    "editEntry": "प्रविष्टि संपादित करें",
+    "fields": {
+      "entryNumber": "प्रविष्टि संख्या #",
+      "date": "दिनांक",
+      "journal": "रोजनामचा",
+      "reference": "संदर्भ",
+      "narration": "विवरण / नोट",
+      "status": "स्थिति",
+      "account": "खाता",
+      "partner": "भागीदार / संपर्क",
+      "debit": "नामे / डेबिट (₹)",
+      "credit": "जमा / क्रेडिट (₹)",
+      "totalDebit": "कुल नामे",
+      "totalCredit": "कुल जमा",
+      "unbalanced": "असंतुलित प्रविष्टि (अंतर: {diff})",
+      "balanced": "संतुलित प्रविष्टि"
+    },
+    "actions": {
+      "postToLedger": "खाताबही में दर्ज करें (Post)",
+      "reverse": "प्रविष्टि उलटें (Reverse)"
+    }
+  },
+  "analyticAccounts": {
+    "title": "विश्लेषणात्मक खाते (Analytic Accounts)",
+    "subtitle": "प्रबंधकीय लेखांकन के लिए लागत केंद्र और परियोजनाएं",
+    "createAccount": "नया विश्लेषणात्मक खाता",
+    "editAccount": "विश्लेषणात्मक खाता संपादित करें",
+    "fields": {
+      "name": "विश्लेषणात्मक खाते का नाम",
+      "code": "कोड",
+      "department": "विभाग / परियोजना",
+      "budget": "आवंटित बजट",
+      "status": "स्थिति"
+    }
+  },
+  "budgets": {
+    "title": "बजट (Budgets)",
+    "subtitle": "विश्लेषणात्मक खाते द्वारा वित्तीय योजना और विचरण ट्रैकिंग",
+    "createBudget": "नया बजट",
+    "editBudget": "बजट संपादित करें",
+    "fields": {
+      "name": "बजट का नाम",
+      "periodStart": "प्रारंभ तिथि",
+      "periodEnd": "समाप्ति तिथि",
+      "analyticAccount": "विश्लेषणात्मक खाता",
+      "responsible": "जिम्मेदार प्रबंधक",
+      "plannedAmount": "नियोजित राशि (Planned)",
+      "actualAmount": "वास्तविक राशि (Actual)",
+      "variance": "विचरण (Variance)",
+      "consumption": "खपत (%)"
+    }
+  },
+  "taxes": {
+    "title": "कर दरें (Tax Rates)",
+    "subtitle": "बिक्री और खरीद कर परिभाषाएं",
+    "createTax": "नया कर",
+    "editTax": "कर संपादित करें",
+    "scopes": {
+      "sales": "केवल बिक्री",
+      "purchase": "केवल खरीद",
+      "both": "बिक्री एवं खरीद दोनों"
+    },
+    "types": {
+      "percentage": "प्रतिशत (%)",
+      "fixed": "निश्चित राशि"
+    },
+    "fields": {
+      "name": "कर का नाम",
+      "rate": "दर (%)",
+      "scope": "दायरा (Scope)",
+      "computation": "गणना प्रकार",
+      "collectedAccount": "निर्गत कर खाता (देय)",
+      "paidAccount": "आगत कर खाता (क्रेडिट)",
+      "status": "स्थिति"
+    }
+  },
+  "purchases": {
+    "title": "खरीद आदेश (Purchase Orders)",
+    "subtitle": "खरीद आदेश और विक्रेता पुष्टिकरण",
+    "createOrder": "नया खरीद आदेश",
+    "vendorBillsTitle": "विक्रेता बिल (Vendor Bills)",
+    "createBill": "नया विक्रेता बिल",
+    "fields": {
+      "orderNumber": "पीओ संख्या #",
+      "billNumber": "बिल संख्या #",
+      "vendor": "विक्रेता (Vendor)",
+      "orderDate": "आदेश तिथि",
+      "billDate": "बिल तिथि",
+      "dueDate": "देय तिथि",
+      "reference": "विक्रेता संदर्भ",
+      "untaxedTotal": "कर-पूर्व कुल राशि",
+      "taxTotal": "कुल कर",
+      "totalAmount": "कुल राशि",
+      "paidAmount": "भुगतान की गई राशि",
+      "amountDue": "देय शेष",
+      "notes": "नियम एवं शर्तें"
+    },
+    "lines": {
+      "product": "उत्पाद / वस्तु",
+      "description": "विवरण",
+      "account": "व्यय खाता (Expense Account)",
+      "quantity": "मात्रा",
+      "unitPrice": "इकाई लागत",
+      "tax": "कर",
+      "amount": "पंक्ति योग",
+      "addLine": "वस्तु जोड़ें",
+      "removeLine": "हटाएं"
+    }
+  },
+  "sales": {
+    "title": "बिक्री आदेश (Sales Orders)",
+    "subtitle": "ग्राहक आदेश और वाणिज्यिक प्रस्ताव",
+    "createOrder": "नया बिक्री आदेश",
+    "invoicesTitle": "ग्राहक चालान (Customer Invoices)",
+    "createInvoice": "नया ग्राहक चालान",
+    "fields": {
+      "orderNumber": "एसओ संख्या #",
+      "invoiceNumber": "चालान संख्या #",
+      "customer": "ग्राहक (Customer)",
+      "orderDate": "आदेश तिथि",
+      "invoiceDate": "चालान तिथि",
+      "dueDate": "देय तिथि",
+      "reference": "भुगतान संदर्भ",
+      "untaxedTotal": "कर-पूर्व कुल राशि",
+      "taxTotal": "कुल कर",
+      "totalAmount": "कुल राशि",
+      "paidAmount": "प्राप्त राशि",
+      "amountDue": "देय शेष",
+      "notes": "भुगतान की शर्तें"
+    },
+    "lines": {
+      "product": "उत्पाद / वस्तु",
+      "description": "विवरण",
+      "account": "आय खाता (Income Account)",
+      "quantity": "मात्रा",
+      "unitPrice": "इकाई मूल्य",
+      "tax": "कर",
+      "amount": "पंक्ति योग",
+      "addLine": "वस्तु जोड़ें",
+      "removeLine": "हटाएं"
+    }
+  },
+  "payments": {
+    "title": "भुगतान (Payments)",
+    "subtitle": "ग्राहक प्राप्तियां और विक्रेता संवितरण",
+    "createPayment": "भुगतान दर्ज करें",
+    "directions": {
+      "inbound": "ग्राहक प्राप्ति (Inbound)",
+      "outbound": "विक्रेता संवितरण (Outbound)"
+    },
+    "methods": {
+      "cash": "रोकड़ (Cash)",
+      "bank": "बैंक अंतरण (NEFT/RTGS)",
+      "card": "कार्ड भुगतान",
+      "cheque": "चेक"
+    },
+    "fields": {
+      "paymentNumber": "भुगतान #",
+      "contact": "भागीदार / संपर्क",
+      "date": "भुगतान तिथि",
+      "amount": "प्राप्त / प्रदत्त राशि",
+      "direction": "भुगतान प्रकार",
+      "method": "भुगतान विधि",
+      "journal": "भुगतान रोजनामचा",
+      "reference": "लेन-देन / चेक संख्या",
+      "allocated": "आवंटित राशि",
+      "unallocated": "अनावंटित शेष",
+      "status": "स्थिति"
+    },
+    "allocation": {
+      "title": "चालान / बिल आवंटन",
+      "document": "दस्तावेज़ संख्या #",
+      "originalAmount": "कुल राशि",
+      "openBalance": "बकाया शेष",
+      "allocatedNow": "इस भुगतान को आवंटित करें"
+    }
+  },
+  "reports": {
+    "title": "वित्तीय विवरण (Reports)",
+    "subtitle": "सांविधिक विवरण और प्रबंधकीय वित्तीय सारांश",
+    "balanceSheet": {
+      "title": "तुलन पत्र (Balance Sheet)",
+      "subtitle": "निर्दिष्ट तिथि पर वित्तीय स्थिति का विवरण",
+      "assets": "संपत्तियां (Assets)",
+      "liabilities": "देनदारियां (Liabilities)",
+      "equity": "पूंजी एवं संचित आय (Equity)",
+      "totalAssets": "कुल परिसंपत्तियां",
+      "totalLiabilitiesEquity": "कुल देनदारियां एवं पूंजी",
+      "currentYearEarnings": "चालू वर्ष की अनावंटित आय"
+    },
+    "profitLoss": {
+      "title": "लाभ एवं हानि विवरण (Profit & Loss)",
+      "subtitle": "चयनित रिपोर्टिंग अवधि के लिए आय विवरण",
+      "operatingIncome": "परिचालन आय (Operating Revenue)",
+      "costOfSales": "बिक्री की लागत (COGS)",
+      "grossProfit": "सकल लाभ (Gross Profit)",
+      "operatingExpenses": "परिचालन व्यय (Operating Expenses)",
+      "netProfit": "शुद्ध लाभ / (हानि)"
+    },
+    "budgetReport": {
+      "title": "बजट बनाम वास्तविक (Budget vs Actuals)",
+      "subtitle": "लागत केंद्रों में विश्लेषणात्मक विचरण ट्रैकिंग",
+      "account": "लागत केंद्र (Cost Center)",
+      "planned": "नियोजित व्यय",
+      "actual": "वास्तविक व्यय",
+      "variance": "विचरण (बचत / अधिक व्यय)"
+    },
+    "toolbar": {
+      "asOfDate": "इस तिथि तक (As of Date)",
+      "dateRange": "रिपोर्टिंग अवधि",
+      "thisMonth": "इस महीने",
+      "thisQuarter": "इस तिमाही",
+      "thisFY": "इस वित्तीय वर्ष",
+      "custom": "कस्टम अवधि"
+    }
+  },
+  "portal": {
+    "title": "पार्टनर पोर्टल (Partner Portal)",
+    "welcome": "स्वागत है, {name}",
+    "subtitle": "चालान देखें और भुगतान करें, खाता विवरण की समीक्षा करें",
+    "kpis": {
+      "outstanding": "कुल बकाया राशि",
+      "overdue": "अतिदेय राशि",
+      "paidThisYear": "इस वित्तीय वर्ष में भुगतान किया गया"
+    },
+    "invoices": {
+      "title": "आपके चालान",
+      "empty": "आपके नाम पर कोई चालान जारी नहीं किया गया है।"
+    },
+    "bills": {
+      "title": "आपके विक्रेता बिल",
+      "empty": "कोई विक्रेता बिल उपलब्ध नहीं है।"
+    },
+    "pay": {
+      "payInvoice": "चालान संख्या {number} का भुगतान करें",
+      "amountPrompt": "भुगतान की जाने वाली राशि",
+      "cardPlaceholder": "डेबिट / क्रेडिट कार्ड",
+      "proceed": "भुगतान के लिए आगे बढ़ें"
+    }
+  },
+  "users": {
+    "title": "टीम के सदस्य (Team Members)",
+    "subtitle": "पहुंच प्रबंधित करें, सहयोगियों को आमंत्रित करें और भूमिकाएं तय करें",
+    "inviteUser": "टीम सदस्य को आमंत्रित करें",
+    "fields": {
+      "name": "पूरा नाम",
+      "email": "ईमेल पता",
+      "role": "आवंटित भूमिका",
+      "status": "खाता स्थिति",
+      "invitedAt": "आमंत्रण तिथि"
+    },
+    "roles": {
+      "admin": "व्यवसाय स्वामी (Admin)",
+      "manager": "लेखाकार (Manager)",
+      "user": "संपर्क / ग्राहक (User)"
+    },
+    "dialog": {
+      "inviteTitle": "नए टीम सदस्य को आमंत्रित करें",
+      "inviteDesc": "पासवर्ड सेट करने के लिए प्राप्तकर्ता को एक सुरक्षित लिंक युक्त ईमेल आमंत्रण भेजा जाएगा।",
+      "sendInvite": "आमंत्रण भेजें",
+      "sending": "भेजा जा रहा है…"
+    },
+    "status": {
+      "active": "सक्रिय",
+      "invited": "आमंत्रित (पासवर्ड लंबित)",
+      "deactivated": "निष्क्रिय"
     }
   }
 }

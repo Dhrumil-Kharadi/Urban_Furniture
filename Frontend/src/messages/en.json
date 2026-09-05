@@ -275,6 +275,19 @@
       "submittingButton": "Resetting…",
       "backToLogin": "Back to sign in"
     },
+    "setPassword": {
+      "title": "Set Your Password",
+      "subtitle": "Welcome to the team! Create a strong password for your invited account.",
+      "passwordLabel": "New Password",
+      "passwordPlaceholder": "••••••••",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submitButton": "Set Password & Sign In",
+      "submittingButton": "Setting password…",
+      "successTitle": "Password Set Successfully",
+      "successMessage": "Your account has been activated. Redirecting to sign in...",
+      "goToLogin": "Back to sign in"
+    },
     "verifyResetOtp": {
       "title": "Verify Reset Code",
       "subtitle": "Enter the 6-digit code sent to your email to continue.",
@@ -575,6 +588,456 @@
       "verified": "Verified",
       "pending": "Pending",
       "protectedRoot": "Protected root"
+    }
+  },
+  "common": {
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "archive": "Archive",
+      "restore": "Restore",
+      "create": "Create",
+      "new": "New",
+      "edit": "Edit",
+      "view": "View",
+      "print": "Print",
+      "download": "Download",
+      "export": "Export",
+      "import": "Import",
+      "confirm": "Confirm",
+      "close": "Close",
+      "post": "Post Entry",
+      "reset": "Reset",
+      "filter": "Filter",
+      "clearFilters": "Clear Filters",
+      "search": "Search",
+      "searchPlaceholder": "Search records…",
+      "refresh": "Refresh",
+      "back": "Back",
+      "retry": "Retry",
+      "submit": "Submit",
+      "submitting": "Submitting…",
+      "saving": "Saving…",
+      "loading": "Loading…",
+      "payNow": "Pay Now",
+      "allocate": "Allocate"
+    },
+    "status": {
+      "draft": "Draft",
+      "posted": "Posted",
+      "cancelled": "Cancelled",
+      "unpaid": "Unpaid",
+      "partiallyPaid": "Partially Paid",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "active": "Active",
+      "inactive": "Inactive",
+      "archived": "Archived",
+      "open": "Open",
+      "closed": "Closed",
+      "pending": "Pending",
+      "confirmed": "Confirmed"
+    },
+    "table": {
+      "loading": "Loading records…",
+      "empty": "No records found.",
+      "emptyFiltered": "No records match your filters.",
+      "showing": "Showing {start} to {end} of {total} records",
+      "rowsPerPage": "Rows per page",
+      "actions": "Actions",
+      "selectAll": "Select All"
+    },
+    "validation": {
+      "required": "This field is required",
+      "invalidEmail": "Invalid email address",
+      "invalidNumber": "Must be a valid number",
+      "invalidDate": "Must be a valid date",
+      "positiveNumber": "Must be greater than zero",
+      "nonNegative": "Cannot be negative"
+    },
+    "toast": {
+      "success": "Operation completed successfully",
+      "error": "An error occurred",
+      "saved": "Changes saved successfully",
+      "deleted": "Record deleted",
+      "created": "Record created successfully"
+    }
+  },
+  "contacts": {
+    "title": "Contacts",
+    "subtitle": "Manage customers, vendors, and business partners",
+    "createContact": "New Contact",
+    "editContact": "Edit Contact",
+    "types": {
+      "customer": "Customer",
+      "vendor": "Vendor",
+      "both": "Customer & Vendor"
+    },
+    "fields": {
+      "name": "Contact Name",
+      "type": "Contact Type",
+      "email": "Email Address",
+      "mobile": "Mobile Number",
+      "address": "Street Address",
+      "city": "City",
+      "state": "State",
+      "pincode": "PIN / Postal Code",
+      "taxId": "Tax / GSTIN ID",
+      "portalAccess": "Allow Portal Access",
+      "status": "Status"
+    },
+    "tabs": {
+      "details": "Details",
+      "invoices": "Customer Invoices",
+      "bills": "Vendor Bills",
+      "payments": "Payments & Ledger"
+    }
+  },
+  "products": {
+    "title": "Products",
+    "subtitle": "Items and services for sales and purchases",
+    "createProduct": "New Product",
+    "editProduct": "Edit Product",
+    "types": {
+      "goods": "Physical Goods",
+      "service": "Service"
+    },
+    "fields": {
+      "name": "Product Name",
+      "sku": "SKU / Code",
+      "type": "Product Type",
+      "category": "Category",
+      "salesPrice": "Sales Price",
+      "costPrice": "Cost Price",
+      "salesTax": "Sales Tax",
+      "purchaseTax": "Purchase Tax",
+      "incomeAccount": "Income Account",
+      "expenseAccount": "Expense Account",
+      "description": "Description",
+      "status": "Status"
+    },
+    "categories": {
+      "title": "Product Categories",
+      "createCategory": "New Category",
+      "name": "Category Name",
+      "parent": "Parent Category"
+    }
+  },
+  "accounts": {
+    "title": "Chart of Accounts",
+    "subtitle": "General Ledger account master for double-entry bookkeeping",
+    "createAccount": "New Account",
+    "editAccount": "Edit Account",
+    "types": {
+      "asset": "Asset",
+      "liability": "Liability",
+      "equity": "Equity",
+      "income": "Income",
+      "expense": "Expense"
+    },
+    "fields": {
+      "code": "Account Code",
+      "name": "Account Name",
+      "type": "Account Classification",
+      "parent": "Parent Account",
+      "openingBalance": "Opening Balance",
+      "currentBalance": "Current Balance",
+      "isSystem": "System Account",
+      "status": "Status"
+    }
+  },
+  "journals": {
+    "title": "Journals",
+    "subtitle": "Accounting journals to segregate transactional entries",
+    "createJournal": "New Journal",
+    "editJournal": "Edit Journal",
+    "types": {
+      "sales": "Sales Journal",
+      "purchase": "Purchase Journal",
+      "bank": "Bank Journal",
+      "cash": "Cash Journal",
+      "general": "Miscellaneous Journal"
+    },
+    "fields": {
+      "code": "Journal Code",
+      "name": "Journal Name",
+      "type": "Type",
+      "defaultDebitAccount": "Default Debit Account",
+      "defaultCreditAccount": "Default Credit Account",
+      "sequencePrefix": "Sequence Prefix"
+    }
+  },
+  "journalEntries": {
+    "title": "Journal Entries",
+    "subtitle": "Double-entry general ledger transactions",
+    "createEntry": "New Journal Entry",
+    "editEntry": "Edit Entry",
+    "fields": {
+      "entryNumber": "Entry #",
+      "date": "Date",
+      "journal": "Journal",
+      "reference": "Reference",
+      "narration": "Narration / Note",
+      "status": "Status",
+      "account": "Account",
+      "partner": "Partner / Contact",
+      "debit": "Debit (₹)",
+      "credit": "Credit (₹)",
+      "totalDebit": "Total Debit",
+      "totalCredit": "Total Credit",
+      "unbalanced": "Unbalanced Entry (Difference: {diff})",
+      "balanced": "Balanced Entry"
+    },
+    "actions": {
+      "postToLedger": "Post to Ledger",
+      "reverse": "Reverse Entry"
+    }
+  },
+  "analyticAccounts": {
+    "title": "Analytic Accounts",
+    "subtitle": "Cost centers and projects for managerial accounting",
+    "createAccount": "New Analytic Account",
+    "editAccount": "Edit Analytic Account",
+    "fields": {
+      "name": "Analytic Account Name",
+      "code": "Code",
+      "department": "Department / Project",
+      "budget": "Allocated Budget",
+      "status": "Status"
+    }
+  },
+  "budgets": {
+    "title": "Budgets",
+    "subtitle": "Financial plan and variance tracking by analytic account",
+    "createBudget": "New Budget",
+    "editBudget": "Edit Budget",
+    "fields": {
+      "name": "Budget Name",
+      "periodStart": "Start Date",
+      "periodEnd": "End Date",
+      "analyticAccount": "Analytic Account",
+      "responsible": "Responsible Manager",
+      "plannedAmount": "Planned Amount",
+      "actualAmount": "Actual Amount",
+      "variance": "Variance",
+      "consumption": "Consumption (%)"
+    }
+  },
+  "taxes": {
+    "title": "Tax Rates",
+    "subtitle": "Sales and purchase tax definitions",
+    "createTax": "New Tax",
+    "editTax": "Edit Tax",
+    "scopes": {
+      "sales": "Sales Only",
+      "purchase": "Purchase Only",
+      "both": "Sales & Purchase"
+    },
+    "types": {
+      "percentage": "Percentage (%)",
+      "fixed": "Fixed Amount"
+    },
+    "fields": {
+      "name": "Tax Name",
+      "rate": "Rate (%)",
+      "scope": "Scope",
+      "computation": "Computation",
+      "collectedAccount": "Tax Output Account (Payable)",
+      "paidAccount": "Tax Input Account (Credit)",
+      "status": "Status"
+    }
+  },
+  "purchases": {
+    "title": "Purchase Orders",
+    "subtitle": "Procurement orders and vendor confirmations",
+    "createOrder": "New Purchase Order",
+    "vendorBillsTitle": "Vendor Bills",
+    "createBill": "New Vendor Bill",
+    "fields": {
+      "orderNumber": "PO Number",
+      "billNumber": "Bill Number",
+      "vendor": "Vendor",
+      "orderDate": "Order Date",
+      "billDate": "Bill Date",
+      "dueDate": "Due Date",
+      "reference": "Vendor Reference",
+      "untaxedTotal": "Untaxed Amount",
+      "taxTotal": "Taxes",
+      "totalAmount": "Total Amount",
+      "paidAmount": "Paid Amount",
+      "amountDue": "Amount Due",
+      "notes": "Terms & Conditions"
+    },
+    "lines": {
+      "product": "Product / Item",
+      "description": "Description",
+      "account": "Expense Account",
+      "quantity": "Quantity",
+      "unitPrice": "Unit Cost",
+      "tax": "Tax",
+      "amount": "Line Total",
+      "addLine": "Add an Item",
+      "removeLine": "Remove"
+    }
+  },
+  "sales": {
+    "title": "Sales Orders",
+    "subtitle": "Customer orders and commercial quotations",
+    "createOrder": "New Sales Order",
+    "invoicesTitle": "Customer Invoices",
+    "createInvoice": "New Customer Invoice",
+    "fields": {
+      "orderNumber": "SO Number",
+      "invoiceNumber": "Invoice Number",
+      "customer": "Customer",
+      "orderDate": "Order Date",
+      "invoiceDate": "Invoice Date",
+      "dueDate": "Due Date",
+      "reference": "Payment Reference",
+      "untaxedTotal": "Untaxed Amount",
+      "taxTotal": "Taxes",
+      "totalAmount": "Total Amount",
+      "paidAmount": "Paid Amount",
+      "amountDue": "Amount Due",
+      "notes": "Payment Terms"
+    },
+    "lines": {
+      "product": "Product / Item",
+      "description": "Description",
+      "account": "Income Account",
+      "quantity": "Quantity",
+      "unitPrice": "Unit Price",
+      "tax": "Tax",
+      "amount": "Line Total",
+      "addLine": "Add an Item",
+      "removeLine": "Remove"
+    }
+  },
+  "payments": {
+    "title": "Payments",
+    "subtitle": "Customer receipts and vendor disbursements",
+    "createPayment": "Record Payment",
+    "directions": {
+      "inbound": "Customer Receipt (Inbound)",
+      "outbound": "Vendor Disbursement (Outbound)"
+    },
+    "methods": {
+      "cash": "Cash",
+      "bank": "Bank Transfer / NEFT",
+      "card": "Card Payment",
+      "cheque": "Cheque"
+    },
+    "fields": {
+      "paymentNumber": "Payment #",
+      "contact": "Partner / Contact",
+      "date": "Payment Date",
+      "amount": "Amount Received / Paid",
+      "direction": "Payment Type",
+      "method": "Payment Method",
+      "journal": "Payment Journal",
+      "reference": "Transaction / Cheque #",
+      "allocated": "Allocated Amount",
+      "unallocated": "Unallocated Balance",
+      "status": "Status"
+    },
+    "allocation": {
+      "title": "Invoice / Bill Allocation",
+      "document": "Document #",
+      "originalAmount": "Total Amount",
+      "openBalance": "Outstanding",
+      "allocatedNow": "Allocate This Payment"
+    }
+  },
+  "reports": {
+    "title": "Financial Reports",
+    "subtitle": "Statutory statements and managerial financial summaries",
+    "balanceSheet": {
+      "title": "Balance Sheet",
+      "subtitle": "Statement of Financial Position as of date",
+      "assets": "Assets",
+      "liabilities": "Liabilities",
+      "equity": "Equity & Retained Earnings",
+      "totalAssets": "Total Assets",
+      "totalLiabilitiesEquity": "Total Liabilities & Equity",
+      "currentYearEarnings": "Unallocated Current Year Earnings"
+    },
+    "profitLoss": {
+      "title": "Profit and Loss",
+      "subtitle": "Income statement for selected reporting period",
+      "operatingIncome": "Operating Revenue",
+      "costOfSales": "Cost of Goods Sold",
+      "grossProfit": "Gross Profit",
+      "operatingExpenses": "Operating Expenses",
+      "netProfit": "Net Profit / (Loss)"
+    },
+    "budgetReport": {
+      "title": "Budget vs. Actuals",
+      "subtitle": "Analytical variance tracking across cost centers",
+      "account": "Analytic Cost Center",
+      "planned": "Planned Spend",
+      "actual": "Actual Spend",
+      "variance": "Variance (Savings / Overrun)"
+    },
+    "toolbar": {
+      "asOfDate": "As of Date",
+      "dateRange": "Reporting Period",
+      "thisMonth": "This Month",
+      "thisQuarter": "This Quarter",
+      "thisFY": "This Financial Year",
+      "custom": "Custom Range"
+    }
+  },
+  "portal": {
+    "title": "Partner Portal",
+    "welcome": "Welcome, {name}",
+    "subtitle": "View and pay invoices, review account statements",
+    "kpis": {
+      "outstanding": "Total Outstanding",
+      "overdue": "Overdue Amount",
+      "paidThisYear": "Paid This Financial Year"
+    },
+    "invoices": {
+      "title": "Your Invoices",
+      "empty": "You have no invoices raised."
+    },
+    "bills": {
+      "title": "Your Bills",
+      "empty": "You have no vendor bills."
+    },
+    "pay": {
+      "payInvoice": "Pay Invoice {number}",
+      "amountPrompt": "Amount to pay",
+      "cardPlaceholder": "Debit / Credit Card (Gateway Mock)",
+      "proceed": "Proceed to Payment"
+    }
+  },
+  "users": {
+    "title": "Team Members",
+    "subtitle": "Manage access, invite colleagues, and configure roles",
+    "inviteUser": "Invite Team Member",
+    "fields": {
+      "name": "Full Name",
+      "email": "Email Address",
+      "role": "Assigned Role",
+      "status": "Account Status",
+      "invitedAt": "Invited Date"
+    },
+    "roles": {
+      "admin": "Business Owner (Admin)",
+      "manager": "Accountant (Manager)",
+      "user": "Contact / Customer (User)"
+    },
+    "dialog": {
+      "inviteTitle": "Invite New Team Member",
+      "inviteDesc": "An email invitation with a secure single-use link will be sent to the recipient to set their password.",
+      "sendInvite": "Send Invitation",
+      "sending": "Sending…"
+    },
+    "status": {
+      "active": "Active",
+      "invited": "Invited (Pending Set Password)",
+      "deactivated": "Deactivated"
     }
   }
 }

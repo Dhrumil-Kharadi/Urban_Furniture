@@ -275,6 +275,19 @@
       "submittingButton": "રીસેટ થઈ રહ્યું છે…",
       "backToLogin": "સાઇન ઇન પર પાછા"
     },
+    "setPassword": {
+      "title": "તમારો પાસવર્ડ સેટ કરો",
+      "subtitle": "ટીમમાં આપનું સ્વાગત છે! તમારા આમંત્રિત એકાઉન્ટ માટે સુરક્ષિત પાસવર્ડ બનાવો.",
+      "passwordLabel": "નવો પાસવર્ડ",
+      "passwordPlaceholder": "••••••••",
+      "confirmPasswordLabel": "પાસવર્ડની પુષ્ટિ કરો",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submitButton": "પાસવર્ડ સેટ કરો અને સાઇન ઇન કરો",
+      "submittingButton": "પાસવર્ડ સેટ થઈ રહ્યો છે…",
+      "successTitle": "પાસવર્ડ સફળતાપૂર્વક સેટ થયો",
+      "successMessage": "તમારું એકાઉન્ટ સક્રિય થઈ ગયું છે. સાઇન ઇન પર રીડાયરેક્ટ કરી રહ્યાં છીએ...",
+      "goToLogin": "સાઇન ઇન પર પાછા જાઓ"
+    },
     "verifyResetOtp": {
       "title": "રીસેટ કોડ ચકાસો",
       "subtitle": "ચાલુ રાખવા માટે તમારા ઈમેલ પર મોકલેલો 6 અંકનો કોડ દાખલ કરો.",
@@ -575,6 +588,456 @@
       "verified": "ચકાસાયેલ",
       "pending": "બાકી",
       "protectedRoot": "સુરક્ષિત મૂળ"
+    }
+  },
+  "common": {
+    "actions": {
+      "save": "સાચવો",
+      "cancel": "રદ કરો",
+      "delete": "કાઢી નાખો",
+      "archive": "સંગ્રહિત કરો",
+      "restore": "પુનઃસ્થાપિત કરો",
+      "create": "નવું બનાવો",
+      "new": "નવું",
+      "edit": "ફેરફાર કરો",
+      "view": "જુઓ",
+      "print": "પ્રિન્ટ કરો",
+      "download": "ડાઉનલોડ કરો",
+      "export": "નિકાસ કરો (Export)",
+      "import": "આયાત કરો (Import)",
+      "confirm": "ખાતરી કરો",
+      "close": "બંધ કરો",
+      "post": "નોંધ કરો (Post)",
+      "reset": "રીસેટ કરો",
+      "filter": "ફિલ્ટર",
+      "clearFilters": "ફિલ્ટર સાફ કરો",
+      "search": "શોધો",
+      "searchPlaceholder": "રેકોર્ડ શોધો…",
+      "refresh": "તાજું કરો",
+      "back": "પાછા જાઓ",
+      "retry": "ફરી પ્રયાસ કરો",
+      "submit": "સબમિટ કરો",
+      "submitting": "સબમિટ થઈ રહ્યું છે…",
+      "saving": "સાચવી રહ્યું છે…",
+      "loading": "લોડ થઈ રહ્યું છે…",
+      "payNow": "હમણાં ચૂકવો",
+      "allocate": "ફાળવો"
+    },
+    "status": {
+      "draft": "કાચું (Draft)",
+      "posted": "નોંધાયેલ (Posted)",
+      "cancelled": "રદ કરેલ (Cancelled)",
+      "unpaid": "બાકી (Unpaid)",
+      "partiallyPaid": "અંશતઃ ચૂકવેલ",
+      "paid": "ચૂકવેલ (Paid)",
+      "overdue": "મુદત વીતેલી (Overdue)",
+      "active": "સક્રિય",
+      "inactive": "નિષ્ક્રિય",
+      "archived": "સંગ્રહિત",
+      "open": "ખુલ્લું",
+      "closed": "બંધ",
+      "pending": "બાકી / પેન્ડિંગ",
+      "confirmed": "પુષ્ટિ થયેલ"
+    },
+    "table": {
+      "loading": "રેકોર્ડ લોડ થઈ રહ્યા છે…",
+      "empty": "કોઈ રેકોર્ડ મળ્યા નથી.",
+      "emptyFiltered": "ફિલ્ટર સાથે મેળ ખાતા કોઈ રેકોર્ડ નથી.",
+      "showing": "{total} માંથી {start} થી {end} રેકોર્ડ દર્શાવે છે",
+      "rowsPerPage": "પૃષ્ઠ દીઠ પંક્તિઓ",
+      "actions": "ક્રિયાઓ",
+      "selectAll": "બધા પસંદ કરો"
+    },
+    "validation": {
+      "required": "આ વિગત જરૂરી છે",
+      "invalidEmail": "અમાન્ય ઇમેઇલ સરનામું",
+      "invalidNumber": "માન્ય સંખ્યા દાખલ કરો",
+      "invalidDate": "માન્ય તારીખ દાખલ કરો",
+      "positiveNumber": "શૂન્ય કરતાં વધુ હોવું જોઈએ",
+      "nonNegative": "નકારાત્મક ન હોઈ શકે"
+    },
+    "toast": {
+      "success": "કાર્ય સફળતાપૂર્વક પૂર્ણ થયું",
+      "error": "ભૂલ આવી છે",
+      "saved": "ફેરફારો સચવાયા છે",
+      "deleted": "રેકોર્ડ કાઢી નાખવામાં આવ્યો છે",
+      "created": "રેકોર્ડ સફળતાપૂર્વક બનાવવામાં આવ્યો છે"
+    }
+  },
+  "contacts": {
+    "title": "સંપર્કો (Contacts)",
+    "subtitle": "ગ્રાહકો, વેપારીઓ અને ભાગીદારોનું સંચાલન",
+    "createContact": "નવો સંપર્ક",
+    "editContact": "સંપર્કમાં ફેરફાર કરો",
+    "types": {
+      "customer": "ગ્રાહક (Customer)",
+      "vendor": "વેપારી (Vendor)",
+      "both": "ગ્રાહક અને વેપારી બંને"
+    },
+    "fields": {
+      "name": "સંપર્કનું નામ",
+      "type": "સંપર્ક પ્રકાર",
+      "email": "ઇમેઇલ સરનામું",
+      "mobile": "મોબાઇલ નંબર",
+      "address": "શેરી / સરનામું",
+      "city": "શહેર",
+      "state": "રાજ્ય",
+      "pincode": "પીન કોડ",
+      "taxId": "જીએસટીઆઇએન / કર નંબર",
+      "portalAccess": "પોર્ટલ ઍક્સેસ આપો",
+      "status": "સ્થિતિ"
+    },
+    "tabs": {
+      "details": "વિગતો",
+      "invoices": "ગ્રાહક ઇનવોઇસ (Invoices)",
+      "bills": "વેપારી બિલ (Bills)",
+      "payments": "ચુકવણીઓ અને ખાતાવહી"
+    }
+  },
+  "products": {
+    "title": "ઉત્પાદનો (Products)",
+    "subtitle": "વેચાણ અને ખરીદી માટેની વસ્તુઓ અને સેવાઓ",
+    "createProduct": "નવું ઉત્પાદન",
+    "editProduct": "ઉત્પાદનમાં ફેરફાર કરો",
+    "types": {
+      "goods": "ભૌતિક માલસામાન (Goods)",
+      "service": "સેવા (Service)"
+    },
+    "fields": {
+      "name": "ઉત્પાદનનું નામ",
+      "sku": "એસકેયુ / કોડ",
+      "type": "ઉત્પાદન પ્રકાર",
+      "category": "વર્ગીકરણ (Category)",
+      "salesPrice": "વેચાણ કિંમત",
+      "costPrice": "મૂળ કિંમત / પડતર",
+      "salesTax": "વેચાણ કર",
+      "purchaseTax": "ખરીદ કર",
+      "incomeAccount": "આવક ખાતું (Income Account)",
+      "expenseAccount": "ખર્ચ ખાતું (Expense Account)",
+      "description": "વર્ણન",
+      "status": "સ્થિતિ"
+    },
+    "categories": {
+      "title": "ઉત્પાદન વર્ગો",
+      "createCategory": "નવો વર્ગ",
+      "name": "વર્ગનું નામ",
+      "parent": "મુખ્ય વર્ગ"
+    }
+  },
+  "accounts": {
+    "title": "ખાતાઓનું ચાર્ટ (Chart of Accounts)",
+    "subtitle": "નામા પદ્ધતિ માટે ખાતાવહીના મુખ્ય ખાતાઓ",
+    "createAccount": "નવું ખાતું",
+    "editAccount": "ખાતામાં ફેરફાર કરો",
+    "types": {
+      "asset": "મિલકત / સંપત્તિ (Asset)",
+      "liability": "જવાબદારી / દેવું (Liability)",
+      "equity": "મૂડી (Equity)",
+      "income": "આવક (Income)",
+      "expense": "ખર્ચ (Expense)"
+    },
+    "fields": {
+      "code": "ખાતા કોડ",
+      "name": "ખાતાનું નામ",
+      "type": "ખાતાનો પ્રકાર",
+      "parent": "મુખ્ય ખાતું",
+      "openingBalance": "શરૂઆતની સિલક (Opening Balance)",
+      "currentBalance": "હાલની સિલક",
+      "isSystem": "સિસ્ટમ ખાતું",
+      "status": "સ્થિતિ"
+    }
+  },
+  "journals": {
+    "title": "રોજમેળ / જર્નલ (Journals)",
+    "subtitle": "વ્યવહારોની નોંધ અલગ પાડવા માટેના રોજમેળ",
+    "createJournal": "નવો રોજમેળ",
+    "editJournal": "રોજમેળમાં ફેરફાર કરો",
+    "types": {
+      "sales": "વેચાણ રોજમેળ (Sales Journal)",
+      "purchase": "ખરીદ રોજમેળ (Purchase Journal)",
+      "bank": "બેંક રોજમેળ (Bank Journal)",
+      "cash": "રોકડ મેળ (Cash Journal)",
+      "general": "સામાન્ય રોજમેળ (General Journal)"
+    },
+    "fields": {
+      "code": "રોજમેળ કોડ",
+      "name": "રોજમેળનું નામ",
+      "type": "પ્રકાર",
+      "defaultDebitAccount": "ડિફૉલ્ટ ઉધાર ખાતું (Debit Account)",
+      "defaultCreditAccount": "ડિફૉલ્ટ જમા ખાતું (Credit Account)",
+      "sequencePrefix": "ક્રમ પૂર્વગ (Prefix)"
+    }
+  },
+  "journalEntries": {
+    "title": "જર્નલ એન્ટ્રીઓ (Journal Entries)",
+    "subtitle": "બેવડી નામા પદ્ધતિ મુજબ સામાન્ય ખાતાવહી વ્યવહારો",
+    "createEntry": "નવી જર્નલ એન્ટ્રી",
+    "editEntry": "એન્ટ્રીમાં ફેરફાર કરો",
+    "fields": {
+      "entryNumber": "એન્ટ્રી નંબર #",
+      "date": "તારીખ",
+      "journal": "રોજમેળ",
+      "reference": "સંદર્ભ",
+      "narration": "વિગત / નોંધ",
+      "status": "સ્થિતિ",
+      "account": "ખાતું",
+      "partner": "ભાગીદાર / સંપર્ક",
+      "debit": "ઉધાર (₹)",
+      "credit": "જમા (₹)",
+      "totalDebit": "કુલ ઉધાર",
+      "totalCredit": "કુલ જમા",
+      "unbalanced": "અસંતુલિત એન્ટ્રી (તફાવત: {diff})",
+      "balanced": "સંતુલિત એન્ટ્રી"
+    },
+    "actions": {
+      "postToLedger": "ખાતાવહીમાં નોંધો (Post)",
+      "reverse": "એન્ટ્રી ઉલટાવો (Reverse)"
+    }
+  },
+  "analyticAccounts": {
+    "title": "વિશ્લેષણાત્મક ખાતાઓ (Analytic Accounts)",
+    "subtitle": "સંચાલકીય હિસાબ માટે ખર્ચ કેન્દ્રો અને પ્રોજેક્ટ્સ",
+    "createAccount": "નવું વિશ્લેષણાત્મક ખાતું",
+    "editAccount": "વિશ્લેષણાત્મક ખાતામાં ફેરફાર કરો",
+    "fields": {
+      "name": "વિશ્લેષણાત્મક ખાતાનું નામ",
+      "code": "કોડ",
+      "department": "વિભાગ / પ્રોજેક્ટ",
+      "budget": "ફાળવેલ બજેટ",
+      "status": "સ્થિતિ"
+    }
+  },
+  "budgets": {
+    "title": "બજેટ (Budgets)",
+    "subtitle": "વિશ્લેષણાત્મક ખાતા દ્વારા આયોજન અને તફાવત ટ્રેકિંગ",
+    "createBudget": "નવું બજેટ",
+    "editBudget": "બજેટમાં ફેરફાર કરો",
+    "fields": {
+      "name": "બજેટનું નામ",
+      "periodStart": "શરૂઆતની તારીખ",
+      "periodEnd": "અંતિમ તારીખ",
+      "analyticAccount": "વિશ્લેષણાત્મક ખાતું",
+      "responsible": "જવાબદાર મેનેજર",
+      "plannedAmount": "આયોજિત રકમ (Planned)",
+      "actualAmount": "વાસ્તવિક રકમ (Actual)",
+      "variance": "તફાવત (Variance)",
+      "consumption": "વપરાશ (%)"
+    }
+  },
+  "taxes": {
+    "title": "કર દરો (Tax Rates)",
+    "subtitle": "વેચાણ અને ખરીદી માટેના કર નિયમો",
+    "createTax": "નવો કર",
+    "editTax": "કરમાં ફેરફાર કરો",
+    "scopes": {
+      "sales": "માત્ર વેચાણ",
+      "purchase": "માત્ર ખરીદી",
+      "both": "વેચાણ અને ખરીદી બંને"
+    },
+    "types": {
+      "percentage": "ટકાવારી (%)",
+      "fixed": "નિશ્ચિત રકમ"
+    },
+    "fields": {
+      "name": "કરનું નામ",
+      "rate": "દર (%)",
+      "scope": "ક્ષેત્ર (Scope)",
+      "computation": "ગણતરી પ્રકાર",
+      "collectedAccount": "ઉઘરાવેલ કર ખાતું (દેવું)",
+      "paidAccount": "ચૂકવેલ કર ખાતું (જમા)",
+      "status": "સ્થિતિ"
+    }
+  },
+  "purchases": {
+    "title": "ખરીદ ઓર્ડર (Purchase Orders)",
+    "subtitle": "ખરીદી ઓર્ડર અને વેપારી પુષ્ટિ",
+    "createOrder": "નવો ખરીદ ઓર્ડર",
+    "vendorBillsTitle": "વેપારી બિલ (Vendor Bills)",
+    "createBill": "નવું વેપારી બિલ",
+    "fields": {
+      "orderNumber": "પીઓ નંબર #",
+      "billNumber": "બિલ નંબર #",
+      "vendor": "વેપારી (Vendor)",
+      "orderDate": "ઓર્ડર તારીખ",
+      "billDate": "બિલ તારીખ",
+      "dueDate": "ચુકવણી તારીખ",
+      "reference": "વેપારી સંદર્ભ",
+      "untaxedTotal": "કર વિનાની કુલ રકમ",
+      "taxTotal": "કુલ કર",
+      "totalAmount": "કુલ રકમ",
+      "paidAmount": "ચૂકવેલ રકમ",
+      "amountDue": "બાકી રકમ",
+      "notes": "નિયમો અને શરતો"
+    },
+    "lines": {
+      "product": "ઉત્પાદન / માલસામાન",
+      "description": "વર્ણન",
+      "account": "ખર્ચ ખાતું (Expense Account)",
+      "quantity": "જથ્થો",
+      "unitPrice": "એકમ કિંમત",
+      "tax": "કર",
+      "amount": "કુલ રકમ",
+      "addLine": "વસ્તુ ઉમેરો",
+      "removeLine": "દૂર કરો"
+    }
+  },
+  "sales": {
+    "title": "વેચાણ ઓર્ડર (Sales Orders)",
+    "subtitle": "ગ્રાહક ઓર્ડર અને વેચાણ દરખાસ્તો",
+    "createOrder": "નવો વેચાણ ઓર્ડર",
+    "invoicesTitle": "ગ્રાહક ઇનવોઇસ (Customer Invoices)",
+    "createInvoice": "નવું ગ્રાહક ઇનવોઇસ",
+    "fields": {
+      "orderNumber": "એસઓ નંબર #",
+      "invoiceNumber": "ઇનવોઇસ નંબર #",
+      "customer": "ગ્રાહક (Customer)",
+      "orderDate": "ઓર્ડર તારીખ",
+      "invoiceDate": "ઇનવોઇસ તારીખ",
+      "dueDate": "ચુકવણી તારીખ",
+      "reference": "ચુકવણી સંદર્ભ",
+      "untaxedTotal": "કર વિનાની કુલ રકમ",
+      "taxTotal": "કુલ કર",
+      "totalAmount": "કુલ રકમ",
+      "paidAmount": "મળેલ રકમ",
+      "amountDue": "બાકી રકમ",
+      "notes": "ચુકવણી શરતો"
+    },
+    "lines": {
+      "product": "ઉત્પાદન / માલસામાન",
+      "description": "વર્ણન",
+      "account": "આવક ખાતું (Income Account)",
+      "quantity": "જથ્થો",
+      "unitPrice": "એકમ કિંમત",
+      "tax": "કર",
+      "amount": "કુલ રકમ",
+      "addLine": "વસ્તુ ઉમેરો",
+      "removeLine": "દૂર કરો"
+    }
+  },
+  "payments": {
+    "title": "ચુકવણીઓ (Payments)",
+    "subtitle": "ગ્રાહકો પાસેથી આવક અને વેપારીઓને ચુકવણી",
+    "createPayment": "ચુકવણી નોંધો",
+    "directions": {
+      "inbound": "ગ્રાહક આવક (Inbound)",
+      "outbound": "વેપારી ચુકવણી (Outbound)"
+    },
+    "methods": {
+      "cash": "રોકડ (Cash)",
+      "bank": "બેંક ટ્રાન્સફર (NEFT/RTGS)",
+      "card": "કાર્ડ ચુકવણી",
+      "cheque": "ચેક"
+    },
+    "fields": {
+      "paymentNumber": "ચુકવણી #",
+      "contact": "ભાગીદાર / સંપર્ક",
+      "date": "ચુકવણી તારીખ",
+      "amount": "મળેલ / ચૂકવેલ રકમ",
+      "direction": "ચુકવણી પ્રકાર",
+      "method": "ચુકવણી પદ્ધતિ",
+      "journal": "ચુકવણી રોજમેળ",
+      "reference": "વ્યવહાર / ચેક નંબર",
+      "allocated": "ફાળવેલ રકમ",
+      "unallocated": "બાકી રકમ",
+      "status": "સ્થિતિ"
+    },
+    "allocation": {
+      "title": "ઇનવોઇસ / બિલ ફાળવણી",
+      "document": "દસ્તાવેજ નંબર #",
+      "originalAmount": "કુલ રકમ",
+      "openBalance": "બાકી રકમ",
+      "allocatedNow": "આ ચુકવણી ફાળવો"
+    }
+  },
+  "reports": {
+    "title": "નાણાકીય અહેવાલો (Reports)",
+    "subtitle": "સરવૈયું, નફા-નુકસાન અને સંચાલકીય અહેવાલો",
+    "balanceSheet": {
+      "title": "સરવૈયું (Balance Sheet)",
+      "subtitle": "ચોક્કસ તારીખની નાણાકીય સ્થિતિનું પત્રક",
+      "assets": "મિલકતો (Assets)",
+      "liabilities": "દેવાં / જવાબદારીઓ (Liabilities)",
+      "equity": "મૂડી અને સંચિત નફો (Equity)",
+      "totalAssets": "કુલ મિલકતો",
+      "totalLiabilitiesEquity": "કુલ દેવાં અને મૂડી",
+      "currentYearEarnings": "ચાલુ વર્ષનો વહેંચાયા વિનાનો નફો"
+    },
+    "profitLoss": {
+      "title": "નફા-નુકસાન પત્રક (Profit & Loss)",
+      "subtitle": "પસંદ કરેલ સમયગાળા માટે આવક-ખર્ચ પત્રક",
+      "operatingIncome": "કામગીરી આવક (Operating Revenue)",
+      "costOfSales": "વેચાયેલ માલની પડતર (COGS)",
+      "grossProfit": "કાચો નફો (Gross Profit)",
+      "operatingExpenses": "કામગીરી ખર્ચ (Operating Expenses)",
+      "netProfit": "ચોખ્ખો નફો / (નુકસાન)"
+    },
+    "budgetReport": {
+      "title": "બજેટ વિરુદ્ધ વાસ્તવિક (Budget vs Actuals)",
+      "subtitle": "ખર્ચ કેન્દ્રોમાં આયોજન વિરુદ્ધ વાસ્તવિક ખર્ચનું વિશ્લેષણ",
+      "account": "ખર્ચ કેન્દ્ર (Cost Center)",
+      "planned": "આયોજિત ખર્ચ",
+      "actual": "વાસ્તવિક ખર્ચ",
+      "variance": "તફાવત (બચત / વધારાનો ખર્ચ)"
+    },
+    "toolbar": {
+      "asOfDate": "આ તારીખ સુધીનું (As of Date)",
+      "dateRange": "સમયગાળો",
+      "thisMonth": "આ મહિનો",
+      "thisQuarter": "આ ત્રિમાસિક",
+      "thisFY": "આ નાણાકીય વર્ષ",
+      "custom": "કસ્ટમ સમયગાળો"
+    }
+  },
+  "portal": {
+    "title": "પાર્ટનર પોર્ટલ (Partner Portal)",
+    "welcome": "આપનું સ્વાગત છે, {name}",
+    "subtitle": "ઇનવોઇસ જુઓ અને ચૂકવો, ખાતા વિગતોની સમીક્ષા કરો",
+    "kpis": {
+      "outstanding": "કુલ બાકી રકમ",
+      "overdue": "મુદત વીતી ગયેલ રકમ",
+      "paidThisYear": "આ નાણાકીય વર્ષમાં ચૂકવેલ"
+    },
+    "invoices": {
+      "title": "તમારા ઇનવોઇસ",
+      "empty": "કોઈ ઇનવોઇસ મળ્યા નથી."
+    },
+    "bills": {
+      "title": "તમારા બિલ",
+      "empty": "કોઈ વેપારી બિલ ઉપલબ્ધ નથી."
+    },
+    "pay": {
+      "payInvoice": "ઇનવોઇસ નંબર {number} ચૂકવો",
+      "amountPrompt": "ચૂકવવાની રકમ",
+      "cardPlaceholder": "ડેબિટ / ક્રેડિટ કાર્ડ",
+      "proceed": "ચુકવણી માટે આગળ વધો"
+    }
+  },
+  "users": {
+    "title": "ટીમ સભ્યો (Team Members)",
+    "subtitle": "વપરાશકર્તા ઍક્સેસ, આમંત્રણ અને ભૂમિકાઓનું સંચાલન",
+    "inviteUser": "ટીમ સભ્યને આમંત્રિત કરો",
+    "fields": {
+      "name": "પૂરું નામ",
+      "email": "ઇમેઇલ સરનામું",
+      "role": "સોંપેલ ભૂમિકા",
+      "status": "ખાતાની સ્થિતિ",
+      "invitedAt": "આમંત્રણ તારીખ"
+    },
+    "roles": {
+      "admin": "બિઝનેસ ઓનર (Admin)",
+      "manager": "એકાઉન્ટન્ટ (Manager)",
+      "user": "સંપર્ક / ગ્રાહક (User)"
+    },
+    "dialog": {
+      "inviteTitle": "નવા ટીમ સભ્યને આમંત્રિત કરો",
+      "inviteDesc": "પાસવર્ડ સેટ કરવા માટે સુરક્ષિત લિંક સાથેનું ઇમેઇલ આમંત્રણ મોકલવામાં આવશે.",
+      "sendInvite": "આમંત્રણ મોકલો",
+      "sending": "મોકલી રહ્યું છે…"
+    },
+    "status": {
+      "active": "સક્રિય",
+      "invited": "આમંત્રિત (પાસવર્ડ બાકી)",
+      "deactivated": "નિષ્ક્રિય કરેલ"
     }
   }
 }
