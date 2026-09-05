@@ -375,4 +375,37 @@
   --tex-deep-r: 0;
   --tex-deep-g: 5;
   --tex-deep-b: 22;
+
+  /* ── Phase 4 Foundation Tokens (Frozen Lake Derived) ── */
+  --modal-backdrop: rgba(0, 0, 56, 0.55);
+  --modal-bg: #FFFFFF;
+  --modal-border: rgba(0, 0, 128, 0.12);
+  --modal-shadow: 0 24px 48px -12px rgba(0, 0, 80, 0.25);
+  
+  --drawer-bg: #FFFFFF;
+  --drawer-border: rgba(0, 0, 128, 0.12);
+  --drawer-shadow: -8px 0 24px rgba(0, 0, 80, 0.16);
+
+  --toast-bg: #000B2E;
+  --toast-text: #FFFFFF;
+  --toast-border: rgba(0, 0, 128, 0.22);
+  --toast-shadow: 0 16px 32px -8px rgba(0, 0, 80, 0.35);
+
+  --status-draft-bg: rgba(109, 129, 150, 0.12);
+  --status-draft-text: #6D8196;
+  --status-posted-bg: rgba(0, 0, 128, 0.10);
+  --status-posted-text: #000080;
+  --status-paid-bg: rgba(21, 42, 110, 0.12);
+  --status-paid-text: #152A6E;
+  --status-cancelled-bg: rgba(61, 100, 154, 0.14);
+  --status-cancelled-text: #3D649A;
+  --status-overdue-bg: rgba(0, 0, 128, 0.15);
+  --status-overdue-text: #000080;
+
+  --filter-bar-bg: #FFFFFF;
+  --filter-bar-border: rgba(0, 0, 128, 0.08);
+  --picker-dropdown-bg: #FFFFFF;
+  --picker-dropdown-border: rgba(0, 0, 128, 0.12);
+  --picker-dropdown-shadow: 0 12px 32px rgba(0, 0, 80, 0.15);
+  --picker-item-hover-bg: #F3F5F7;
 }

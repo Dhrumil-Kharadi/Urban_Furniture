@@ -1,0 +1,146 @@
+/* ============================================================
+   FILE: src/styles/transactions.css
+   Phase 4 — Transactional Document Styles (PO, SO, Bills, Invoices, Payments, JE)
+   Strict rule: all colors use var(--*) from globals.css
+   ============================================================ */
+
+/* ── Document Status Bar ── */
+.doc-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 0.85rem 1.25rem;
+  box-shadow: 4px 4px 10px var(--nm-shadow-dark),
+              -2px -2px 6px var(--nm-shadow-light);
+  margin-bottom: 1.25rem;
+}
+
+.doc-status-stages {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.doc-stage-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  background: var(--dash-badge-bg);
+  color: var(--dash-badge-text);
+}
+
+.doc-stage-badge.active {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+/* ── Document Line Grid (Editable lines for PO/SO/Bill/Invoice/JE) ── */
+.line-grid-container {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: 6px 6px 14px var(--nm-shadow-dark),
+              -3px -3px 8px var(--nm-shadow-light);
+  margin-top: 1.25rem;
+  overflow-x: auto;
+}
+
+.line-grid-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.line-grid-th {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-align: left;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 2px solid var(--dash-divider);
+}
+
+.line-grid-th.text-right {
+  text-align: right;
+}
+
+.line-grid-td {
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid var(--dash-divider);
+  vertical-align: top;
+}
+
+.line-grid-td.text-right {
+  text-align: right;
+}
+
+.line-grid-actions-btn {
+  background: transparent;
+  border: none;
+  color: var(--dash-danger-text);
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 4px;
+}
+
+.line-grid-actions-btn:hover {
+  background: var(--dash-danger-hover-bg);
+}
+
+/* ── Totals Box (Untaxed, Tax, Total) ── */
+.doc-totals-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding-right: 0.5rem;
+}
+
+.doc-total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 280px;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.doc-total-row.grand-total {
+  border-top: 2px solid var(--dash-divider);
+  padding-top: 0.5rem;
+  font-family: 'Orbitron', monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.doc-total-val {
+  font-family: 'Orbitron', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ── Responsive Line Grid for Mobile (<768px) ── */
+@media (max-width: 768px) {
+  .line-card-mobile {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-medium);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

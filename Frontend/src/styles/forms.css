@@ -1,0 +1,306 @@
+/* ============================================================
+   FILE: src/styles/forms.css
+   Phase 4 — Unified Neumorphic Form Styles
+   Strict rule: all colors use var(--*) from globals.css
+   ============================================================ */
+
+/* ── Form Container & Grid ── */
+.app-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.app-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .app-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.app-form-section {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 8px 8px 16px var(--nm-shadow-dark),
+              -4px -4px 10px var(--nm-shadow-light);
+}
+
+.app-form-section-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.app-form-section-desc {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 1.25rem;
+}
+
+/* ── Form Field Wrapper ── */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.form-field-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-field-label {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.form-field-required {
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.form-field-hint {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.form-field-control {
+  position: relative;
+  width: 100%;
+}
+
+/* ── Standard Inputs & Selects ── */
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  background: var(--bg-base);
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  padding: 0.65rem 0.85rem;
+  box-shadow: inset 2px 2px 4px var(--nm-inset-dark),
+              inset -2px -2px 4px var(--nm-inset-light);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--accent-primary);
+  box-shadow: inset 2px 2px 4px var(--nm-inset-dark),
+              0 0 0 2px var(--glow-primary);
+}
+
+.form-input:disabled,
+.form-select:disabled,
+.form-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-field-error {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.76rem;
+  color: var(--dash-danger-text);
+  margin-top: 0.2rem;
+}
+
+/* ── Form Actions Bar ── */
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.85rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--dash-divider);
+  margin-top: 0.5rem;
+}
+
+.form-actions-left {
+  margin-right: auto;
+}
+
+/* ── Filter Bar ── */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem;
+  background: var(--filter-bar-bg);
+  border: 1px solid var(--filter-bar-border);
+  border-radius: 12px;
+  padding: 0.85rem 1.1rem;
+  box-shadow: 4px 4px 12px var(--nm-shadow-dark),
+              -2px -2px 8px var(--nm-shadow-light);
+  margin-bottom: 1.25rem;
+}
+
+.filter-search-wrap {
+  flex: 1;
+  min-width: 220px;
+  position: relative;
+}
+
+.filter-search-icon {
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.filter-search-input {
+  width: 100%;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  background: var(--bg-base);
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  padding: 0.55rem 0.85rem 0.55rem 2.2rem;
+  outline: none;
+  box-shadow: inset 1px 1px 3px var(--nm-inset-dark),
+              inset -1px -1px 3px var(--nm-inset-light);
+}
+
+.filter-search-input:focus {
+  border-color: var(--accent-primary);
+}
+
+/* ── Pagination Controls ── */
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 0.5rem;
+}
+
+.pagination-info {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pagination-btn {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.8rem;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-primary);
+  cursor: pointer;
+  box-shadow: 2px 2px 6px var(--nm-shadow-dark),
+              -2px -2px 6px var(--nm-shadow-light);
+  transition: all 0.15s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  box-shadow: inset 2px 2px 4px var(--nm-inset-dark),
+              inset -2px -2px 4px var(--nm-inset-light);
+}
+
+.pagination-btn.active {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border-color: var(--btn-primary-bg);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Pickers & Dropdowns ── */
+.picker-container {
+  position: relative;
+  width: 100%;
+}
+
+.picker-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.picker-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--picker-dropdown-bg);
+  border: 1px solid var(--picker-dropdown-border);
+  border-radius: 8px;
+  box-shadow: var(--picker-dropdown-shadow);
+  padding: 0.4rem 0;
+}
+
+.picker-option {
+  padding: 0.6rem 0.85rem;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.1s ease;
+}
+
+.picker-option:hover,
+.picker-option.focused {
+  background: var(--picker-item-hover-bg);
+  color: var(--accent-primary);
+}
+
+.picker-empty {
+  padding: 0.8rem;
+  text-align: center;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}

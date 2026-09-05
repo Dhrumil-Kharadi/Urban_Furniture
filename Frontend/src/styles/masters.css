@@ -1,0 +1,118 @@
+/* ============================================================
+   FILE: src/styles/masters.css
+   Phase 4 — Master Data Module Styles (Contacts, Products, CoA, Journals, Taxes)
+   Strict rule: all colors use var(--*) from globals.css
+   ============================================================ */
+
+.master-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.master-header-card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  box-shadow: 6px 6px 14px var(--nm-shadow-dark),
+              -3px -3px 8px var(--nm-shadow-light);
+}
+
+.master-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.master-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.master-subtitle {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* ── Tree View for Chart of Accounts ── */
+.account-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.account-node {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 2px 2px 6px var(--nm-shadow-dark),
+              -1px -1px 4px var(--nm-shadow-light);
+}
+
+.account-node-code {
+  font-family: 'Orbitron', monospace;
+  font-weight: 600;
+  color: var(--accent-primary);
+  margin-right: 0.75rem;
+}
+
+.account-node-name {
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.account-node-balance {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+/* ── Detail Card & Tabs ── */
+.master-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--dash-divider);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.master-tab-btn {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.master-tab-btn:hover {
+  color: var(--text-primary);
+  background: var(--dash-nav-hover-bg);
+}
+
+.master-tab-btn.active {
+  color: var(--accent-primary);
+  background: var(--dash-nav-active-bg);
+  font-weight: 600;
+}

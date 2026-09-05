@@ -1,0 +1,93 @@
+/* ============================================================
+   FILE: src/styles/reports.css
+   Phase 4 — Financial Reports Styles (Balance Sheet, P&L, Budget Report)
+   Strict rule: all colors use var(--*) from globals.css
+   ============================================================ */
+
+.report-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.report-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 0.85rem 1.25rem;
+  box-shadow: 4px 4px 12px var(--nm-shadow-dark),
+              -2px -2px 8px var(--nm-shadow-light);
+}
+
+.report-sheet-card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 8px 8px 18px var(--nm-shadow-dark),
+              -4px -4px 12px var(--nm-shadow-light);
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.88rem;
+}
+
+.report-section-header {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  background: var(--bg-surface);
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border-medium);
+  border-bottom: 1px solid var(--border-medium);
+}
+
+.report-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--dash-divider);
+}
+
+.report-row:hover {
+  background: var(--dash-nav-hover-bg);
+}
+
+.report-row-account {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-primary);
+}
+
+.report-row-amount {
+  font-family: 'Orbitron', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.report-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 1rem;
+  background: var(--bg-surface);
+  border-top: 2px solid var(--border-medium);
+  border-bottom: 2px solid var(--border-medium);
+  margin: 0.5rem 0;
+}
