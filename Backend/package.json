@@ -8,6 +8,7 @@
     "dev": "nodemon src/server.js",
     "migrate": "node src/database/migrations/run-migrations.js",
     "seed": "node src/database/seeds/seed_urban_furniture.js",
+    "seed:demo": "node src/database/seeds/seed_demo_data.js",
     "test": "node tests/security-audit.test.js",
     "test:phase1": "jest tests/phase1-tenancy.test.js",
     "test:phase2": "jest tests/phase2-shared.test.js --runInBand",
