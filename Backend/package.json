@@ -10,7 +10,8 @@
     "test": "node tests/security-audit.test.js",
     "test:phase1": "jest tests/phase1-tenancy.test.js",
     "test:phase2": "jest tests/phase2-shared.test.js --runInBand",
-    "test:phase3": "jest tests/phase3-auth-org.test.js --runInBand"
+    "test:phase3": "jest tests/phase3-auth-org.test.js --runInBand",
+    "test:phase5": "jest tests/phase5-accounting-core.test.js --runInBand"
   },
   "keywords": [],
   "author": "",
