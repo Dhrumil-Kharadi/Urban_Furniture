@@ -443,7 +443,10 @@
       "bills": "मेरे बिल",
       "statements": "विवरण",
       "settings": "सेटिंग्स",
-      "help": "सहायता"
+      "help": "सहायता",
+      "journalEntries": "जर्नल प्रविष्टियाँ",
+      "taxes": "कर दरें (Taxes)",
+      "analyticAccounts": "विश्लेषणात्मक खाते (Analytic Accounts)"
     },
     "promo": {
       "title": "आपकी बहियाँ",
@@ -734,7 +737,8 @@
       "liability": "दायित्व (Liability)",
       "equity": "पूंजी / इक्विटी (Equity)",
       "income": "आय (Income)",
-      "expense": "व्यय (Expense)"
+      "expense": "व्यय (Expense)",
+      "capital": "पूंजी (Capital)"
     },
     "fields": {
       "code": "खाता कोड",

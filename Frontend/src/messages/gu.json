@@ -443,7 +443,10 @@
       "bills": "મારા બિલ",
       "statements": "પત્રક",
       "settings": "સેટિંગ્સ",
-      "help": "મદદ"
+      "help": "મદદ",
+      "journalEntries": "જર્નલ એન્ટ્રીઓ",
+      "taxes": "કરના દરો (Taxes)",
+      "analyticAccounts": "વિશ્લેષણાત્મક ખાતાઓ (Analytic Accounts)"
     },
     "promo": {
       "title": "તમારી ચોપડીઓ",
@@ -734,7 +737,8 @@
       "liability": "જવાબદારી / દેવું (Liability)",
       "equity": "મૂડી (Equity)",
       "income": "આવક (Income)",
-      "expense": "ખર્ચ (Expense)"
+      "expense": "ખર્ચ (Expense)",
+      "capital": "મૂડી (Capital)"
     },
     "fields": {
       "code": "ખાતા કોડ",

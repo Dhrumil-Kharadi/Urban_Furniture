@@ -443,7 +443,10 @@
       "bills": "My Bills",
       "statements": "Statement",
       "settings": "Settings",
-      "help": "Help"
+      "help": "Help",
+      "journalEntries": "Journal Entries",
+      "taxes": "Tax Rates",
+      "analyticAccounts": "Analytic Accounts"
     },
     "promo": {
       "title": "Your books on",
@@ -734,7 +737,8 @@
       "liability": "Liability",
       "equity": "Equity",
       "income": "Income",
-      "expense": "Expense"
+      "expense": "Expense",
+      "capital": "Capital"
     },
     "fields": {
       "code": "Account Code",
