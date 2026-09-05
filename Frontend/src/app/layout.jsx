@@ -11,7 +11,9 @@ import '../styles/masterdata.css';
 import '../styles/forms.css';
 import '../styles/masters.css';
 import '../styles/transactions.css';
+import '../styles/budgets.css';
 import '../styles/reports.css';
+import '../styles/auditlogs.css';
 import '../styles/portal.css';
 
 export const metadata = {
@@ -26,7 +28,7 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Sora:wght@300;400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>

@@ -50,7 +50,8 @@ export default function DashboardFrame({
   const handleSearch = onSearchChange || setInternalSearch;
 
   const groups = useMemo(() => {
-    const roleGroups = DASHBOARD_NAV[role] || DASHBOARD_NAV.user;
+    const navRole = user?.role || role;
+    const roleGroups = DASHBOARD_NAV[navRole] || DASHBOARD_NAV.customer;
 
     // Only entries that actually go somewhere are shown. The config lists the
     // whole intended menu, including sections later phases will build, but a
@@ -97,7 +98,7 @@ export default function DashboardFrame({
         ],
       },
     ];
-  }, [role, activeKey, t, logout]);
+  }, [role, user?.role, activeKey, t, logout]);
 
   const sidebar = (
     <Sidebar

@@ -219,7 +219,7 @@ export default function BudgetsPage() {
   );
 
   return (
-    <div className="budget-container">
+      <div className="budget-container">
       {/* Top Header */}
       <div className="budget-header">
         <div className="budget-header-content">
@@ -327,6 +327,6 @@ export default function BudgetsPage() {
         onSaved={fetchBudgets}
         budget={selectedBudget}
       />
-    </div>
+      </div>
   );
 }

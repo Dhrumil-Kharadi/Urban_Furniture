@@ -38,7 +38,7 @@ export default function ReportsHubPage() {
   ];
 
   return (
-    <div className="report-container">
+      <div className="report-container">
       {/* Page Header */}
       <div className="report-header">
         <div className="report-header-content">
@@ -77,6 +77,6 @@ export default function ReportsHubPage() {
           </Link>
         ))}
       </div>
-    </div>
+      </div>
   );
 }

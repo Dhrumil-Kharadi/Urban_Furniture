@@ -47,12 +47,12 @@ export default function AuditLogsPage() {
       if (search.trim()) params.entityId = search.trim();
 
       const res = await api.get('/audit-logs', { params });
-      if (res.data?.success) {
-        setLogs(res.data.data.items || []);
+      if (res?.success && res.data) {
+        setLogs(res.data.items || []);
         setPagination({
-          page: res.data.data.page,
-          total: res.data.data.total,
-          totalPages: res.data.data.totalPages || 1,
+          page: res.data.page,
+          total: res.data.total,
+          totalPages: res.data.totalPages || 1,
         });
       }
     } catch (err) {
@@ -84,7 +84,7 @@ export default function AuditLogsPage() {
   }
 
   return (
-    <DashboardFrame>
+    <DashboardFrame role="business_owner" allowedRoles={['business_owner']} activeKey="auditLogs">
       <div className="audit-container">
         {/* Header */}
         <div className="audit-header">

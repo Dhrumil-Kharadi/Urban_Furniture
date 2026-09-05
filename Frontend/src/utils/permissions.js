@@ -113,7 +113,7 @@ export const MODULE_PERMISSIONS = {
   // Contact Portal
   portal: {
     view: ['customer', 'vendor'],
-    pay: ['customer', 'vendor'],
+    pay: ['customer'],
   },
 };
 
