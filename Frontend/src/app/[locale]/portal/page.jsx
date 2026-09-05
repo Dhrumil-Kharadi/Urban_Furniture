@@ -20,7 +20,7 @@ import StatCard from '@/reusablefiles/statcard/StatCard';
 import DataTable from '@/reusablefiles/datatable/DataTable';
 import Pill from '@/reusablefiles/pill';
 import { MoneyText, StatusPill } from '@/components/masterdata/Cells';
-import PaymentModal from '@/components/portal/PaymentModal';
+import RazorpayCheckoutButton from '@/components/payment/RazorpayCheckoutButton';
 import { useAuth } from '@/context/AuthContext';
 import portalService from '@/services/portal.service';
 
@@ -31,8 +31,6 @@ export default function PortalPage() {
   const [summary, setSummary] = useState(null);
   const [recentInvoices, setRecentInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const [isPayModalOpen, setIsPayModalOpen] = useState(false);
 
   const fetchPortalData = useCallback(async () => {
     setLoading(true);
@@ -57,12 +55,6 @@ export default function PortalPage() {
   useEffect(() => {
     fetchPortalData();
   }, [fetchPortalData]);
-
-  const handlePayNow = (inv, e) => {
-    e?.stopPropagation();
-    setSelectedInvoice(inv);
-    setIsPayModalOpen(true);
-  };
 
   const invoiceColumns = [
     {
@@ -123,21 +115,19 @@ export default function PortalPage() {
           return <span className="text-xs text-gray-500">{t('invoices.paidInFull')}</span>;
         }
         return (
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={(e) => handlePayNow(row, e)}
-          >
-            {t('invoices.payNow')}
-          </Button>
+          <RazorpayCheckoutButton
+            invoiceId={row.id}
+            onPaid={fetchPortalData}
+            label={t('invoices.payNow')}
+          />
         );
       },
     },
   ];
 
   return (
-    <ProtectedRoute allowedRoles={['customer', 'vendor']}>
-      <main className="p-6 space-y-6 max-w-6xl mx-auto text-[var(--foreground,#f3f4f6)]">
+    <ProtectedRoute allowedRoles={['customer']}>
+      <main className="portal-route">
         {/* Portal Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-[var(--card-bg,#181d28)] p-6 rounded-2xl border border-[var(--border,#2b3245)] shadow-sm">
           <div>
@@ -251,15 +241,6 @@ export default function PortalPage() {
           />
         </div>
 
-        {/* Card Checkout Modal */}
-        <PaymentModal
-          isOpen={isPayModalOpen}
-          onClose={() => setIsPayModalOpen(false)}
-          invoice={selectedInvoice}
-          onPaymentSuccess={() => {
-            fetchPortalData();
-          }}
-        />
       </main>
     </ProtectedRoute>
   );

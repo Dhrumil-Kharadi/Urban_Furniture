@@ -25,6 +25,11 @@ export const reportsService = {
     return api.get(`/reports/budget${qs}`);
   },
 
+  async getGeneralLedger(params = {}) {
+    const qs = toQueryString(params);
+    return api.get(`/reports/general-ledger${qs}`);
+  },
+
   exportCsvUrl(type, params = {}) {
     const qs = toQueryString(params);
     return `${BASE_URL}/reports/${type}/export${qs}`;

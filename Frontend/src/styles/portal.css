@@ -69,6 +69,107 @@
   color: var(--text-primary);
 }
 
+/* The portal pages predate the shared stylesheet and use utility-like class
+   names. Keep their markup intact while giving those surfaces the same clean
+   Frozen Lake treatment as the dashboard shell. */
+.portal-layout,
+.portal-layout > * { min-width: 0; }
+
+.portal-page-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.portal-table-surface {
+  overflow-x: auto;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  box-shadow: 8px 8px 16px var(--nm-shadow-dark), -4px -4px 10px var(--nm-shadow-light);
+}
+
+.portal-route {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-sizing: border-box;
+  color: var(--text-primary);
+  font-family: 'Sora', sans-serif;
+}
+
+.portal-route > * { min-width: 0; }
+
+.portal-route > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 22px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  box-shadow: 8px 8px 16px var(--nm-shadow-dark), -4px -4px 10px var(--nm-shadow-light);
+}
+
+.portal-route > div:not(:first-child) [class*="bg-"],
+.portal-route > div[class*="bg-"] {
+  background: var(--bg-raised);
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.portal-route [class*="text-gray"] { color: var(--text-secondary); }
+.portal-route [class*="text-white"] { color: var(--text-primary); }
+.portal-route [class*="rounded-2xl"],
+.portal-route [class*="rounded-xl"] { border-radius: 12px; }
+
+.portal-route > div:nth-child(2) {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.portal-route > div:nth-child(3) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.portal-route > div:nth-child(2) > a,
+.portal-route > div:nth-child(3) > * {
+  min-width: 0;
+}
+
+.portal-route select {
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font: 0.78rem 'Sora', sans-serif;
+}
+
+.portal-route table { width: 100%; }
+
+@media (max-width: 720px) {
+  .portal-route { padding: 14px; }
+  .portal-route > div:first-child { align-items: flex-start; flex-direction: column; }
+  .portal-route > div:nth-child(2),
+  .portal-route > div:nth-child(3) { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
+  .dash-form { grid-template-columns: 1fr; }
+  .report-container { padding: 1rem; }
+  .report-toolbar { align-items: stretch; }
+  .report-date-input { width: min(100%, 240px); }
+}
+
 /* ── Modal & Drawer Dialogs ── */
 .app-modal-backdrop {
   position: fixed;

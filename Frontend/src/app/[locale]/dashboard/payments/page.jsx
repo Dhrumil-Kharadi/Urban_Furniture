@@ -47,7 +47,7 @@ export default function PaymentsPage() {
       setPayments(res.items || []);
       setPagination(res.meta || { page: 1, limit: 10, total: 0, totalPages: 1 });
     } catch (err) {
-      setError(err.message || tc('states.errorBody'));
+      setError(err?.status >= 500 ? tc('states.errorBody') : (err.message || tc('states.errorBody')));
     } finally {
       setLoading(false);
     }

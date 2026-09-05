@@ -14,6 +14,7 @@ import { X, Calendar, DollarSign, FileText } from 'lucide-react';
 import Button from '@/reusablefiles/button';
 import InputBox from '@/reusablefiles/inputbox';
 import api from '@/lib/api';
+import { getCachedRequest } from '@/lib/requestCache';
 
 export default function BudgetDrawer({
   isOpen,
@@ -64,7 +65,10 @@ export default function BudgetDrawer({
       }
 
       setFetchingAnalytics(true);
-      api.get('/analytic-accounts?status=active&limit=100')
+      getCachedRequest(
+        'budget-drawer:analytic-accounts:active:100',
+        () => api.get('/analytic-accounts?status=active&limit=100'),
+      )
         .then((res) => {
           if (res?.data?.items) {
             setAnalyticAccounts(res.data.items);

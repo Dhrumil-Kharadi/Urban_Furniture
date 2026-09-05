@@ -10,7 +10,7 @@
   flex-direction: column;
   gap: 1.75rem;
   width: 100%;
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 1.5rem;
   box-sizing: border-box;
@@ -104,7 +104,7 @@
 /* ─── KPI Cards Grid ─────────────────────────────────────── */
 .fin-dash-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 1.25rem;
   width: 100%;
 }
@@ -161,8 +161,29 @@
   width: 100%;
 }
 
+.fin-dash-kpi-grid > *,
+.fin-dash-charts-grid > *,
+.fin-dash-triple-grid > * {
+  min-width: 0;
+}
+
 @media (max-width: 960px) {
+  .fin-dash-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .fin-dash-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .fin-dash-container {
+    padding: 1rem;
+  }
+
+  .fin-dash-kpi-grid,
+  .fin-dash-triple-grid {
     grid-template-columns: 1fr;
   }
 }

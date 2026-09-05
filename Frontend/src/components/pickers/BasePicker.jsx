@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Search, ChevronDown, X, Check, Loader2 } from 'lucide-react';
 import api from '@/lib/api';
 import { useDebounce } from '@/hooks/useDebounce';
+import { getCachedRequest } from '@/lib/requestCache';
 
 /**
  * BasePicker
@@ -44,6 +45,12 @@ export default function BasePicker({
 
   const containerRef = useRef(null);
   const abortControllerRef = useRef(null);
+  const valueRef = useRef(value);
+  const selectedItemRef = useRef(selectedItem);
+  const getOptionKeyRef = useRef(getOptionKey);
+
+  const extraParamsKey = JSON.stringify(extraParams);
+  const stableExtraParams = useMemo(() => extraParams, [extraParamsKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const debouncedSearch = useDebounce(searchTerm, 300);
 
@@ -55,6 +62,12 @@ export default function BasePicker({
       setSelectedItem(null);
     }
   }, [value]);
+
+  useEffect(() => {
+    valueRef.current = value;
+    selectedItemRef.current = selectedItem;
+    getOptionKeyRef.current = getOptionKey;
+  }, [value, selectedItem, getOptionKey]);
 
   // Fetch initial/matching options on search change or open
   const fetchOptions = useCallback(async (query) => {
@@ -68,22 +81,25 @@ export default function BasePicker({
     setLoading(true);
 
     try {
-      const res = await api.get(endpoint, {
-        params: {
-          search: query || undefined,
-          limit: 20,
-          ...extraParams,
-        },
-        signal: controller.signal,
-      });
+      const params = {
+        search: query || undefined,
+        limit: 20,
+        ...stableExtraParams,
+      };
+      const cacheKey = `picker:${endpoint}:${JSON.stringify(params)}`;
+      const res = await getCachedRequest(cacheKey, () => api.get(endpoint, {
+        params,
+      }));
+
+      if (controller.signal.aborted) return;
 
       if (res.success) {
         const items = res.data?.items || res.data || [];
         setOptions(items);
 
         // If value was an ID and selectedItem not yet set, find it in items
-        if (value && typeof value === 'string' && !selectedItem) {
-          const match = items.find((i) => getOptionKey(i) === value);
+        if (valueRef.current && typeof valueRef.current === 'string' && !selectedItemRef.current) {
+          const match = items.find((i) => getOptionKeyRef.current(i) === valueRef.current);
           if (match) setSelectedItem(match);
         }
       }
@@ -96,7 +112,7 @@ export default function BasePicker({
         setLoading(false);
       }
     }
-  }, [endpoint, extraParams, value, selectedItem, getOptionKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [endpoint, stableExtraParams]);
 
   useEffect(() => {
     if (isOpen) {

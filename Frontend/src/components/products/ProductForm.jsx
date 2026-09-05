@@ -20,6 +20,7 @@ import { useTranslations } from 'next-intl';
 import InputBox from '@/reusablefiles/inputbox';
 import FormShell from '@/components/masterdata/FormShell';
 import { productCategoriesService } from '@/services/masterdata.service';
+import { getCachedRequest } from '@/lib/requestCache';
 
 /** A price the server will accept: up to 13 digits, up to 2 decimals. */
 const PRICE_PATTERN = /^\d{1,13}(\.\d{1,2})?$/;
@@ -64,9 +65,9 @@ export default function ProductForm({
 
     (async () => {
       try {
-        const data = await productCategoriesService.list(
-          { status: 'active', limit: 100, sortBy: 'name' },
-          controller.signal,
+        const data = await getCachedRequest(
+          'product-form:categories:active:100:name',
+          () => productCategoriesService.list({ status: 'active', limit: 100, sortBy: 'name' }),
         );
         if (!ignore) setCategories(data?.items ?? []);
       } catch {

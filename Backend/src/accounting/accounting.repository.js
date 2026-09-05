@@ -372,6 +372,92 @@ const accountingRepository = {
     return listResult(dataRes.rows, page, limit, total);
   },
 
+  /**
+   * List posted journal lines for the General Ledger. The running balance is
+   * calculated by PostgreSQL from the same tenant-scoped ledger rows, so the
+   * UI never builds a second or synthetic ledger dataset.
+   *
+   * @param {object|null} client
+   * @param {string} organizationId
+   * @param {object} query
+   * @returns {Promise<{ items: Array, pagination: object }>}
+   */
+  async listLedgerLines(client, organizationId, query = {}) {
+    const db = client || pool;
+    const { page, limit, offset } = parsePagination(query);
+    const conditions = [
+      'l.organization_id = $1',
+      "e.status IN ('posted', 'reversed')",
+    ];
+    const params = [organizationId];
+
+    if (query.accountId) {
+      params.push(query.accountId);
+      conditions.push(`l.account_id = $${params.length}`);
+    }
+    if (query.journalId) {
+      params.push(query.journalId);
+      conditions.push(`e.journal_id = $${params.length}`);
+    }
+    if (query.dateFrom) {
+      params.push(query.dateFrom);
+      conditions.push(`e.entry_date >= $${params.length}`);
+    }
+    if (query.dateTo) {
+      params.push(query.dateTo);
+      conditions.push(`e.entry_date <= $${params.length}`);
+    }
+
+    const search = searchTerm(query);
+    if (search) {
+      params.push(`%${search}%`);
+      const index = params.length;
+      conditions.push(`(e.entry_number ILIKE $${index} OR e.reference ILIKE $${index} OR a.code ILIKE $${index} OR a.name ILIKE $${index})`);
+    }
+
+    const whereClause = `WHERE ${conditions.join(' AND ')}`;
+    const countRes = await db.query(
+      `SELECT COUNT(*)::integer AS total
+         FROM journal_entry_lines l
+         JOIN journal_entries e ON e.id = l.journal_entry_id AND e.organization_id = l.organization_id
+         JOIN accounts a ON a.id = l.account_id AND a.organization_id = l.organization_id
+        ${whereClause}`,
+      params
+    );
+    const total = countRes.rows[0]?.total || 0;
+
+    params.push(limit);
+    const limitIndex = params.length;
+    params.push(offset);
+    const offsetIndex = params.length;
+    const dataRes = await db.query(
+      `WITH ledger AS (
+         SELECT l.id, l.organization_id, l.journal_entry_id, l.line_no,
+                l.debit, l.credit, l.description, l.partner_contact_id,
+                e.entry_number, e.entry_date, e.reference, e.narration,
+                e.source_type, e.is_auto_generated, j.id AS journal_id,
+                j.name AS journal_name, a.id AS account_id, a.code AS account_code,
+                a.name AS account_name,
+                SUM(l.debit - l.credit) OVER (
+                  PARTITION BY l.account_id
+                  ORDER BY e.entry_date, e.entry_number, l.line_no
+                  ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+                ) AS running_balance
+           FROM journal_entry_lines l
+           JOIN journal_entries e ON e.id = l.journal_entry_id AND e.organization_id = l.organization_id
+           JOIN journals j ON j.id = e.journal_id AND j.organization_id = e.organization_id
+           JOIN accounts a ON a.id = l.account_id AND a.organization_id = l.organization_id
+          ${whereClause}
+       )
+       SELECT * FROM ledger
+        ORDER BY entry_date DESC, entry_number DESC, line_no DESC
+        LIMIT $${limitIndex} OFFSET $${offsetIndex}`,
+      params
+    );
+
+    return listResult(dataRes.rows, page, limit, total);
+  },
+
   // ─── Reporting primitives (Phase 11 consumes these) ──────────────────────
 
   /**

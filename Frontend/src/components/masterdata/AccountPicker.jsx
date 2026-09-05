@@ -18,6 +18,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import InputBox from '@/reusablefiles/inputbox';
 import { accountsService } from '@/services/masterdata.service';
+import { getCachedRequest } from '@/lib/requestCache';
 
 /**
  * @param {object}   props
@@ -49,9 +50,9 @@ export default function AccountPicker({
       try {
         // MAX_LIMIT is 100 server-side; a chart of accounts larger than that
         // wants a searchable picker, which is a Phase 11 concern.
-        const data = await accountsService.list(
-          { status: 'active', limit: 100, sortBy: 'code' },
-          controller.signal,
+        const data = await getCachedRequest(
+          'account-picker:active:100:code',
+          () => accountsService.list({ status: 'active', limit: 100, sortBy: 'code' }),
         );
         if (!ignore) setAccounts(data?.items ?? []);
       } catch {

@@ -84,11 +84,17 @@ export default function ProfitAndLossReportPage() {
   }, [data]);
 
   const totals = data?.totals || {
-    totalIncome: '0.00',
-    totalExpenses: '0.00',
-    netProfit: '0.00',
-    isProfitable: true,
+    totalIncome: data?.income?.total || '0.00',
+    totalExpenses: data?.expenses?.total || '0.00',
+    netProfit: data?.netProfit || '0.00',
+    isProfitable: data?.isProfitable ?? true,
   };
+  const incomeLines = Array.isArray(data?.income)
+    ? data.income
+    : data?.income?.lines || [];
+  const expenseLines = Array.isArray(data?.expenses)
+    ? data.expenses
+    : data?.expenses?.lines || [];
 
   return (
     <div className="report-container">
@@ -233,7 +239,7 @@ export default function ProfitAndLossReportPage() {
             </div>
             <table className="report-table">
               <tbody>
-                {data.income?.map((acc) => (
+                {incomeLines.map((acc) => (
                   <tr key={acc.code}>
                     <td className="report-code-col">[{acc.code}]</td>
                     <td className="report-name-col">{acc.name}</td>
@@ -242,7 +248,7 @@ export default function ProfitAndLossReportPage() {
                     </td>
                   </tr>
                 ))}
-                {(!data.income || data.income.length === 0) && (
+                {incomeLines.length === 0 && (
                   <tr>
                     <td colSpan={3} className="report-empty-cell">{t('noIncome')}</td>
                   </tr>
@@ -259,7 +265,7 @@ export default function ProfitAndLossReportPage() {
             </div>
             <table className="report-table">
               <tbody>
-                {data.expenses?.map((acc) => (
+                {expenseLines.map((acc) => (
                   <tr key={acc.code}>
                     <td className="report-code-col">[{acc.code}]</td>
                     <td className="report-name-col">{acc.name}</td>
@@ -268,7 +274,7 @@ export default function ProfitAndLossReportPage() {
                     </td>
                   </tr>
                 ))}
-                {(!data.expenses || data.expenses.length === 0) && (
+                {expenseLines.length === 0 && (
                   <tr>
                     <td colSpan={3} className="report-empty-cell">{t('noExpenses')}</td>
                   </tr>

@@ -26,7 +26,7 @@ export const budgetsService = {
   },
 
   async archive(id) {
-    return api.delete(`/budgets/${id}`);
+    return api.patch(`/budgets/${id}/archive`);
   },
 
   async getLines(id, params = {}) {

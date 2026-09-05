@@ -13,12 +13,11 @@ import { ArrowLeft, Search, Filter, Receipt } from 'lucide-react';
 
 import { Link } from '@/i18n/navigation';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import Button from '@/reusablefiles/button';
 import InputBox from '@/reusablefiles/inputbox';
 import DataTable from '@/reusablefiles/datatable/DataTable';
 import Pill from '@/reusablefiles/pill';
 import { MoneyText } from '@/components/masterdata/Cells';
-import PaymentModal from '@/components/portal/PaymentModal';
+import RazorpayCheckoutButton from '@/components/payment/RazorpayCheckoutButton';
 import portalService from '@/services/portal.service';
 
 export default function PortalInvoicesPage() {
@@ -28,8 +27,6 @@ export default function PortalInvoicesPage() {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const [isPayModalOpen, setIsPayModalOpen] = useState(false);
 
   const fetchInvoices = useCallback(async () => {
     setLoading(true);
@@ -51,12 +48,6 @@ export default function PortalInvoicesPage() {
   useEffect(() => {
     fetchInvoices();
   }, [fetchInvoices]);
-
-  const handlePayNow = (inv, e) => {
-    e?.stopPropagation();
-    setSelectedInvoice(inv);
-    setIsPayModalOpen(true);
-  };
 
   const columns = useMemo(
     () => [
@@ -124,23 +115,21 @@ export default function PortalInvoicesPage() {
             return <span className="text-xs text-gray-500">{t('paidInFull')}</span>;
           }
           return (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={(e) => handlePayNow(row, e)}
-            >
-              {t('payNow')}
-            </Button>
+            <RazorpayCheckoutButton
+              invoiceId={row.id}
+              label={t('payNow')}
+              onPaid={fetchInvoices}
+            />
           );
         },
       },
     ],
-    [t],
+    [fetchInvoices, t],
   );
 
   return (
     <ProtectedRoute allowedRoles={['customer', 'vendor']}>
-      <main className="p-6 space-y-6 max-w-6xl mx-auto text-[var(--foreground,#f3f4f6)]">
+      <main className="portal-route">
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -195,15 +184,6 @@ export default function PortalInvoicesPage() {
           />
         </div>
 
-        {/* Card Checkout Modal */}
-        <PaymentModal
-          isOpen={isPayModalOpen}
-          onClose={() => setIsPayModalOpen(false)}
-          invoice={selectedInvoice}
-          onPaymentSuccess={() => {
-            fetchInvoices();
-          }}
-        />
       </main>
     </ProtectedRoute>
   );

@@ -49,25 +49,15 @@ export default function BudgetDetailPage({ params }) {
     }
   };
 
-  const fetchLines = async () => {
-    if (!budgetId) return;
-    setLinesLoading(true);
-    try {
-      const res = await api.get(`/budgets/${budgetId}/lines?limit=100`);
-      const items = res?.data?.items || res?.items || [];
-      setLines(items);
-    } catch (err) {
-      console.error('Failed to load contributing lines', err);
-      setLines([]);
-    } finally {
-      setLinesLoading(false);
-    }
-  };
-
   useEffect(() => {
     fetchBudgetDetail();
-    fetchLines();
   }, [budgetId]);
+
+  useEffect(() => {
+    if (!budget?.contributingLines) return;
+    setLines(budget.contributingLines);
+    setLinesLoading(false);
+  }, [budget]);
 
   const chartData = useMemo(() => {
     if (!budget?.monthlyBreakdown || !budget.monthlyBreakdown.length) {

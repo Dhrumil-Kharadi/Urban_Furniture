@@ -110,7 +110,7 @@ export default function PortalBillsPage() {
 
   return (
     <ProtectedRoute allowedRoles={['customer', 'vendor']}>
-      <main className="p-6 space-y-6 max-w-6xl mx-auto text-[var(--foreground,#f3f4f6)]">
+      <main className="portal-route">
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">

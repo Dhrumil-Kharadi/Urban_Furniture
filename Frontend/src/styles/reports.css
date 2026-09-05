@@ -75,6 +75,70 @@
   width: 160px;
 }
 
+.report-date-input > span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text-secondary);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.68rem;
+}
+
+.report-date-input input,
+.report-date-input select,
+.report-search-input input {
+  width: 100%;
+  min-height: 36px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.76rem;
+  outline: none;
+}
+
+.report-search-input {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 9px;
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  background: var(--bg-base);
+  color: var(--accent-primary);
+}
+
+.report-search-input input { min-height: 30px; padding: 0; border: 0; background: transparent; }
+
+.report-filter-submit {
+  min-height: 36px;
+  align-self: end;
+  padding: 0 14px;
+  border: 1px solid var(--btn-primary-bg);
+  border-radius: 6px;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.report-table-wrap { overflow-x: auto; }
+.report-table th {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid var(--border-medium);
+  color: var(--text-secondary);
+  font-family: 'Orbitron', monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
 /* ── Reports Hub Grid ── */
 .report-hub-grid {
   display: grid;

@@ -6,6 +6,7 @@ import '../styles/auth.css';
 import '../styles/loading.css';
 import '../styles/dashboard.css';
 import '../styles/dashboard-shell.css';
+import '../styles/financial-dashboard.css';
 import '../styles/graphs.css';
 import '../styles/masterdata.css';
 import '../styles/forms.css';

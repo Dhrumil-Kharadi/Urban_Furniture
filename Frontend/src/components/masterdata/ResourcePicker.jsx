@@ -17,6 +17,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import InputBox from '@/reusablefiles/inputbox';
+import { getCachedRequest, getRequestOwnerId } from '@/lib/requestCache';
 
 /**
  * @param {object}   props
@@ -50,9 +51,11 @@ export default function ResourcePicker({
 
     (async () => {
       try {
-        const data = await service.list(
-          { status: 'active', limit: 100, ...JSON.parse(paramsKey) },
-          controller.signal,
+        const requestParams = { status: 'active', limit: 100, ...JSON.parse(paramsKey) };
+        const serviceKey = getRequestOwnerId(service);
+        const data = await getCachedRequest(
+          `resource-picker:${serviceKey}:${paramsKey}`,
+          () => service.list(requestParams),
         );
         if (!ignore) setRecords(data?.items ?? []);
       } catch {

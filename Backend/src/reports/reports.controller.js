@@ -12,6 +12,7 @@ const { generateBalanceSheet } = require('./reports.balanceSheet');
 const { generateProfitLoss } = require('./reports.profitLoss');
 const { generateBudgetReport } = require('./reports.budget');
 const { exportBalanceSheetCsv, exportProfitLossCsv, exportBudgetCsv } = require('./reports.export');
+const accountingRepository = require('../accounting/accounting.repository');
 const { success, error } = require('../utils/response');
 
 const reportsController = {
@@ -40,6 +41,15 @@ const reportsController = {
       const { budgetId, fromDate, toDate } = req.query;
       const data = await generateBudgetReport(req.organizationId, { budgetId, fromDate, toDate });
       return success(res, 'Budget report generated successfully', data);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async getGeneralLedger(req, res, next) {
+    try {
+      const data = await accountingRepository.listLedgerLines(null, req.organizationId, req.query);
+      return success(res, 'General ledger retrieved successfully', data);
     } catch (err) {
       next(err);
     }

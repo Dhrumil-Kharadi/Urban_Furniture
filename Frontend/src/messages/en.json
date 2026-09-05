@@ -1669,6 +1669,28 @@
       "loadError": "Could not generate the budget report.",
       "noData": "No budgets to compare yet."
     },
+    "generalLedger": {
+      "title": "General ledger",
+      "subtitle": "Every posted journal line with a running account balance.",
+      "account": "Account",
+      "allAccounts": "All accounts",
+      "journal": "Journal",
+      "allJournals": "All journals",
+      "dateFrom": "Date from",
+      "dateTo": "Date to",
+      "search": "Search entry, account or reference",
+      "apply": "Apply filters",
+      "date": "Date",
+      "entry": "Entry #",
+      "reference": "Reference",
+      "description": "Description",
+      "debit": "Debit",
+      "credit": "Credit",
+      "balance": "Balance",
+      "emptyValue": "—",
+      "empty": "No posted ledger lines match these filters.",
+      "loadError": "Could not load the general ledger."
+    },
     "toolbar": {
       "thisMonth": "This month",
       "thisQuarter": "This quarter",
@@ -1736,6 +1758,32 @@
       "description": "Description",
       "amount": "Amount",
       "noLines": "Nothing has been posted against this analytic account in the budget period."
+    }
+  },
+  "organizationSettings": {
+    "title": "Organization Settings",
+    "subtitle": "Manage the business profile and accounting defaults for this organization.",
+    "name": "Organization name",
+    "currency": "Currency",
+    "fiscalYearStartMonth": "Fiscal year start month",
+    "save": "Save settings",
+    "saving": "Saving settings",
+    "saved": "Organization settings updated",
+    "loadError": "Unable to load organization settings.",
+    "saveError": "Unable to save organization settings.",
+    "months": {
+      "1": "January",
+      "2": "February",
+      "3": "March",
+      "4": "April",
+      "5": "May",
+      "6": "June",
+      "7": "July",
+      "8": "August",
+      "9": "September",
+      "10": "October",
+      "11": "November",
+      "12": "December"
     }
   }
 }

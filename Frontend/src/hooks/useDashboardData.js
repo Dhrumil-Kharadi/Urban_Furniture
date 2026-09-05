@@ -19,8 +19,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   buildDirectoryMetrics,
-  fetchFarmTelemetry,
-  fetchManagerSummary,
   fetchUsers,
 } from '@/services/dashboard.service';
 
@@ -35,15 +33,7 @@ async function fetchScope(scope) {
     return { users: res.users, error: res.error };
   }
 
-  if (scope === 'operations') {
-    const [telemetry, mgr] = await Promise.all([
-      fetchFarmTelemetry('operations'),
-      fetchManagerSummary(),
-    ]);
-    return { telemetry, summary: mgr.summary, error: mgr.error };
-  }
-
-  return { telemetry: await fetchFarmTelemetry('farm'), error: null };
+  return { users: [], error: `Unsupported dashboard scope: ${scope}` };
 }
 
 export default function useDashboardData({ scope = 'farm', enabled = true } = {}) {

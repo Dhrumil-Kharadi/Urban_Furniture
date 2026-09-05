@@ -19,6 +19,7 @@ router.use(authMiddleware.authenticate, resolveTenant, authMiddleware.authorize(
 router.get('/balance-sheet', reportsController.getBalanceSheet);
 router.get('/profit-loss', reportsController.getProfitLoss);
 router.get('/budget', reportsController.getBudgetReport);
+router.get('/general-ledger', reportsController.getGeneralLedger);
 router.get('/:type/export', reportsController.exportReport);
 
 module.exports = router;

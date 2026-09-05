@@ -64,7 +64,10 @@ export default function DashboardFrame({
     // a section once its route exists.
     const mapItems = (items) =>
       items
-        .filter((item) => Boolean(item.href) || typeof item.onClick === 'function')
+        .filter((item) => {
+          const roleAllowed = !item.roles || item.roles.includes(role);
+          return roleAllowed && (Boolean(item.href) || typeof item.onClick === 'function');
+        })
         .map((item) => {
           const Icon = item.icon;
           return {
@@ -101,7 +104,7 @@ export default function DashboardFrame({
         ],
       },
     ];
-  }, [role, user?.role, activeKey, t, logout]);
+  }, [role, activeKey, t, logout]);
 
   const sidebar = (
     <Sidebar

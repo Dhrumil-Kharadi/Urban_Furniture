@@ -16,6 +16,7 @@ import { ArrowLeft, Wallet, XCircle } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { StatusPill, ErrorState, ConfirmDialog, useToast } from '@/components/shared';
+import { useAuth } from '@/context/AuthContext';
 import { paymentsService } from '@/services/payments.service';
 import { formatMoney, formatDate } from '@/utils/format';
 
@@ -25,6 +26,7 @@ export default function PaymentDetailPage() {
   const { id } = useParams();
   const locale = useLocale();
   const { showSuccess, showError } = useToast();
+  const { role } = useAuth();
 
   const [payment, setPayment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -102,7 +104,7 @@ export default function PaymentDetailPage() {
         <div className="doc-page-actions">
           <StatusPill status={payment.status} />
 
-          {payment.status === 'posted' && (
+          {role === 'business_owner' && payment.status === 'posted' && (
             <button
               type="button"
               disabled={busy}
