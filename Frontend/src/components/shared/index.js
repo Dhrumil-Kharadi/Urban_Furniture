@@ -11,4 +11,7 @@ export { default as EmptyState } from './EmptyState';
 export { default as ErrorState } from './ErrorState';
 export { default as FormField } from './FormField';
 export { default as FormActions } from './FormActions';
+export { default as DocumentLineGrid } from './DocumentLineGrid';
+export { default as DocumentTotals } from './DocumentTotals';
+export { default as DocumentStatusBar } from './DocumentStatusBar';
 export { ToastProvider, useToast } from './ToastProvider';

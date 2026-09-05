@@ -45,6 +45,8 @@ const migrations = [
   require('./016_create_journal_entries'),
   require('./017_create_journal_entry_lines'),
   require('./018_create_document_sequences'),
+  require('./019_create_purchase_orders'),
+  require('./020_create_vendor_bills'),
   require('./026_create_audit_logs'),
   require('./028_ledger_integrity_triggers'),
 ];

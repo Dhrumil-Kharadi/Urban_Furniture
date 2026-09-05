@@ -20,6 +20,8 @@ const analyticsRoutes = require('./analytics/analytics.routes');
 const contactsRoutes = require('./contacts/contacts.routes');
 const productsRoutes = require('./products/products.routes');
 const productCategoriesRoutes = require('./product-categories/product-categories.routes');
+const purchaseOrdersRoutes = require('./purchases/purchaseOrders.routes');
+const vendorBillsRoutes = require('./purchases/vendorBills.routes');
 
 // Uploaded files (contact profile images) live outside src/ and are served
 // read-only from a fixed root. Filenames are random UUIDs chosen by the
@@ -81,6 +83,8 @@ app.use('/api/analytic-accounts', analyticsRoutes);
 app.use('/api/contacts', contactsRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/product-categories', productCategoriesRoutes);
+app.use('/api/purchase-orders', purchaseOrdersRoutes);
+app.use('/api/vendor-bills', vendorBillsRoutes);
 
 // ─── Uploaded Files ─────────────────────────────────────
 // `dotfiles: 'deny'` and an explicit Content-Type stop a stored file being
