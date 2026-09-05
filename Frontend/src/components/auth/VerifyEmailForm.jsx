@@ -3,7 +3,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
-import api from '@/lib/api';
+import api, { setToken } from '@/lib/api';
+import { useAuth, getDashboardPath } from '@/context/AuthContext';
+import { usePageTransition } from '@/reusablefiles/pagetransition';
 
 export default function VerifyEmailForm({
   email: initialEmail = '',
@@ -12,6 +14,8 @@ export default function VerifyEmailForm({
 }) {
   const t = useTranslations('auth');
   const router = useRouter();
+  const { refreshUser } = useAuth();
+  const { trigger } = usePageTransition();
 
   const [email, setEmail] = useState(initialEmail);
   const [digits, setDigits] = useState(['', '', '', '', '', '']);
@@ -88,6 +92,27 @@ export default function VerifyEmailForm({
 
       if (res.success) {
         setIsSuccess(true);
+
+        // Verifying the address signs the account in — the server has already
+        // issued the session cookie (or JWT) alongside the confirmation, so a
+        // freshly registered owner goes straight to their dashboard instead of
+        // being sent back to the login form to retype what they just typed.
+        if (res.data?.token) {
+          setToken(res.data.token);
+        }
+
+        const signedInUser = res.data?.user || null;
+        if (signedInUser) {
+          await refreshUser();
+          trigger({
+            to: getDashboardPath(signedInUser.role),
+            replace: true,
+            text: 'Initializing Furnova',
+            subtitle: 'Redirecting to your workspace',
+          });
+          return;
+        }
+
         setTimeout(() => {
           if (onSuccess) {
             onSuccess(email.trim());

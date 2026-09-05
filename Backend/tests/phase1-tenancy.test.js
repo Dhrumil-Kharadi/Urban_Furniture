@@ -33,9 +33,9 @@ describe('Phase 1: Multi-Tenancy Foundation & Organizations Module', () => {
       INSERT INTO users (name, email, password_hash, role, email_verified, organization_id)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id, role, organization_id;
-    `, ['Phase1 Admin', `admin_${Date.now()}@example.com`, 'hash', 'admin', true, testOrgId]);
+    `, ['Phase1 Admin', `admin_${Date.now()}@example.com`, 'hash', 'business_owner', true, testOrgId]);
     adminUserId = adminRes.rows[0].id;
-    const adminSession = authSession.createSession(adminUserId, 'admin', false);
+    const adminSession = authSession.createSession(adminUserId, 'business_owner', false);
     adminSessionId = adminSession.sessionId;
 
     // Create test manager (accountant) with organization
@@ -43,9 +43,9 @@ describe('Phase 1: Multi-Tenancy Foundation & Organizations Module', () => {
       INSERT INTO users (name, email, password_hash, role, email_verified, organization_id)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id, role, organization_id;
-    `, ['Phase1 Manager', `manager_${Date.now()}@example.com`, 'hash', 'manager', true, testOrgId]);
+    `, ['Phase1 Manager', `manager_${Date.now()}@example.com`, 'hash', 'accountant', true, testOrgId]);
     managerUserId = managerRes.rows[0].id;
-    const managerSession = authSession.createSession(managerUserId, 'manager', false);
+    const managerSession = authSession.createSession(managerUserId, 'accountant', false);
     managerSessionId = managerSession.sessionId;
 
     // Create test user with NO organization
@@ -53,9 +53,9 @@ describe('Phase 1: Multi-Tenancy Foundation & Organizations Module', () => {
       INSERT INTO users (name, email, password_hash, role, email_verified, organization_id)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id, role, organization_id;
-    `, ['Phase1 NoOrg', `noorg_${Date.now()}@example.com`, 'hash', 'admin', true, null]);
+    `, ['Phase1 NoOrg', `noorg_${Date.now()}@example.com`, 'hash', 'business_owner', true, null]);
     userWithoutOrgId = noOrgRes.rows[0].id;
-    const noOrgSession = authSession.createSession(userWithoutOrgId, 'admin', false);
+    const noOrgSession = authSession.createSession(userWithoutOrgId, 'business_owner', false);
     userWithoutOrgSessionId = noOrgSession.sessionId;
   });
 

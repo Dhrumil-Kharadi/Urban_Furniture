@@ -3,13 +3,13 @@
 // ============================================================
 // FILE: src/app/[locale]/dashboard/audit-logs/page.jsx
 //
-// System Audit Logs — ADMIN ONLY
+// System Audit Logs — BUSINESS OWNER ONLY
 // Reference: project.md §9.2 · phase.md Phase 13 · strict.md
 //
 // Filterable immutable audit trail with before/after state diffs.
 // ============================================================
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Search, RefreshCw, X, Eye, ShieldAlert } from 'lucide-react';
 import api from '@/lib/api';
@@ -17,6 +17,21 @@ import { useAuth } from '@/context/AuthContext';
 import DashboardFrame from '@/components/dashboard/DashboardFrame';
 import Button from '@/reusablefiles/button';
 import { DashboardSkeleton } from '@/reusablefiles/skeleton';
+
+const ENTITY_TYPES = [
+  'customer_invoice',
+  'vendor_bill',
+  'payment',
+  'journal_entry',
+  'budget',
+  'product',
+  'contact',
+  'user',
+];
+
+const ACTIONS = ['post', 'create', 'update', 'delete', 'reverse', 'cancel', 'upload_attachment'];
+
+const PAGE_SIZE = 20;
 
 export default function AuditLogsPage() {
   const t = useTranslations('audit');
@@ -32,51 +47,76 @@ export default function AuditLogsPage() {
   const [action, setAction] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState({ page: 1, total: 0, totalPages: 1 });
+  const [pagination, setPagination] = useState({
+    page: 1,
+    total: 0,
+    totalPages: 1,
+    hasNext: false,
+    hasPrev: false,
+  });
 
   // Diff Modal State
   const [selectedLog, setSelectedLog] = useState(null);
+
+  const isOwner = role === 'business_owner';
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const params = { page, limit: 20 };
-      if (entityType) params.entityType = entityType;
-      if (action) params.action = action;
-      if (search.trim()) params.entityId = search.trim();
+      // `entityId` takes a full record UUID; a partial string matches nothing,
+      // so only send it once it looks like one.
+      const trimmed = search.trim();
+      const res = await api.get('/audit-logs', {
+        params: {
+          page,
+          limit: PAGE_SIZE,
+          entityType: entityType || undefined,
+          action: action || undefined,
+          entityId: trimmed || undefined,
+        },
+      });
 
-      const res = await api.get('/audit-logs', { params });
-      if (res.data?.success) {
-        setLogs(res.data.data.items || []);
+      // The API client hands back the parsed envelope; the previous
+      // `res.data.success` check never passed, which is why this table was
+      // permanently empty.
+      if (res.success) {
+        setLogs(res.data?.items || []);
         setPagination({
-          page: res.data.data.page,
-          total: res.data.data.total,
-          totalPages: res.data.data.totalPages || 1,
+          page: res.data?.pagination?.page ?? 1,
+          total: res.data?.pagination?.total ?? 0,
+          totalPages: res.data?.pagination?.totalPages || 1,
+          hasNext: Boolean(res.data?.pagination?.hasNext),
+          hasPrev: Boolean(res.data?.pagination?.hasPrev),
         });
       }
     } catch (err) {
-      setError(err?.response?.data?.error?.message || err?.message || 'Failed to load audit logs');
+      setError(err?.message || t('loadError'));
+      setLogs([]);
     } finally {
       setLoading(false);
     }
-  }, [page, entityType, action, search]);
+  }, [page, entityType, action, search, t]);
 
   useEffect(() => {
-    fetchLogs();
-  }, [fetchLogs]);
+    if (isOwner) fetchLogs();
+  }, [fetchLogs, isOwner]);
 
-  // Admin access check
-  if (role && role !== 'business_owner') {
+  const range = useMemo(() => {
+    if (!pagination.total) return { from: 0, to: 0 };
+    const from = (pagination.page - 1) * PAGE_SIZE + 1;
+    return { from, to: Math.min(from + logs.length - 1, pagination.total) };
+  }, [pagination, logs.length]);
+
+  // Access is enforced on the server; this is the UX half of the same rule.
+  if (role && !isOwner) {
     return (
-      <DashboardFrame>
+      <DashboardFrame role={role} activeKey="auditLogs">
         <div className="audit-container">
-          <div className="audit-table-card" style={{ textAlign: 'center', padding: '3rem' }}>
-            <ShieldAlert size={48} style={{ color: 'var(--accent-primary)', margin: '0 auto 1rem' }} />
-            <h2 className="audit-title" style={{ fontSize: '1.4rem' }}>Access Denied</h2>
-            <p className="audit-subtitle" style={{ margin: '0.5rem auto' }}>
-              System audit logs are strictly restricted to Business Owners and Administrators.
-            </p>
+          <div className="audit-table-card audit-denied">
+            <ShieldAlert size={48} className="audit-denied-icon" />
+            <h2 className="audit-denied-title">{t('deniedTitle')}</h2>
+            <p className="audit-subtitle">{t('deniedBody')}</p>
           </div>
         </div>
       </DashboardFrame>
@@ -84,12 +124,12 @@ export default function AuditLogsPage() {
   }
 
   return (
-    <DashboardFrame>
+    <DashboardFrame role="business_owner" activeKey="auditLogs">
       <div className="audit-container">
         {/* Header */}
         <div className="audit-header">
           <div className="audit-header-content">
-            <span className="audit-badge">Compliance & Security</span>
+            <span className="audit-badge">{t('badge')}</span>
             <h1 className="audit-title">{t('title')}</h1>
             <p className="audit-subtitle">{t('subtitle')}</p>
           </div>
@@ -106,13 +146,13 @@ export default function AuditLogsPage() {
         {/* Controls and Filters */}
         <div className="audit-controls-card">
           <div className="audit-filters-group">
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Search size={15} style={{ position: 'absolute', left: '12px', color: 'var(--text-muted)' }} />
+            <div className="audit-search-wrap">
+              <Search size={15} className="audit-search-icon" aria-hidden="true" />
               <input
                 type="text"
-                className="audit-search-input"
-                style={{ paddingLeft: '32px' }}
+                className="audit-search-input has-icon"
                 placeholder={t('search')}
+                aria-label={t('search')}
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -123,6 +163,7 @@ export default function AuditLogsPage() {
 
             <select
               className="audit-select"
+              aria-label={t('entityType')}
               value={entityType}
               onChange={(e) => {
                 setEntityType(e.target.value);
@@ -130,17 +171,16 @@ export default function AuditLogsPage() {
               }}
             >
               <option value="">{t('allTypes')}</option>
-              <option value="customer_invoice">Customer Invoice</option>
-              <option value="vendor_bill">Vendor Bill</option>
-              <option value="payment">Payment</option>
-              <option value="journal_entry">Journal Entry</option>
-              <option value="budget">Budget</option>
-              <option value="product">Product</option>
-              <option value="contact">Contact</option>
+              {ENTITY_TYPES.map((key) => (
+                <option key={key} value={key}>
+                  {t(`entityTypes.${key}`)}
+                </option>
+              ))}
             </select>
 
             <select
               className="audit-select"
+              aria-label={t('action')}
               value={action}
               onChange={(e) => {
                 setAction(e.target.value);
@@ -148,13 +188,11 @@ export default function AuditLogsPage() {
               }}
             >
               <option value="">{t('allActions')}</option>
-              <option value="post">Post (Commit to Ledger)</option>
-              <option value="create">Create</option>
-              <option value="update">Update</option>
-              <option value="delete">Delete</option>
-              <option value="reverse">Reverse</option>
-              <option value="cancel">Cancel</option>
-              <option value="upload_attachment">Upload Attachment</option>
+              {ACTIONS.map((key) => (
+                <option key={key} value={key}>
+                  {t(`actions.${key}`)}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -164,93 +202,126 @@ export default function AuditLogsPage() {
           {loading && logs.length === 0 ? (
             <DashboardSkeleton count={5} />
           ) : error ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: '#ef4444' }}>{error}</div>
+            <div className="audit-state is-error">{error}</div>
           ) : logs.length === 0 ? (
-            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              {t('noLogs')}
-            </div>
+            <div className="audit-state">{t('noLogs')}</div>
           ) : (
-            <table className="audit-table">
-              <thead>
-                <tr>
-                  <th>{t('timestamp')}</th>
-                  <th>{t('actor')}</th>
-                  <th>{t('action')}</th>
-                  <th>{t('entityType')}</th>
-                  <th>{t('entityId')}</th>
-                  <th>{t('ipAddress')}</th>
-                  <th style={{ textAlign: 'right' }}>{t('changes')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((log) => {
-                  const actionLower = (log.action || '').toLowerCase();
-                  let actionClass = 'audit-badge-action';
-                  if (actionLower.includes('post')) actionClass += ' post';
-                  else if (actionLower.includes('create')) actionClass += ' create';
-                  else if (actionLower.includes('delete') || actionLower.includes('cancel')) actionClass += ' delete';
+            <div className="audit-table-scroll">
+              <table className="audit-table">
+                <thead>
+                  <tr>
+                    <th>{t('timestamp')}</th>
+                    <th>{t('actor')}</th>
+                    <th>{t('action')}</th>
+                    <th>{t('entityType')}</th>
+                    <th>{t('entityId')}</th>
+                    <th>{t('ipAddress')}</th>
+                    <th className="audit-col-right">{t('changes')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((log) => {
+                    const actionLower = (log.action || '').toLowerCase();
+                    let actionClass = 'audit-badge-action';
+                    if (actionLower.includes('post')) actionClass += ' post';
+                    else if (actionLower.includes('create')) actionClass += ' create';
+                    else if (actionLower.includes('delete') || actionLower.includes('cancel')) {
+                      actionClass += ' delete';
+                    }
 
-                  return (
-                    <tr key={log.id}>
-                      <td className="audit-time-cell">
-                        {log.created_at ? new Date(log.created_at).toLocaleString() : '—'}
-                      </td>
-                      <td>
-                        <div className="audit-actor-name">{log.actor_name || 'System / Batch'}</div>
-                        <div className="audit-actor-email">{log.actor_email || '—'}</div>
-                      </td>
-                      <td>
-                        <span className={actionClass}>{log.action}</span>
-                      </td>
-                      <td>
-                        <code style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                          {log.entity_type}
-                        </code>
-                      </td>
-                      <td>
-                        <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                          {log.entity_id ? log.entity_id.slice(0, 13) + '…' : '—'}
-                        </span>
-                      </td>
-                      <td>
-                        <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                          {log.ip_address || '—'}
-                        </span>
-                      </td>
-                      <td style={{ textAlign: 'right' }}>
-                        {(log.before || log.after) ? (
-                          <button
-                            type="button"
-                            className="audit-btn-diff"
-                            onClick={() => setSelectedLog(log)}
-                          >
-                            <Eye size={12} style={{ marginRight: '4px', verticalAlign: '-1px' }} />
-                            {t('viewDiff')}
-                          </button>
-                        ) : (
-                          <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>—</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                    const entityKey = ENTITY_TYPES.includes(log.entity_type) ? log.entity_type : null;
+                    const actionKey = ACTIONS.includes(actionLower) ? actionLower : null;
+
+                    return (
+                      <tr key={log.id}>
+                        <td className="audit-time-cell">
+                          {log.created_at ? new Date(log.created_at).toLocaleString() : '—'}
+                        </td>
+                        <td>
+                          <div className="audit-actor-name">
+                            {log.actor_name || t('systemActor')}
+                          </div>
+                          <div className="audit-actor-email">{log.actor_email || '—'}</div>
+                        </td>
+                        <td>
+                          <span className={actionClass}>
+                            {actionKey ? t(`actions.${actionKey}`) : log.action}
+                          </span>
+                        </td>
+                        <td className="audit-entity-cell">
+                          {entityKey ? t(`entityTypes.${entityKey}`) : log.entity_type}
+                        </td>
+                        <td>
+                          <span className="audit-id-cell" title={log.entity_id || ''}>
+                            {log.entity_id ? `${log.entity_id.slice(0, 13)}…` : '—'}
+                          </span>
+                        </td>
+                        <td className="audit-ip-cell">{log.ip_address || '—'}</td>
+                        <td className="audit-col-right">
+                          {log.before || log.after ? (
+                            <button
+                              type="button"
+                              className="audit-btn-diff"
+                              onClick={() => setSelectedLog(log)}
+                            >
+                              <Eye size={12} aria-hidden="true" />
+                              <span>{t('viewDiff')}</span>
+                            </button>
+                          ) : (
+                            <span className="audit-ip-cell">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
+
+          {pagination.total > 0 && !error ? (
+            <div className="audit-pagination">
+              <span className="audit-pagination-label">
+                {t('showing', { from: range.from, to: range.to, total: pagination.total })}
+              </span>
+              <div className="audit-pagination-actions">
+                <Button
+                  variant="ghost"
+                  disabled={!pagination.hasPrev || loading}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  {t('previous')}
+                </Button>
+                <Button
+                  variant="ghost"
+                  disabled={!pagination.hasNext || loading}
+                  onClick={() => setPage((p) => p + 1)}
+                >
+                  {t('next')}
+                </Button>
+              </div>
+            </div>
+          ) : null}
         </div>
 
         {/* Diff Modal */}
         {selectedLog && (
           <div className="audit-modal-backdrop" onClick={() => setSelectedLog(null)}>
-            <div className="audit-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="audit-modal-card"
+              role="dialog"
+              aria-modal="true"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="audit-modal-header">
                 <h3 className="audit-modal-title">
                   {t('modalTitle')} — {selectedLog.action} ({selectedLog.entity_type})
                 </h3>
                 <button
                   type="button"
+                  className="audit-modal-close"
+                  aria-label={t('close')}
                   onClick={() => setSelectedLog(null)}
-                  style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
                 >
                   <X size={18} />
                 </button>

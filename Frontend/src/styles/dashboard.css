@@ -155,6 +155,25 @@
   color: var(--status-purple);
 }
 
+/* Current role vocabulary (migration 029 renamed the stored values).
+   The colour assignment carries over: contact roles keep the navy chip,
+   the accountant the green, the business owner the amber. */
+.meta-pill-dash.pill-customer,
+.meta-pill-dash.pill-vendor {
+  background: var(--border-subtle);
+  color: var(--accent-primary);
+}
+
+.meta-pill-dash.pill-accountant {
+  background: var(--status-success-soft);
+  color: var(--status-success);
+}
+
+.meta-pill-dash.pill-business_owner {
+  background: var(--status-warning-bg);
+  color: var(--status-warning);
+}
+
 /* Grid & Cards */
 .dashboard-grid-dash {
   display: grid;

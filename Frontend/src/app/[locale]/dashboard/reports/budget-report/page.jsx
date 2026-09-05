@@ -38,12 +38,11 @@ export default function BudgetReportPage() {
       const res = await reportsService.getBudgetReport(params);
       setData(res?.data || res);
     } catch (err) {
-      console.error('Failed to load budget report', err);
-      setError(err?.message || 'Failed to generate budget analysis report');
+      setError(err?.message || t('loadError'));
     } finally {
       setLoading(false);
     }
-  }, [selectedBudgetId]);
+  }, [selectedBudgetId, t]);
 
   useEffect(() => {
     fetchReport();
@@ -74,17 +73,17 @@ export default function BudgetReportPage() {
     return {
       categories,
       series: [
-        { name: 'Planned', color: '#000080', data: plannedData },
-        { name: 'Actual', color: '#6D8196', data: actualData },
+        { name: t('planned'), color: 'var(--graph-series-1)', data: plannedData },
+        { name: t('actual'), color: 'var(--graph-series-5)', data: actualData },
       ],
     };
-  }, [budgetsList]);
+  }, [budgetsList, t]);
 
   const columns = useMemo(
     () => [
       {
         key: 'name',
-        header: 'Budget',
+        header: t('budget'),
         render: (row) => (
           <div className="budget-name-cell">
             <Link
@@ -101,7 +100,7 @@ export default function BudgetReportPage() {
       },
       {
         key: 'analytic',
-        header: 'Analytic Account',
+        header: t('analyticAccount'),
         render: (row) => (
           <div className="budget-analytic-cell">
             <span className="budget-analytic-name">
@@ -134,7 +133,7 @@ export default function BudgetReportPage() {
         render: (row) => {
           const isOver = row.isOverBudget || (Number(row.actualAmount) > Number(row.plannedAmount));
           return (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            <div className="budget-variance-cell">
               <span className={isOver ? 'budget-val-negative' : 'budget-val-positive'}>
                 <MoneyText value={row.variance} />
               </span>
@@ -153,15 +152,15 @@ export default function BudgetReportPage() {
           const pct = Number(row.consumptionPercent) || 0;
           const isOver = pct > 100;
           return (
-            <div style={{ width: '100%' }}>
+            <div className="budget-usage-cell">
               <ProgressBar
                 value={Math.min(pct, 100)}
                 max={100}
-                color={isOver ? '#ef4444' : '#10b981'}
+                color={isOver ? 'var(--status-error)' : 'var(--status-success)'}
                 size="sm"
                 formatValue={() => `${pct.toFixed(1)}%`}
               />
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
+              <div className="budget-usage-legend">
                 <span className="budget-date-sub">{isOver ? t('overBudget') : t('underBudget')}</span>
               </div>
             </div>
@@ -170,7 +169,7 @@ export default function BudgetReportPage() {
       },
       {
         key: 'status',
-        header: 'Status',
+        header: t('status'),
         render: (row) => (
           <StatusPill status={row.status} label={row.status} />
         ),
@@ -183,8 +182,8 @@ export default function BudgetReportPage() {
     <div className="report-container">
       {/* Top Header */}
       <div className="report-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link href="/dashboard/reports" className="budget-back-btn">
+        <div className="report-header-row">
+          <Link href="/dashboard/reports" className="budget-back-btn" aria-label={tReports('back')}>
             <ArrowLeft size={18} />
           </Link>
           <div className="report-header-content">
@@ -266,7 +265,7 @@ export default function BudgetReportPage() {
           <h2 className="report-chart-title">
             {t('chartTitle')}
           </h2>
-          <div style={{ width: '100%' }}>
+          <div className="report-chart-frame">
             <GroupedBarChart
               categories={chartConfig.categories}
               series={chartConfig.series}
@@ -283,8 +282,8 @@ export default function BudgetReportPage() {
           columns={columns}
           rows={budgetsList}
           loading={loading}
-          loadingLabel="Calculating real-time actuals from ledger…"
-          emptyLabel="No budgets found matching the criteria."
+          loadingLabel={tReports('loading')}
+          emptyLabel={t('noData')}
         />
       </div>
     </div>

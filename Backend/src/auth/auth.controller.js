@@ -46,8 +46,35 @@ const authController = {
         return error(res, 'Validation failed', 400, validation.errors);
       }
 
-      const result = await authService.verifyEmail(validation.data);
-      return success(res, 'Email verified successfully', result);
+      const result = await authService.verifyEmail({
+        ...validation.data,
+        userAgent: req.headers['user-agent'] || null,
+        ipAddress: req.ip || req.connection?.remoteAddress || null,
+      });
+
+      // Verification signs the account in, so the same cookie handling the
+      // login route performs has to happen here — otherwise the client holds
+      // a user object it has no credentials for.
+      if (result.authType === 'session') {
+        res.cookie('sid', result.sessionId, result.cookieOptions);
+        setCsrfCookie(res, generateCsrfToken(), env.isProduction);
+        return success(res, 'Email verified successfully', {
+          email: result.email,
+          email_verified: true,
+          user: result.user,
+        });
+      }
+
+      if (result.rawRefreshToken) {
+        res.cookie('refreshToken', result.rawRefreshToken, result.cookieOptions);
+      }
+
+      return success(res, 'Email verified successfully', {
+        email: result.email,
+        email_verified: true,
+        token: result.token,
+        user: result.user,
+      });
     } catch (err) {
       next(err);
     }

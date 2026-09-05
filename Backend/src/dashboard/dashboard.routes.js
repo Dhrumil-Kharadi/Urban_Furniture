@@ -16,7 +16,7 @@ router.use(authMiddleware.authenticate, resolveTenant);
 
 router.get(
   '/summary',
-  authMiddleware.authorize('admin', 'manager', 'user'),
+  authMiddleware.authorize('business_owner', 'accountant', 'customer', 'vendor'),
   dashboardController.getSummary
 );
 

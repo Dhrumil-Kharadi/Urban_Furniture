@@ -732,3 +732,64 @@
     margin-left: 0;
   }
 }
+
+/* ─── Detail sub-section ─────────────────────────────────────
+   A block of related records shown beneath a record's own facts — the
+   postings under a journal, for instance. */
+
+.md-subsection {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.md-subsection-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.md-subsection-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem;
+}
+
+.md-cell-link {
+  color: var(--accent-primary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease;
+}
+
+.md-cell-link:hover {
+  border-color: currentColor;
+}
+
+/* ─── User management ────────────────────────────────────────
+   Invite form and directory actions on /dashboard/users. */
+
+.users-invite-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.9rem;
+  align-items: end;
+}
+
+.users-invite-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  grid-column: 1 / -1;
+}
+
+.users-locked-note {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}

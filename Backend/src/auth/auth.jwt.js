@@ -4,13 +4,13 @@ const { env } = require('../config/env');
 /**
  * Auth JWT Utility
  *
- * Exclusively used for normal users (role = 'user').
+ * Exclusively used for contact portal users (role = 'customer' | 'vendor').
  * Privileged users (manager, admin, super_admin) use server-side sessions.
  *
  * Payload:
  * {
  *   sub: user-id (UUID),
- *   role: 'user',
+ *   role: 'customer',
  *   tokenVersion: integer
  * }
  *

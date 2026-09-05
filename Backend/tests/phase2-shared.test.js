@@ -205,13 +205,13 @@ describe('validate.js', () => {
   describe('oneOf()', () => {
     it('accepts valid option', () => {
       expect(() =>
-        validate({ role: 'admin' }).field('role', v => v.required().oneOf(['admin', 'manager'])).run()
+        validate({ role: 'business_owner' }).field('role', v => v.required().oneOf(['business_owner', 'accountant'])).run()
       ).not.toThrow();
     });
 
     it('rejects invalid option', () => {
       expect(() =>
-        validate({ role: 'superuser' }).field('role', v => v.required().oneOf(['admin', 'manager'])).run()
+        validate({ role: 'superuser' }).field('role', v => v.required().oneOf(['business_owner', 'accountant'])).run()
       ).toThrow(ValidationError);
     });
   });
@@ -334,9 +334,9 @@ describe('dbErrors.js — mapDbError()', () => {
 // ─── constants.js ─────────────────────────────────────────────────────────────
 
 describe('constants.js', () => {
-  it('ROLES contains admin, manager, user', () => {
+  it('ROLES contains business_owner, accountant, customer, vendor', () => {
     expect(Object.values(constants.ROLES)).toEqual(
-      expect.arrayContaining(['admin', 'manager', 'user'])
+      expect.arrayContaining(['business_owner', 'accountant', 'customer', 'vendor'])
     );
   });
 

@@ -33,14 +33,21 @@ export default function AuthPage({ initialMode = 'login' }) {
   // race: LoginForm's trigger() handles the animated redirect after login,
   // so this effect should only fire when a logged-in user directly visits
   // an auth URL (e.g. typing /auth/login while already authenticated).
+  const transitionBusy = transitionState.status !== 'IDLE';
+
   useEffect(() => {
-    if (!loading && isAuthenticated) {
+    // The guard the comment above describes was never actually applied — the
+    // transition state was read and then ignored, so a sign-in raced its own
+    // animated redirect. Checking it here leaves the animated navigation to
+    // LoginForm / VerifyEmailForm and keeps this effect for the plain case:
+    // an already-signed-in visitor landing on an auth URL.
+    if (!loading && isAuthenticated && !transitionBusy) {
       const targetDashboard = getDashboardPath(role || 'customer');
       router.replace(targetDashboard);
     }
-  }, [loading, isAuthenticated, role, router]);
+  }, [loading, isAuthenticated, role, router, transitionBusy]);
 
-  if (loading || isAuthenticated) {
+  if (loading || (isAuthenticated && !transitionBusy)) {
     return null;
   }
 

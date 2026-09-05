@@ -127,7 +127,7 @@ const authService = {
    * Register a new user and trigger email verification OTP.
    * If organizationName is provided (Phase 3 Business-Owner Signup):
    * - Creates organization with unique slug
-   * - Inserts user with role='admin' and organization_id
+   * - Inserts user with role='business_owner' and organization_id
    * - Seeds 10 system accounts, 4 journals, 6 sequences in ONE transaction
    * - Issues OTP inside transaction
    * - Commits, then sends email (mail failures never rollback the organization)
@@ -254,7 +254,7 @@ const authService = {
    * @param {Object} verificationData
    * @returns {Promise<{ email: string, email_verified: boolean }>}
    */
-  async verifyEmail({ email, otp }) {
+  async verifyEmail({ email, otp, userAgent = null, ipAddress = null }) {
     const user = await authRepository.findUserByEmail(email);
     if (!user) {
       const error = new Error('Invalid request or account not found');
@@ -306,7 +306,19 @@ const authService = {
     await authRepository.markOtpUsed(otpRecord.id);
     await authRepository.markEmailVerified(user.id);
 
+    // Signing in here is the point: the OTP just proved ownership of the
+    // address, so asking for the password again immediately afterwards adds
+    // no security and costs a newly registered business owner a detour
+    // through the login form (project.md §2.1).
+    const verifiedUser = await authRepository.findUserById(user.id);
+    const auth = await this.issueAuthForUser(verifiedUser || { ...user, email_verified: true }, {
+      remember: false,
+      userAgent,
+      ipAddress,
+    });
+
     return {
+      ...auth,
       email: user.email,
       email_verified: true,
     };
@@ -378,11 +390,30 @@ const authService = {
       throw error;
     }
 
+    return await this.issueAuthForUser(user, { remember, userAgent, ipAddress });
+  },
+
+  /**
+   * Mint the session or JWT for an already-authenticated user.
+   *
+   * Split out of login() so that email verification can sign the account in
+   * directly — a business owner who has just proved they own the address
+   * should land in their dashboard, not back on the sign-in form.
+   *
+   * @param {Object} user Full user row
+   * @param {Object} [options]
+   * @param {boolean} [options.remember=false]
+   * @param {string} [options.userAgent]
+   * @param {string} [options.ipAddress]
+   * @returns {Promise<Object>} Same shape login() returns
+   */
+  async issueAuthForUser(user, { remember = false, userAgent = null, ipAddress = null } = {}) {
     const sanitizedUser = {
       id: user.id,
       name: user.name,
       email: user.email,
       role: user.role,
+      organization_id: user.organization_id || null,
       token_version: user.token_version || 1,
       email_verified: user.email_verified,
       created_at: user.created_at,

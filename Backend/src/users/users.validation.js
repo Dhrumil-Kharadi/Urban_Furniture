@@ -11,7 +11,7 @@ const usersValidation = {
    * Validate invite payload.
    *
    * Security rules:
-   * - Only manager role is allowed to be invited (Admin cannot mint another Admin).
+   * - Only the accountant role may be invited (an owner cannot mint another owner).
    * - name and email are required.
    *
    * @param {Object} body
@@ -43,7 +43,7 @@ const usersValidation = {
 
     // Role restriction: Admin may only invite role='accountant'
     if (role && role !== 'accountant') {
-      errors.push('Only manager accounts can be created via invite');
+      errors.push('Only accountant accounts can be created via invite');
     }
 
     if (errors.length > 0) {

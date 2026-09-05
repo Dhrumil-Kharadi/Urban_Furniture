@@ -18,7 +18,7 @@ const router = express.Router();
  * billing problem and a way to pollute reconciliation with orders nobody can
  * account for.
  *
- * Roles: 'user' is the Contact paying their own invoice from the portal
+ * Roles: 'customer' is the Contact paying their own invoice from the portal
  * (project.md §5.3); admin and manager are included so staff can exercise the
  * flow. project.md §3 keeps Cash/Bank recording away from Contacts — that is
  * Phase 10's payments module, not this one.
@@ -51,7 +51,7 @@ const verifyRateLimiter = rateLimit({
 
 router.use(authMiddleware.authenticate, resolveTenant);
 
-const PAYING_ROLES = ['user', 'admin', 'manager'];
+const PAYING_ROLES = ['customer', 'business_owner', 'accountant'];
 
 router.get('/config', authMiddleware.authorize(...PAYING_ROLES), gatewayController.getConfig);
 

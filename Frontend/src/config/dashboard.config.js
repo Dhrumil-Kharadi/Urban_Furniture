@@ -94,7 +94,7 @@ export const DASHBOARD_NAV = {
         { key: 'budgets', icon: SOLID_ICONS.calendar, href: '/dashboard/budgets' },
         { key: 'reports', icon: SOLID_ICONS.analytics, href: '/dashboard/reports' },
         { key: 'auditLogs', icon: SOLID_ICONS.system, href: '/dashboard/audit-logs' },
-        { key: 'users', icon: SOLID_ICONS.directory },
+        { key: 'users', icon: SOLID_ICONS.directory, href: '/dashboard/users' },
         { key: 'system', icon: SOLID_ICONS.system },
       ],
     },

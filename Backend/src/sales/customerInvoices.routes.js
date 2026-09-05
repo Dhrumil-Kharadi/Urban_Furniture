@@ -18,14 +18,14 @@ const router = express.Router();
 
 router.use(authMiddleware.authenticate, resolveTenant);
 
-router.get('/', authMiddleware.authorize('admin', 'manager'), salesController.listCustomerInvoices);
-router.post('/', authMiddleware.authorize('admin', 'manager'), salesController.createCustomerInvoice);
+router.get('/', authMiddleware.authorize('business_owner', 'accountant'), salesController.listCustomerInvoices);
+router.post('/', authMiddleware.authorize('business_owner', 'accountant'), salesController.createCustomerInvoice);
 
-router.get('/:id', authMiddleware.authorize('admin', 'manager'), salesController.getCustomerInvoice);
-router.patch('/:id', authMiddleware.authorize('admin', 'manager'), salesController.updateCustomerInvoice);
+router.get('/:id', authMiddleware.authorize('business_owner', 'accountant'), salesController.getCustomerInvoice);
+router.patch('/:id', authMiddleware.authorize('business_owner', 'accountant'), salesController.updateCustomerInvoice);
 
-router.post('/:id/post', authMiddleware.authorize('admin', 'manager'), salesController.postCustomerInvoice);
-router.post('/:id/send', authMiddleware.authorize('admin', 'manager'), salesController.sendCustomerInvoice);
-router.post('/:id/cancel', authMiddleware.authorize('admin'), salesController.cancelCustomerInvoice);
+router.post('/:id/post', authMiddleware.authorize('business_owner', 'accountant'), salesController.postCustomerInvoice);
+router.post('/:id/send', authMiddleware.authorize('business_owner', 'accountant'), salesController.sendCustomerInvoice);
+router.post('/:id/cancel', authMiddleware.authorize('business_owner'), salesController.cancelCustomerInvoice);
 
 module.exports = router;

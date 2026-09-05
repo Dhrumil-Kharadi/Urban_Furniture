@@ -332,3 +332,126 @@
   display: flex;
   justify-content: flex-end;
 }
+
+/* ─── Search field, states, pagination ───────────────────────
+   The page used to place these with inline styles and raw hex colours;
+   they live here now so every value resolves through :root (strict.md §1). */
+
+.audit-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.audit-search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.audit-search-input.has-icon {
+  padding-left: 32px;
+}
+
+/* A long trail must scroll inside its card rather than pushing the page
+   sideways. */
+.audit-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.audit-col-right {
+  text-align: right;
+}
+
+.audit-state {
+  padding: 3rem 2rem;
+  text-align: center;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.audit-state.is-error {
+  color: var(--status-error);
+}
+
+.audit-entity-cell {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.audit-id-cell {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.audit-ip-cell {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.audit-btn-diff {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.audit-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.audit-pagination-label {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.audit-pagination-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.audit-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
+.audit-modal-close:hover {
+  color: var(--accent-primary);
+}
+
+/* Access-denied panel */
+.audit-denied {
+  text-align: center;
+  padding: 3rem;
+}
+
+.audit-denied-icon {
+  color: var(--accent-primary);
+  margin: 0 auto 1rem;
+  display: block;
+}
+
+.audit-denied-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem;
+}
