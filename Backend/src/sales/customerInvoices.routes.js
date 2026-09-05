@@ -11,21 +11,21 @@ const router = express.Router();
  * Middleware chain on every route:
  *   authenticate → resolveTenant → authorize(...roles)
  *
- * RBAC:
- * - authorize('business_owner', 'accountant') on read, create, update, post, send
- * - cancel is admin-only (reverses journal entry if posted)
+ * project.md §3: Admin and Accountant generate invoices and receive payment;
+ * a Contact only ever views their own, through the portal. Cancel is
+ * admin-only because it reverses a posted ledger entry.
  */
 
 router.use(authMiddleware.authenticate, resolveTenant);
 
-router.get('/', authMiddleware.authorize('business_owner', 'accountant'), salesController.listCustomerInvoices);
-router.post('/', authMiddleware.authorize('business_owner', 'accountant'), salesController.createCustomerInvoice);
+router.get('/', authMiddleware.authorize('admin', 'manager'), salesController.listCustomerInvoices);
+router.post('/', authMiddleware.authorize('admin', 'manager'), salesController.createCustomerInvoice);
 
-router.get('/:id', authMiddleware.authorize('business_owner', 'accountant'), salesController.getCustomerInvoice);
-router.patch('/:id', authMiddleware.authorize('business_owner', 'accountant'), salesController.updateCustomerInvoice);
+router.get('/:id', authMiddleware.authorize('admin', 'manager'), salesController.getCustomerInvoice);
+router.patch('/:id', authMiddleware.authorize('admin', 'manager'), salesController.updateCustomerInvoice);
 
-router.post('/:id/post', authMiddleware.authorize('business_owner', 'accountant'), salesController.postCustomerInvoice);
-router.post('/:id/send', authMiddleware.authorize('business_owner', 'accountant'), salesController.sendCustomerInvoice);
-router.post('/:id/cancel', authMiddleware.authorize('business_owner'), salesController.cancelCustomerInvoice);
+router.post('/:id/post', authMiddleware.authorize('admin', 'manager'), salesController.postCustomerInvoice);
+router.post('/:id/send', authMiddleware.authorize('admin', 'manager'), salesController.sendCustomerInvoice);
+router.post('/:id/cancel', authMiddleware.authorize('admin'), salesController.cancelCustomerInvoice);
 
 module.exports = router;

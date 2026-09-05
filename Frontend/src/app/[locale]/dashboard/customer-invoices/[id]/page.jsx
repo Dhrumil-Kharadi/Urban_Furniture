@@ -1,231 +1,241 @@
 'use client';
 
-import React, { useState, useEffect, use, useCallback } from 'react';
-import { useRouter, Link } from '@/i18n/navigation';
-import { useToast, DocumentStatusBar } from '@/components/shared';
+/**
+ * @file Customer Invoice Detail
+ * @route /dashboard/customer-invoices/[id]
+ * @spec Doc/project.md §5.2.4–§5.2.6, Doc/phase.md Phases 9 and 10, Doc/strict.md
+ *
+ * Posting is the irreversible step: it writes Dr Debtors / Cr Sale Income /
+ * Cr Output Tax Payable to the ledger and assigns the real invoice number.
+ * After that the only corrections are a payment or a cancellation, and
+ * cancelling REVERSES the entry rather than deleting it.
+ */
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'next/navigation';
+import { ArrowLeft, Receipt, Send, XCircle, CheckCircle, Wallet, AlertTriangle } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
+import {
+  StatusPill, ErrorState, ConfirmDialog, useToast, DocumentTotals,
+} from '@/components/shared';
 import CustomerInvoiceForm from '@/components/customer-invoices/CustomerInvoiceForm';
+import RegisterPaymentModal from '@/components/payments/RegisterPaymentModal';
 import { customerInvoicesService } from '@/services/sales.service';
-import { RefreshCw, BookOpen, Send, Printer, Receipt } from 'lucide-react';
+import { formatMoney, formatDate } from '@/utils/format';
 
-export default function CustomerInvoiceDetailPage({ params }) {
-  const resolvedParams = use(params);
-  const invoiceId = resolvedParams.id;
-
-  const router = useRouter();
-  const { addToast } = useToast();
+export default function CustomerInvoiceDetailPage() {
+  const t = useTranslations('customerInvoices');
+  const tc = useTranslations('common');
+  const { id } = useParams();
+  const locale = useLocale();
+  const { showSuccess, showError } = useToast();
 
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [showPayment, setShowPayment] = useState(false);
 
   const fetchInvoice = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const data = await customerInvoicesService.get(invoiceId);
-      setInvoice(data);
+      const res = await customerInvoicesService.get(id);
+      setInvoice(res.invoice);
     } catch (err) {
-      addToast({
-        title: 'Error',
-        description: err.message || 'Failed to load customer invoice',
-        type: 'error',
-      });
+      setError(err.message || tc('states.errorBody'));
     } finally {
       setLoading(false);
     }
-  }, [invoiceId, addToast]);
+  }, [id, tc]);
 
-  useEffect(() => {
-    fetchInvoice();
-  }, [fetchInvoice]);
+  useEffect(() => { fetchInvoice(); }, [fetchInvoice]);
 
-  const handleUpdate = async (formData) => {
-    setActionLoading(true);
+  const run = async (fn, successMessage) => {
+    if (busy) return;
+    setBusy(true);
     try {
-      const updated = await customerInvoicesService.update(invoiceId, formData);
-      setInvoice(updated);
-      addToast({
-        title: 'Updated',
-        description: 'Customer invoice updated successfully',
-        type: 'success',
-      });
-    } catch (err) {
-      addToast({
-        title: 'Update Failed',
-        description: err.message || 'Could not update customer invoice',
-        type: 'error',
-      });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handlePost = async () => {
-    if (!confirm('Posting this invoice will generate an immutable balanced double-entry journal record in the ledger (Dr Debtors / Cr Sale Income + Output Tax). Proceed?')) {
-      return;
-    }
-
-    setActionLoading(true);
-    try {
-      const res = await customerInvoicesService.post(invoiceId);
+      await fn();
+      showSuccess(successMessage);
       await fetchInvoice();
-      addToast({
-        title: 'Invoice Posted to Ledger',
-        description: `Invoice ${res.invoice?.invoiceNumber || ''} posted successfully. Journal entry created.`,
-        type: 'success',
-      });
     } catch (err) {
-      addToast({
-        title: 'Posting Failed',
-        description: err.message || 'Could not post customer invoice to ledger',
-        type: 'error',
-      });
+      showError(err.message || tc('toast.error'));
     } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleSend = async () => {
-    setActionLoading(true);
-    try {
-      const res = await customerInvoicesService.send(invoiceId);
-      addToast({
-        title: 'Invoice Sent',
-        description: res.message || 'Invoice sent to customer email successfully',
-        type: 'success',
-      });
-    } catch (err) {
-      addToast({
-        title: 'Send Failed',
-        description: err.message || 'Could not send invoice to customer',
-        type: 'error',
-      });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const handleCancel = async () => {
-    if (!confirm('Are you sure you want to cancel this customer invoice? If posted, a reversing journal entry will be created.')) {
-      return;
-    }
-
-    setActionLoading(true);
-    try {
-      const cancelled = await customerInvoicesService.cancel(invoiceId);
-      setInvoice(cancelled);
-      addToast({
-        title: 'Invoice Cancelled',
-        description: `Customer invoice ${cancelled.invoice_number} cancelled`,
-        type: 'info',
-      });
-    } catch (err) {
-      addToast({
-        title: 'Cancellation Failed',
-        description: err.message || 'Could not cancel customer invoice',
-        type: 'error',
-      });
-    } finally {
-      setActionLoading(false);
+      setBusy(false);
+      setConfirmAction(null);
     }
   };
 
   if (loading) {
+    return <div className="doc-loading">{tc('states.loading')}</div>;
+  }
+
+  if (error || !invoice) {
     return (
-      <div className="p-12 text-center text-gray-400">
-        <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-indigo-400" />
-        Loading customer invoice details…
+      <div className="doc-page doc-page-narrow">
+        <ErrorState message={error || tc('states.notFound')} onRetry={fetchInvoice} />
       </div>
     );
   }
 
-  if (!invoice) {
-    return (
-      <div className="p-12 text-center text-gray-400">
-        Customer invoice not found.
-      </div>
-    );
-  }
-
-  const stages = [
-    { key: 'draft', label: 'Draft' },
-    { key: 'posted', label: 'Posted' },
-    { key: 'partially_paid', label: 'Partially Paid' },
-    { key: 'paid', label: 'Paid' },
-  ];
+  const isDraft = invoice.status === 'draft';
+  const isOpen = ['posted', 'partially_paid'].includes(invoice.status);
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6 print:p-0 print:max-w-none">
-      {/* Document Status Bar (Hidden during Print) */}
-      <div className="print:hidden">
-        <DocumentStatusBar
-          documentNumber={invoice.invoice_number}
-          currentStatus={invoice.status}
-          stages={stages}
-          onConfirm={invoice.status === 'draft' ? handlePost : null}
-          confirmText="Post to Ledger"
-          onCancel={
-            invoice.status !== 'cancelled' &&
-            invoice.status !== 'paid' &&
-            invoice.status !== 'partially_paid'
-              ? handleCancel
-              : null
-          }
-          loading={actionLoading}
-        />
+    <div className="doc-page">
+      <div className="doc-page-head">
+        <div className="doc-page-head-left">
+          <Link
+            href="/dashboard/customer-invoices"
+            className="doc-btn doc-btn-icon"
+            aria-label={tc('actions.back')}
+          >
+            <ArrowLeft size={15} aria-hidden="true" />
+          </Link>
+          <div>
+            <h1 className="doc-page-title">
+              <Receipt size={19} className="doc-icon-accent" aria-hidden="true" />
+              {invoice.invoice_number}
+            </h1>
+            <p className="doc-page-sub">
+              {invoice.customer_name} · {formatDate(invoice.invoice_date, locale)}
+              {invoice.so_number ? ` · ${t('fromOrder')} ${invoice.so_number}` : ''}
+            </p>
+          </div>
+        </div>
+
+        <div className="doc-page-actions">
+          {invoice.is_overdue && (
+            <span className="doc-overdue-flag">
+              <AlertTriangle size={13} aria-hidden="true" />
+              {t('overdue')}
+            </span>
+          )}
+
+          <StatusPill status={invoice.status} />
+
+          {isDraft && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setConfirmAction('post')}
+              className="doc-btn doc-btn-primary"
+            >
+              <CheckCircle size={15} aria-hidden="true" />
+              {t('actions.post')}
+            </button>
+          )}
+
+          {isOpen && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setShowPayment(true)}
+              className="doc-btn doc-btn-primary"
+            >
+              <Wallet size={15} aria-hidden="true" />
+              {t('actions.registerPayment')}
+            </button>
+          )}
+
+          {!isDraft && invoice.status !== 'cancelled' && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => run(() => customerInvoicesService.send(id), t('toast.sent'))}
+              className="doc-btn"
+            >
+              <Send size={15} aria-hidden="true" />
+              {t('actions.send')}
+            </button>
+          )}
+
+          {invoice.status !== 'cancelled' && invoice.status !== 'paid' && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setConfirmAction('cancel')}
+              className="doc-btn"
+            >
+              <XCircle size={15} aria-hidden="true" />
+              {t('actions.cancel')}
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Linked Journal Entry & Quick Actions Banner */}
-      {invoice.journal_entry_id && (
-        <div className="p-4 rounded-xl border border-indigo-900/60 bg-indigo-950/30 flex flex-wrap items-center justify-between gap-3 text-xs text-indigo-200 shadow-sm print:hidden">
-          <div className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4 text-indigo-400" />
-            <span>
-              Posted to General Ledger. Balanced double-entry recorded.
-            </span>
+      {isOpen && (
+        <div className="doc-summary">
+          <div>
+            <p className="doc-summary-label">{t('summary.total')}</p>
+            <p className="doc-summary-value">{formatMoney(invoice.total_amount, locale)}</p>
           </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleSend}
-              disabled={actionLoading}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-indigo-200 bg-indigo-900/50 hover:bg-indigo-800/60 border border-indigo-700/50 transition-colors"
-            >
-              <Send className="w-3.5 h-3.5" />
-              Send to Customer
-            </button>
-
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-gray-200 bg-gray-800 hover:bg-gray-700 border border-gray-700 transition-colors"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              Print / PDF
-            </button>
-
-            <Link
-              href={`/dashboard/journal-entries/${invoice.journal_entry_id}`}
-              className="px-3 py-1.5 rounded-lg font-medium text-white bg-indigo-600 hover:bg-indigo-500 transition-colors"
-            >
-              View Journal Entry
-            </Link>
+          <div>
+            <p className="doc-summary-label">{t('summary.paid')}</p>
+            <p className="doc-summary-value">{formatMoney(invoice.amount_paid, locale)}</p>
           </div>
+          <div>
+            <p className="doc-summary-label">{t('summary.outstanding')}</p>
+            <p className="doc-summary-value is-strong">
+              {formatMoney(invoice.amount_due, locale)}
+            </p>
+          </div>
+          {invoice.due_date && (
+            <div>
+              <p className="doc-summary-label">{t('summary.due')}</p>
+              <p className="doc-summary-value">{formatDate(invoice.due_date, locale)}</p>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Form Card */}
-      <CustomerInvoiceForm
-        initialData={invoice}
-        onSubmit={handleUpdate}
-        onCancel={() => router.push('/dashboard/customer-invoices')}
-        loading={actionLoading}
-        isReadOnly={invoice.status !== 'draft'}
+      <CustomerInvoiceForm initialData={invoice} isReadOnly onSubmit={() => {}} onCancel={() => {}} />
+
+      <div className="doc-totals-right">
+        <DocumentTotals
+          untaxedAmount={invoice.untaxed_amount}
+          taxAmount={invoice.tax_amount}
+          totalAmount={invoice.total_amount}
+        />
+      </div>
+
+      <ConfirmDialog
+        isOpen={confirmAction === 'post'}
+        title={t('postDialog.title')}
+        description={t('postDialog.body')}
+        confirmLabel={t('actions.post')}
+        cancelLabel={tc('actions.cancel')}
+        isSubmitting={busy}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={() => run(() => customerInvoicesService.post(id), t('toast.posted'))}
       />
+
+      <ConfirmDialog
+        isOpen={confirmAction === 'cancel'}
+        title={t('cancelDialog.title')}
+        description={t('cancelDialog.body')}
+        confirmLabel={t('actions.cancel')}
+        cancelLabel={tc('actions.close')}
+        isDestructive
+        isSubmitting={busy}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={() => run(() => customerInvoicesService.cancel(id), t('toast.cancelled'))}
+      />
+
+      {showPayment && (
+        <RegisterPaymentModal
+          isOpen={showPayment}
+          onClose={() => setShowPayment(false)}
+          document={invoice}
+          direction="inbound"
+          onRecorded={() => {
+            setShowPayment(false);
+            fetchInvoice();
+          }}
+        />
+      )}
     </div>
   );
 }

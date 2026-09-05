@@ -406,45 +406,6 @@
         "admin": "Business Owner"
       }
     },
-    "summary": {
-      "title": "Executive Financial Dashboard",
-      "subtitle": "Single-request real-time overview of cash flow, receivables, payables, and profitability.",
-      "period": "Period",
-      "periods": {
-        "this_month": "This Month",
-        "this_quarter": "This Quarter",
-        "this_year": "This Fiscal Year"
-      },
-      "kpis": {
-        "totalReceivable": "Total Receivable",
-        "totalPayable": "Total Payable",
-        "totalIncome": "Operating Income",
-        "totalExpenses": "Total Expenses",
-        "netProfit": "Net Profit",
-        "overdueCount": "Overdue Documents"
-      },
-      "charts": {
-        "incomeVsExpense": "Monthly Income vs Expense",
-        "topCustomers": "Top 5 Customers by Revenue",
-        "receivableAging": "Receivable Aging",
-        "cashTrend": "Cash & Bank Balance Movement",
-        "expenseBreakdown": "Expense Breakdown",
-        "recentActivity": "Recent Financial Activity"
-      },
-      "portal": {
-        "title": "Customer Financial Overview",
-        "subtitle": "Your outstanding balances, overdue bills, and documents.",
-        "totalOutstanding": "Total Outstanding",
-        "totalOverdue": "Overdue Balance",
-        "paidThisYear": "Settled This Year",
-        "recentDocuments": "Recent Documents",
-        "invoiceNumber": "Invoice #",
-        "date": "Date",
-        "amount": "Total Amount",
-        "due": "Amount Due",
-        "status": "Status"
-      }
-    },
     "nav": {
       "menu": "Menu",
       "general": "General",
@@ -473,8 +434,7 @@
       "productCategories": "Product categories",
       "taxes": "Taxes",
       "analyticAccounts": "Analytic accounts",
-      "journalEntries": "Journal entries",
-      "auditLogs": "Audit Logs"
+      "journalEntries": "Journal entries"
     },
     "promo": {
       "title": "Your books on",
@@ -842,61 +802,7 @@
     "subtitle": "Invoices and bills raised for your account.",
     "welcome": "Welcome, {name}",
     "comingSoon": "Your invoices, bills and online payments will appear here.",
-    "signOut": "Sign out",
-    "tabs": {
-      "overview": "Overview",
-      "invoices": "Invoices",
-      "bills": "Bills Statement"
-    },
-    "kpi": {
-      "outstanding": "Total Outstanding",
-      "overdue": "Total Overdue",
-      "paidThisYear": "Paid This Year",
-      "unpaidInvoices": "Unpaid Invoices"
-    },
-    "invoices": {
-      "title": "Customer Invoices",
-      "subtitle": "View your invoices and pay outstanding balances securely online.",
-      "invoiceNumber": "Invoice #",
-      "date": "Date",
-      "dueDate": "Due Date",
-      "total": "Total Amount",
-      "paid": "Paid",
-      "due": "Balance Due",
-      "status": "Status",
-      "payNow": "Pay Now",
-      "paidInFull": "Paid in Full",
-      "empty": "No invoices found for your account."
-    },
-    "bills": {
-      "title": "Statement of Account",
-      "subtitle": "Historical statement of bills raised by the organization for your vendor account.",
-      "billNumber": "Bill #",
-      "date": "Date",
-      "dueDate": "Due Date",
-      "total": "Total Amount",
-      "paid": "Paid",
-      "due": "Balance Due",
-      "status": "Status",
-      "notice": "This is a read-only statement of account. Vendor disbursements are processed directly by the organization.",
-      "empty": "No bills found on this account."
-    },
-    "payment": {
-      "modalTitle": "Card Payment Checkout",
-      "invoiceSummary": "Invoice Summary",
-      "amountToPay": "Amount to Pay",
-      "cardNotice": "Secure card payment simulated via Razorpay gateway adapter.",
-      "cardNumber": "Card Number",
-      "expiry": "MM / YY",
-      "cvv": "CVV",
-      "nameOnCard": "Name on Card",
-      "payButton": "Pay {amount}",
-      "processing": "Authorizing & posting payment…",
-      "success": "Payment successful! Your invoice is updated and receipt recorded.",
-      "failure": "Payment failed or was declined.",
-      "cancel": "Cancel",
-      "close": "Close"
-    }
+    "signOut": "Sign out"
   },
   "accounts": {
     "badge": "Accounting core",
@@ -1170,151 +1076,300 @@
       "allJournals": "All journals"
     }
   },
-  "budgets": {
-    "badge": "Cost Management",
-    "title": "Budgets",
-    "subtitle": "Track planned expenditure against real-time actual journal movements tagged to analytic accounts.",
-    "newBudget": "Create Budget",
-    "editBudget": "Edit Budget",
-    "save": "Save Budget",
-    "cancel": "Cancel",
-    "fields": {
-      "name": "Budget Name",
-      "analyticAccount": "Analytic Account",
-      "periodStart": "Period Start",
-      "periodEnd": "Period End",
-      "plannedAmount": "Planned Amount",
-      "status": "Status"
-    },
-    "placeholders": {
-      "name": "e.g. Showroom Renovation 2026",
-      "analyticAccount": "Select analytic account",
-      "plannedAmount": "50000.00"
-    },
-    "table": {
-      "name": "Budget",
-      "analytic": "Analytic Account",
-      "period": "Period",
-      "planned": "Planned",
-      "actual": "Actual",
-      "variance": "Variance",
-      "usage": "Usage",
-      "status": "Status"
+  "payment": {
+    "payNow": "Pay now",
+    "paying": "Opening checkout…",
+    "verifying": "Verifying payment…",
+    "success": "Payment received",
+    "cancelled": "Payment cancelled",
+    "failed": "Payment failed",
+    "unavailable": "Online payment is not available yet",
+    "amount": "Amount",
+    "description": "Secure card payment via Razorpay",
+    "notRecorded": "Payment verified. It will be recorded against your invoice once payment recording is live."
+  },
+  "common": {
+    "actions": {
+      "save": "Save",
+      "submitting": "Saving…",
+      "cancel": "Cancel",
+      "create": "Create",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirm": "Confirm",
+      "back": "Back",
+      "retry": "Try again",
+      "refresh": "Refresh",
+      "search": "Search",
+      "clearFilters": "Clear filters",
+      "close": "Close",
+      "view": "View"
     },
     "status": {
+      "draft": "Draft",
+      "posted": "Posted",
+      "confirmed": "Confirmed",
+      "billed": "Billed",
+      "invoiced": "Invoiced",
+      "paid": "Paid",
+      "partiallyPaid": "Partially paid",
+      "partial": "Partially paid",
+      "overdue": "Overdue",
+      "cancelled": "Cancelled",
       "active": "Active",
       "archived": "Archived",
-      "draft": "Draft"
+      "reversed": "Reversed"
     },
-    "kpi": {
-      "totalPlanned": "Total Planned",
-      "totalActual": "Total Actual",
-      "netVariance": "Net Variance",
-      "activeBudgets": "Active Budgets"
+    "states": {
+      "loading": "Loading…",
+      "notFound": "Not found",
+      "errorTitle": "That didn't load",
+      "errorBody": "Something went wrong.",
+      "emptyTitle": "Nothing here yet",
+      "noMatchTitle": "No matches",
+      "noMatchBody": "No records match the current filters."
     },
-    "overBudget": "Over Budget",
-    "onTrack": "Within Budget",
-    "detail": {
-      "back": "Back to Budgets",
-      "overview": "Performance Overview",
-      "monthlyBreakdown": "Monthly Planned vs Actual",
-      "contributingTransactions": "Contributing Journal Lines",
+    "toast": {
+      "created": "Created successfully",
+      "updated": "Saved successfully",
+      "error": "Something went wrong"
+    },
+    "allStatuses": "All statuses",
+    "all": "All"
+  },
+  "salesOrders": {
+    "title": "Sales Orders",
+    "subtitle": "Customer quotes and confirmed orders awaiting invoicing",
+    "new": {
+      "title": "Create Sales Order",
+      "subtitle": "Draft an order of goods or services for a customer"
+    },
+    "searchPlaceholder": "Search by number or customer…",
+    "newAction": "New Sales Order",
+    "table": {
+      "number": "SO Number",
       "date": "Date",
-      "entry": "Entry #",
-      "account": "Account",
-      "partner": "Partner",
-      "description": "Description",
-      "amount": "Debit Amount",
-      "noLines": "No journal entries recorded for this analytic account in the budget period."
+      "customer": "Customer",
+      "total": "Total",
+      "status": "Status"
+    },
+    "fields": {
+      "customer": "Customer",
+      "orderDate": "Order Date",
+      "expectedDate": "Expected Date",
+      "notes": "Notes"
+    },
+    "linesTitle": "Order Lines",
+    "empty": {
+      "title": "No sales orders yet",
+      "body": "Create the first order for a customer."
+    },
+    "actions": {
+      "confirm": "Confirm",
+      "createInvoice": "Create Invoice",
+      "cancel": "Cancel"
+    },
+    "submit": {
+      "create": "Create Sales Order",
+      "update": "Update Sales Order"
+    },
+    "confirmDialog": {
+      "title": "Confirm this sales order?",
+      "body": "Confirming assigns the real SO number and locks the order from further edits."
+    },
+    "cancelDialog": {
+      "title": "Cancel this sales order?",
+      "body": "A cancelled order cannot be confirmed or invoiced."
+    },
+    "invoicePanel": {
+      "title": "Create Customer Invoice",
+      "body": "The invoice is created as a DRAFT. Posting it is a separate step — that is what writes Dr Debtors / Cr Sale Income / Cr Output Tax to the ledger.",
+      "action": "Create Draft Invoice",
+      "creating": "Creating…"
+    },
+    "errors": {
+      "customer": "A customer is required",
+      "orderDate": "An order date is required",
+      "lines": "At least one line is required",
+      "lineProduct": "Every line needs a product or a description",
+      "lineQuantity": "Every line needs a quantity greater than zero"
+    },
+    "toast": {
+      "created": "Sales order created in draft",
+      "confirmed": "Sales order confirmed",
+      "cancelled": "Sales order cancelled",
+      "invoiceCreated": "A draft invoice was created. Post it to reach the ledger.",
+      "journalRequired": "Choose the sales journal the invoice will post through"
+    }
+  },
+  "customerInvoices": {
+    "title": "Customer Invoices",
+    "subtitle": "Receivables raised against customers",
+    "new": {
+      "title": "Create Customer Invoice",
+      "subtitle": "Raise a receivable against a customer"
+    },
+    "searchPlaceholder": "Search by number or customer…",
+    "newAction": "New Invoice",
+    "overdueOnly": "Overdue only",
+    "overdue": "Overdue",
+    "table": {
+      "number": "Invoice",
+      "date": "Date",
+      "dueDate": "Due",
+      "customer": "Customer",
+      "total": "Total",
+      "outstanding": "Outstanding",
+      "status": "Status"
+    },
+    "fields": {
+      "customer": "Customer",
+      "journal": "Sales Journal",
+      "invoiceDate": "Invoice Date",
+      "dueDate": "Due Date",
+      "notes": "Notes"
+    },
+    "linesTitle": "Invoice Lines",
+    "summary": {
+      "total": "Total",
+      "paid": "Paid",
+      "outstanding": "Outstanding",
+      "due": "Due"
     },
     "empty": {
-      "title": "No budgets created yet",
-      "body": "Set up your first budget to start monitoring cost center variance."
+      "title": "No invoices yet",
+      "body": "Raise the first invoice, or create one from a sales order."
+    },
+    "actions": {
+      "post": "Post",
+      "send": "Send",
+      "cancel": "Cancel",
+      "registerPayment": "Register Payment"
+    },
+    "submit": {
+      "create": "Create Invoice",
+      "update": "Update Invoice"
+    },
+    "postDialog": {
+      "title": "Post this invoice?",
+      "body": "Posting writes Dr Debtors / Cr Sale Income / Cr Output Tax Payable to the ledger and assigns the invoice number. It cannot be undone — only reversed."
+    },
+    "cancelDialog": {
+      "title": "Cancel this invoice?",
+      "body": "A posted invoice is cancelled by REVERSING its journal entry. The original entry stays in the ledger with a mirror beside it."
+    },
+    "errors": {
+      "customer": "A customer is required",
+      "journal": "A sales journal is required",
+      "invoiceDate": "An invoice date is required",
+      "dueDate": "The due date cannot be before the invoice date",
+      "lines": "At least one line is required",
+      "lineProduct": "Every line needs a product or a description",
+      "lineQuantity": "Every line needs a quantity greater than zero",
+      "lineAccount": "Every line needs an income account"
+    },
+    "toast": {
+      "created": "Invoice created in draft. Post it to reach the ledger.",
+      "posted": "Invoice posted to the ledger",
+      "sent": "Invoice marked as sent",
+      "cancelled": "Invoice cancelled and reversed"
+    },
+    "fromOrder": "from"
+  },
+  "payments": {
+    "title": "Payments",
+    "subtitle": "Receipts from customers and payments to vendors",
+    "newAction": "Record Payment",
+    "new": {
+      "title": "Record a Payment",
+      "subtitle": "Every payment settles a specific document",
+      "body": "Open the invoice or bill the money relates to and use Register Payment there. The document already knows the contact and what is outstanding, so the amount can be checked against the real balance rather than typed twice.",
+      "inbound": "Money received",
+      "inboundHint": "Pick an unpaid customer invoice",
+      "outbound": "Money paid",
+      "outboundHint": "Pick an unpaid vendor bill"
+    },
+    "table": {
+      "number": "Payment",
+      "date": "Date",
+      "contact": "Contact",
+      "method": "Method",
+      "amount": "Amount",
+      "status": "Status"
+    },
+    "fields": {
+      "amount": "Amount",
+      "method": "Method",
+      "paymentDate": "Payment Date",
+      "journal": "Journal",
+      "cashAccount": "Cash / Bank Account",
+      "reference": "Reference",
+      "journalEntry": "Journal Entry"
+    },
+    "methods": {
+      "cash": "Cash",
+      "bank": "Bank",
+      "card": "Card"
+    },
+    "directions": {
+      "all": "All directions",
+      "inbound": "Received",
+      "outbound": "Paid"
+    },
+    "allMethods": "All methods",
+    "empty": {
+      "title": "No payments yet",
+      "body": "Record a payment from an invoice or a bill."
+    },
+    "register": {
+      "title": "Register Payment",
+      "outstanding": "Outstanding",
+      "action": "Record Payment",
+      "recording": "Recording…",
+      "remaining": "{amount} will remain outstanding — the document becomes partially paid.",
+      "settles": "This settles the document in full.",
+      "cashJournal": "Cash Journal",
+      "bankJournal": "Bank Journal"
+    },
+    "allocations": {
+      "title": "Allocations",
+      "document": "Document",
+      "documentTotal": "Document Total",
+      "allocated": "Allocated",
+      "stillDue": "Still Due"
+    },
+    "cancelDialog": {
+      "title": "Cancel this payment?",
+      "body": "The journal entry is REVERSED, not deleted, and each document's outstanding balance is restored exactly as it was."
+    },
+    "errors": {
+      "amount": "Enter an amount greater than zero",
+      "exceeds": "Cannot exceed the {amount} outstanding",
+      "decimals": "At most two decimal places",
+      "date": "A payment date is required",
+      "futureDate": "The payment date cannot be in the future",
+      "journal": "A journal is required",
+      "cashAccount": "A Cash/Bank account is required"
+    },
+    "toast": {
+      "recorded": "Payment recorded",
+      "recordedBody": "The ledger has been updated",
+      "cancelled": "Payment cancelled",
+      "cancelledBody": "The journal entry was reversed and the balances restored"
     }
   },
-  "reports": {
-    "badge": "Financial Intelligence",
-    "title": "Financial Reports",
-    "subtitle": "Real-time, double-entry financial statements and variance reports directly from the ledger.",
-    "hub": {
-      "balanceSheetTitle": "Balance Sheet",
-      "balanceSheetDesc": "Real-time assets, liabilities, and equity with the fundamental equation guarantee.",
-      "profitLossTitle": "Profit & Loss",
-      "profitLossDesc": "Operating revenue, cost of goods sold, expenses, and net profit for the selected period.",
-      "budgetReportTitle": "Budget Report",
-      "budgetReportDesc": "Variance analysis comparing planned budgets against actual journal transactions.",
-      "viewReport": "Open Report"
-    },
-    "balanceSheet": {
-      "title": "Balance Sheet",
-      "subtitle": "Real-time financial position statement as of a selected date.",
-      "asOfDate": "As of Date",
-      "assets": "Assets",
-      "liabilities": "Liabilities",
-      "equity": "Equity & Capital",
-      "netProfit": "Current Period Net Profit / (Loss)",
-      "totalAssets": "Total Assets",
-      "totalLiabilitiesEquity": "Total Liabilities & Equity",
-      "balanced": "Ledger is in perfect balance (Assets = Liabilities + Equity)",
-      "unbalanced": "Warning: Balance sheet equation mismatch",
-      "exportCsv": "Export CSV",
-      "accountCode": "Code",
-      "accountName": "Account",
-      "balance": "Balance"
-    },
-    "profitLoss": {
-      "title": "Profit & Loss Statement",
-      "subtitle": "Operating revenue, direct costs, expenses, and net profit for the period.",
-      "fromDate": "From Date",
-      "toDate": "To Date",
-      "income": "Income / Revenue",
-      "cogs": "Cost of Goods Sold / Purchases",
-      "grossProfit": "Gross Profit",
-      "expenses": "Operating Expenses",
-      "netProfit": "Net Profit",
-      "netLoss": "Net Loss",
-      "profitTrend": "Monthly Profit Trend",
-      "expenseBreakdown": "Expense Breakdown",
-      "exportCsv": "Export CSV",
-      "accountCode": "Code",
-      "accountName": "Account",
-      "amount": "Amount"
-    },
-    "budgetReport": {
-      "title": "Budget Report",
-      "subtitle": "Variance analysis comparing planned budgets against actual journal transactions.",
-      "selectBudget": "Filter by Budget",
-      "allBudgets": "All Budgets",
-      "planned": "Planned Amount",
-      "actual": "Actual Expense",
-      "variance": "Variance",
-      "percent": "Consumption %",
-      "status": "Over / Under",
-      "underBudget": "Under Budget",
-      "overBudget": "Over Budget",
-      "chartTitle": "Planned vs Actual by Budget",
-      "exportCsv": "Export CSV"
-    }
-  },
-  "audit": {
-    "title": "System Audit Logs",
-    "subtitle": "Immutable regulatory audit trail capturing all state transitions across financial documents.",
-    "allTypes": "All Entity Types",
-    "allActions": "All Actions",
-    "search": "Filter by Entity ID...",
-    "timestamp": "Timestamp",
-    "actor": "Actor",
-    "action": "Action",
-    "entityType": "Entity Type",
-    "entityId": "Entity ID",
-    "changes": "Changes (Diff)",
-    "ipAddress": "IP Address",
-    "viewDiff": "View Diff",
-    "modalTitle": "Audit State Diff",
-    "before": "State Before Change",
-    "after": "State After Change",
-    "noChanges": "No state diff recorded",
-    "close": "Close",
-    "noLogs": "No audit records found"
+  "documentLines": {
+    "product": "Product / Item",
+    "description": "Description",
+    "quantity": "Qty",
+    "unitPrice": "Unit Price",
+    "tax": "Tax",
+    "analytic": "Cost Centre",
+    "subtotal": "Subtotal",
+    "account": "Account",
+    "actions": "Actions",
+    "addLine": "Add line",
+    "removeLine": "Remove line",
+    "noLines": "No lines yet"
   }
 }

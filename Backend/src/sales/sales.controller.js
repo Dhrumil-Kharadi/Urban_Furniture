@@ -1,116 +1,120 @@
+const { success, created, error } = require('../utils/response');
+const salesValidation = require('./sales.validation');
+const salesOrdersService = require('./salesOrders.service');
+const customerInvoicesService = require('./customerInvoices.service');
+
 /**
  * Sales Controller
  *
- * HTTP handlers for Sales Order and Customer Invoice endpoints.
- * Delegates business logic to salesOrders.service and customerInvoices.service.
+ * Reads the request, validates, delegates, responds. No SQL, no business rules.
+ *
+ * Every :id reaches the service alongside req.organizationId, which came from
+ * the verified session — never from the request.
  */
 
-const { success, created, error } = require('../utils/response');
-const salesOrdersService = require('./salesOrders.service');
-const customerInvoicesService = require('./customerInvoices.service');
-const salesValidation = require('./sales.validation');
-const logger = require('../utils/logger');
-
 const salesController = {
-  // ─── SALES ORDERS ─────────────────────────────────────────
+  // ─── SALES ORDERS ────────────────────────────────────────
 
+  /** GET /api/sales-orders */
   async listSalesOrders(req, res, next) {
     try {
-      const result = await salesOrdersService.listSalesOrders(
-        req.organizationId,
-        req.query
-      );
-      return success(res, 'Sales orders retrieved', result);
+      const validation = salesValidation.validateListQuery(req.query, 'so');
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
+
+      const result = await salesOrdersService.listSalesOrders(req.organizationId, {
+        ...req.query,
+        ...validation.data,
+      });
+      return success(res, 'Sales orders retrieved successfully', result);
     } catch (err) {
       next(err);
     }
   },
 
+  /** GET /api/sales-orders/:id */
   async getSalesOrder(req, res, next) {
     try {
-      const so = await salesOrdersService.getSalesOrderById(
-        req.organizationId,
-        req.params.id
+      const salesOrder = await salesOrdersService.getSalesOrderById(
+        req.organizationId, req.params.id
       );
-      return success(res, 'Sales order retrieved', so);
+      return success(res, 'Sales order retrieved successfully', { salesOrder });
     } catch (err) {
       next(err);
     }
   },
 
+  /** POST /api/sales-orders */
   async createSalesOrder(req, res, next) {
     try {
-      const validationErrors = salesValidation.validateCreateSO(req.body);
-      if (validationErrors) {
-        return error(res, 'Validation failed', 400, validationErrors);
+      const validation = salesValidation.validateCreateSalesOrder(req.body);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
       }
 
-      const so = await salesOrdersService.createSalesOrder(
-        req.organizationId,
-        req.user.id,
-        req.body
+      const salesOrder = await salesOrdersService.createSalesOrder(
+        req.organizationId, req.user.id, validation.data
       );
-      return created(res, 'Sales order created', so);
+      return created(res, 'Sales order created successfully', { salesOrder });
     } catch (err) {
       next(err);
     }
   },
 
+  /** PATCH /api/sales-orders/:id — draft only */
   async updateSalesOrder(req, res, next) {
     try {
-      const validationErrors = salesValidation.validateUpdateSO(req.body);
-      if (validationErrors) {
-        return error(res, 'Validation failed', 400, validationErrors);
+      const validation = salesValidation.validateUpdateSalesOrder(req.body);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
       }
 
-      const so = await salesOrdersService.updateSalesOrder(
-        req.organizationId,
-        req.user.id,
-        req.params.id,
-        req.body
+      const salesOrder = await salesOrdersService.updateSalesOrder(
+        req.organizationId, req.user.id, req.params.id, validation.data
       );
-      return success(res, 'Sales order updated', so);
+      return success(res, 'Sales order updated successfully', { salesOrder });
     } catch (err) {
       next(err);
     }
   },
 
+  /** POST /api/sales-orders/:id/confirm */
   async confirmSalesOrder(req, res, next) {
     try {
-      const so = await salesOrdersService.confirmSalesOrder(
-        req.organizationId,
-        req.user.id,
-        req.params.id
+      const salesOrder = await salesOrdersService.confirmSalesOrder(
+        req.organizationId, req.user.id, req.params.id
       );
-      return success(res, 'Sales order confirmed', so);
+      return success(res, 'Sales order confirmed', { salesOrder });
     } catch (err) {
       next(err);
     }
   },
 
+  /** POST /api/sales-orders/:id/create-invoice */
   async createInvoiceFromSO(req, res, next) {
     try {
-      const { journal_id } = req.body;
+      const validation = salesValidation.validateCreateInvoiceFromSO(req.body);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
+
       const invoice = await salesOrdersService.createInvoiceFromSO(
-        req.organizationId,
-        req.user.id,
-        req.params.id,
-        journal_id || null
+        req.organizationId, req.user.id, req.params.id, validation.data
       );
-      return created(res, 'Customer invoice created from sales order', invoice);
+      return created(res, 'Customer invoice created from sales order', { invoice });
     } catch (err) {
       next(err);
     }
   },
 
+  /** POST /api/sales-orders/:id/cancel */
   async cancelSalesOrder(req, res, next) {
     try {
-      const so = await salesOrdersService.cancelSalesOrder(
-        req.organizationId,
-        req.user.id,
-        req.params.id
+      const salesOrder = await salesOrdersService.cancelSalesOrder(
+        req.organizationId, req.user.id, req.params.id
       );
-      return success(res, 'Sales order cancelled', so);
+      return success(res, 'Sales order cancelled', { salesOrder });
     } catch (err) {
       next(err);
     }
@@ -118,101 +122,101 @@ const salesController = {
 
   // ─── CUSTOMER INVOICES ───────────────────────────────────
 
+  /** GET /api/customer-invoices */
   async listCustomerInvoices(req, res, next) {
     try {
-      const result = await customerInvoicesService.listCustomerInvoices(
-        req.organizationId,
-        req.query
-      );
-      return success(res, 'Customer invoices retrieved', result);
+      const validation = salesValidation.validateListQuery(req.query, 'invoice');
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
+
+      const result = await customerInvoicesService.listCustomerInvoices(req.organizationId, {
+        ...req.query,
+        ...validation.data,
+      });
+      return success(res, 'Customer invoices retrieved successfully', result);
     } catch (err) {
       next(err);
     }
   },
 
+  /** GET /api/customer-invoices/:id */
   async getCustomerInvoice(req, res, next) {
     try {
       const invoice = await customerInvoicesService.getCustomerInvoiceById(
-        req.organizationId,
-        req.params.id
+        req.organizationId, req.params.id
       );
-      return success(res, 'Customer invoice retrieved', invoice);
+      return success(res, 'Customer invoice retrieved successfully', { invoice });
     } catch (err) {
       next(err);
     }
   },
 
+  /** POST /api/customer-invoices */
   async createCustomerInvoice(req, res, next) {
     try {
-      const validationErrors = salesValidation.validateCreateInvoice(req.body);
-      if (validationErrors) {
-        return error(res, 'Validation failed', 400, validationErrors);
+      const validation = salesValidation.validateCreateInvoice(req.body);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
       }
 
       const invoice = await customerInvoicesService.createCustomerInvoice(
-        req.organizationId,
-        req.user.id,
-        req.body
+        req.organizationId, req.user.id, validation.data
       );
-      return created(res, 'Customer invoice created', invoice);
+      return created(res, 'Customer invoice created successfully', { invoice });
     } catch (err) {
       next(err);
     }
   },
 
+  /** PATCH /api/customer-invoices/:id — draft only */
   async updateCustomerInvoice(req, res, next) {
     try {
-      const validationErrors = salesValidation.validateUpdateInvoice(req.body);
-      if (validationErrors) {
-        return error(res, 'Validation failed', 400, validationErrors);
+      const validation = salesValidation.validateUpdateInvoice(req.body);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
       }
 
       const invoice = await customerInvoicesService.updateCustomerInvoice(
-        req.organizationId,
-        req.user.id,
-        req.params.id,
-        req.body
+        req.organizationId, req.user.id, req.params.id, validation.data
       );
-      return success(res, 'Customer invoice updated', invoice);
+      return success(res, 'Customer invoice updated successfully', { invoice });
     } catch (err) {
       next(err);
     }
   },
 
+  /** POST /api/customer-invoices/:id/post — generates the journal entry */
   async postCustomerInvoice(req, res, next) {
     try {
-      const result = await customerInvoicesService.postCustomerInvoice(
-        req.organizationId,
-        req.user.id,
-        req.params.id
+      const invoice = await customerInvoicesService.postCustomerInvoice(
+        req.organizationId, req.user.id, req.params.id
       );
-      return success(res, 'Invoice posted', result);
+      return success(res, 'Customer invoice posted', { invoice });
     } catch (err) {
       next(err);
     }
   },
 
+  /** POST /api/customer-invoices/:id/send */
   async sendCustomerInvoice(req, res, next) {
     try {
-      const result = await customerInvoicesService.sendCustomerInvoice(
-        req.organizationId,
-        req.user.id,
-        req.params.id
+      const invoice = await customerInvoicesService.sendCustomerInvoice(
+        req.organizationId, req.user.id, req.params.id
       );
-      return success(res, result.message, result);
+      return success(res, 'Customer invoice sent', { invoice });
     } catch (err) {
       next(err);
     }
   },
 
+  /** POST /api/customer-invoices/:id/cancel — admin only; reverses if posted */
   async cancelCustomerInvoice(req, res, next) {
     try {
       const invoice = await customerInvoicesService.cancelCustomerInvoice(
-        req.organizationId,
-        req.user.id,
-        req.params.id
+        req.organizationId, req.user.id, req.params.id
       );
-      return success(res, 'Customer invoice cancelled', invoice);
+      return success(res, 'Customer invoice cancelled', { invoice });
     } catch (err) {
       next(err);
     }

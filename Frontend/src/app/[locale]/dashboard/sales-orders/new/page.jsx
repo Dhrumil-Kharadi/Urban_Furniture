@@ -1,63 +1,65 @@
 'use client';
 
+/**
+ * @file Create Sales Order
+ * @route /dashboard/sales-orders/new
+ * @spec Doc/project.md §5.2.1, Doc/phase.md Phase 9, Doc/strict.md
+ */
+
 import React, { useState } from 'react';
-import { useRouter } from '@/i18n/navigation';
+import { ArrowLeft, FileText } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useRouter, Link } from '@/i18n/navigation';
 import { useToast } from '@/components/shared';
 import SalesOrderForm from '@/components/sales-orders/SalesOrderForm';
 import { salesOrdersService } from '@/services/sales.service';
-import { ArrowLeft, ShoppingCart } from 'lucide-react';
-import { Link } from '@/i18n/navigation';
 
 export default function NewSalesOrderPage() {
+  const t = useTranslations('salesOrders');
+  const tc = useTranslations('common');
   const router = useRouter();
-  const { addToast } = useToast();
+  const { showSuccess, showError } = useToast();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (formData) => {
+    // Guarded as well as disabled: a double-submitted order is a duplicate
+    // document that will take its own number.
+    if (loading) return;
     setLoading(true);
+
     try {
-      const created = await salesOrdersService.create(formData);
-      addToast({
-        title: 'Success',
-        description: `Sales order ${created.so_number} created in draft`,
-        type: 'success',
-      });
-      router.push(`/dashboard/sales-orders/${created.id}`);
+      const { salesOrder } = await salesOrdersService.create(formData);
+      showSuccess(t('toast.created'));
+      router.push(`/dashboard/sales-orders/${salesOrder.id}`);
     } catch (err) {
-      addToast({
-        title: 'Creation Failed',
-        description: err.message || 'Could not create sales order',
-        type: 'error',
-      });
-    } finally {
+      showError(err.message || tc('toast.error'));
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
+    <div className="doc-page">
+      <div className="doc-page-head-left">
         <Link
           href="/dashboard/sales-orders"
-          className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
+          className="doc-btn doc-btn-icon"
+          aria-label={tc('actions.back')}
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft size={15} aria-hidden="true" />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-gray-100 flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5 text-indigo-400" />
-            Create Sales Order
+          <h1 className="doc-page-title">
+            <FileText size={19} className="doc-icon-accent" aria-hidden="true" />
+            {t('new.title')}
           </h1>
-          <p className="text-xs text-gray-400 mt-0.5">
-            Draft a customer sales order with line items and automatic tax calculations
-          </p>
+          <p className="doc-page-sub">{t('new.subtitle')}</p>
         </div>
       </div>
 
       <SalesOrderForm
         onSubmit={handleSubmit}
         onCancel={() => router.push('/dashboard/sales-orders')}
-        loading={loading}
+        isSubmitting={loading}
       />
     </div>
   );

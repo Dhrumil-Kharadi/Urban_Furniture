@@ -42,7 +42,6 @@ const migrations = [
   require('./012_create_products'),
   require('./013_create_journals'),
   require('./014_create_analytic_accounts'),
-  require('./015_create_budgets'),
   require('./016_create_journal_entries'),
   require('./017_create_journal_entry_lines'),
   require('./018_create_document_sequences'),
@@ -52,11 +51,8 @@ const migrations = [
   require('./022_create_customer_invoices'),
   require('./023_create_payments'),
   require('./024_create_payment_allocations'),
-  require('./025_create_attachments'),
   require('./026_create_audit_logs'),
-  require('./027_create_notifications'),
   require('./028_ledger_integrity_triggers'),
-  require('./029_rename_roles'),
 ];
 
 /**

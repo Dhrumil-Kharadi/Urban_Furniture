@@ -1,63 +1,66 @@
 'use client';
 
+/**
+ * @file Create Customer Invoice
+ * @route /dashboard/customer-invoices/new
+ * @spec Doc/project.md §5.2, Doc/phase.md Phase 9, Doc/strict.md
+ *
+ * Creates a DRAFT. Posting is separate and deliberate — it writes to the
+ * ledger, and cannot be undone, only reversed.
+ */
+
 import React, { useState } from 'react';
-import { useRouter } from '@/i18n/navigation';
+import { ArrowLeft, Receipt } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useRouter, Link } from '@/i18n/navigation';
 import { useToast } from '@/components/shared';
 import CustomerInvoiceForm from '@/components/customer-invoices/CustomerInvoiceForm';
 import { customerInvoicesService } from '@/services/sales.service';
-import { ArrowLeft, Receipt } from 'lucide-react';
-import { Link } from '@/i18n/navigation';
 
 export default function NewCustomerInvoicePage() {
+  const t = useTranslations('customerInvoices');
+  const tc = useTranslations('common');
   const router = useRouter();
-  const { addToast } = useToast();
+  const { showSuccess, showError } = useToast();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (formData) => {
+    if (loading) return;
     setLoading(true);
+
     try {
-      const created = await customerInvoicesService.create(formData);
-      addToast({
-        title: 'Success',
-        description: `Customer invoice created in draft`,
-        type: 'success',
-      });
-      router.push(`/dashboard/customer-invoices/${created.id}`);
+      const { invoice } = await customerInvoicesService.create(formData);
+      showSuccess(t('toast.created'));
+      router.push(`/dashboard/customer-invoices/${invoice.id}`);
     } catch (err) {
-      addToast({
-        title: 'Creation Failed',
-        description: err.message || 'Could not create customer invoice',
-        type: 'error',
-      });
-    } finally {
+      showError(err.message || tc('toast.error'));
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
+    <div className="doc-page">
+      <div className="doc-page-head-left">
         <Link
           href="/dashboard/customer-invoices"
-          className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
+          className="doc-btn doc-btn-icon"
+          aria-label={tc('actions.back')}
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft size={15} aria-hidden="true" />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-gray-100 flex items-center gap-2">
-            <Receipt className="w-5 h-5 text-indigo-400" />
-            Create Customer Invoice
+          <h1 className="doc-page-title">
+            <Receipt size={19} className="doc-icon-accent" aria-hidden="true" />
+            {t('new.title')}
           </h1>
-          <p className="text-xs text-gray-400 mt-0.5">
-            Issue a direct customer invoice for sales revenue and output tax
-          </p>
+          <p className="doc-page-sub">{t('new.subtitle')}</p>
         </div>
       </div>
 
       <CustomerInvoiceForm
         onSubmit={handleSubmit}
         onCancel={() => router.push('/dashboard/customer-invoices')}
-        loading={loading}
+        isSubmitting={loading}
       />
     </div>
   );

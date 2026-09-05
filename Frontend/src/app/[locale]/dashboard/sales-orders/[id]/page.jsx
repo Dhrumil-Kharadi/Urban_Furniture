@@ -1,225 +1,231 @@
 'use client';
 
-import React, { useState, useEffect, use, useCallback } from 'react';
-import { useRouter } from '@/i18n/navigation';
-import { useToast, DocumentStatusBar, Modal } from '@/components/shared';
+/**
+ * @file Sales Order Detail
+ * @route /dashboard/sales-orders/[id]
+ * @spec Doc/project.md §5.2.2, §5.2.3, Doc/phase.md Phase 9, Doc/strict.md
+ *
+ * Actions follow the lifecycle: a draft can be confirmed, a confirmed order
+ * can become an invoice, and either can be cancelled. An invoiced order offers
+ * nothing — cancel its invoice instead, which reverses the ledger entry.
+ */
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'next/navigation';
+import { ArrowLeft, FileText, CheckCircle, Receipt, XCircle } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter, Link } from '@/i18n/navigation';
+import {
+  StatusPill, ErrorState, ConfirmDialog, useToast, DocumentTotals,
+} from '@/components/shared';
 import SalesOrderForm from '@/components/sales-orders/SalesOrderForm';
 import JournalPicker from '@/components/pickers/JournalPicker';
 import { salesOrdersService } from '@/services/sales.service';
-import { RefreshCw, ShoppingCart } from 'lucide-react';
+import { formatDate } from '@/utils/format';
 
-export default function SalesOrderDetailPage({ params }) {
-  const resolvedParams = use(params);
-  const soId = resolvedParams.id;
-
+export default function SalesOrderDetailPage() {
+  const t = useTranslations('salesOrders');
+  const tc = useTranslations('common');
+  const { id } = useParams();
   const router = useRouter();
-  const { addToast } = useToast();
+  const locale = useLocale();
+  const { showSuccess, showError } = useToast();
 
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
 
-  // Journal selection modal for SO -> Invoice conversion
-  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
-  const [selectedJournalId, setSelectedJournalId] = useState('');
+  const [confirmAction, setConfirmAction] = useState(null);
+  const [invoiceJournalId, setInvoiceJournalId] = useState('');
+  const [showInvoicePanel, setShowInvoicePanel] = useState(false);
 
   const fetchOrder = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const data = await salesOrdersService.get(soId);
-      setOrder(data);
+      const { salesOrder } = await salesOrdersService.get(id);
+      setOrder(salesOrder);
     } catch (err) {
-      addToast({
-        title: 'Error',
-        description: err.message || 'Failed to load sales order',
-        type: 'error',
-      });
+      setError(err.message || tc('states.errorBody'));
     } finally {
       setLoading(false);
     }
-  }, [soId, addToast]);
+  }, [id, tc]);
 
-  useEffect(() => {
-    fetchOrder();
-  }, [fetchOrder]);
+  useEffect(() => { fetchOrder(); }, [fetchOrder]);
 
-  const handleUpdate = async (formData) => {
-    setActionLoading(true);
+  const run = async (fn, successMessage) => {
+    if (busy) return;
+    setBusy(true);
     try {
-      const updated = await salesOrdersService.update(soId, formData);
-      setOrder(updated);
-      addToast({
-        title: 'Updated',
-        description: 'Sales order updated successfully',
-        type: 'success',
-      });
+      await fn();
+      showSuccess(successMessage);
+      await fetchOrder();
     } catch (err) {
-      addToast({
-        title: 'Update Failed',
-        description: err.message || 'Could not update sales order',
-        type: 'error',
-      });
+      showError(err.message || tc('toast.error'));
     } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleConfirm = async () => {
-    setActionLoading(true);
-    try {
-      const confirmed = await salesOrdersService.confirm(soId);
-      setOrder(confirmed);
-      addToast({
-        title: 'Order Confirmed',
-        description: `SO ${confirmed.so_number} is now confirmed`,
-        type: 'success',
-      });
-    } catch (err) {
-      addToast({
-        title: 'Confirmation Failed',
-        description: err.message || 'Could not confirm sales order',
-        type: 'error',
-      });
-    } finally {
-      setActionLoading(false);
+      setBusy(false);
+      setConfirmAction(null);
     }
   };
 
   const handleCreateInvoice = async () => {
-    setActionLoading(true);
-    try {
-      const invoice = await salesOrdersService.createInvoice(soId, selectedJournalId || null);
-      setInvoiceModalOpen(false);
-      addToast({
-        title: 'Invoice Created',
-        description: `Customer Invoice generated from ${order.so_number}`,
-        type: 'success',
-      });
-      router.push(`/dashboard/customer-invoices/${invoice.id}`);
-    } catch (err) {
-      addToast({
-        title: 'Invoice Creation Failed',
-        description: err.message || 'Could not generate customer invoice',
-        type: 'error',
-      });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleCancel = async () => {
-    if (!confirm('Are you sure you want to cancel this sales order?')) {
+    if (!invoiceJournalId) {
+      showError(t('toast.journalRequired'));
       return;
     }
 
-    setActionLoading(true);
+    setBusy(true);
     try {
-      const cancelled = await salesOrdersService.cancel(soId);
-      setOrder(cancelled);
-      addToast({
-        title: 'Order Cancelled',
-        description: `Sales order ${cancelled.so_number} has been cancelled`,
-        type: 'info',
+      const { invoice } = await salesOrdersService.createInvoice(id, {
+        journal_id: invoiceJournalId,
+        invoice_date: new Date().toISOString().slice(0, 10),
       });
+      showSuccess(t('toast.invoiceCreated'));
+      router.push(`/dashboard/customer-invoices/${invoice.id}`);
     } catch (err) {
-      addToast({
-        title: 'Cancellation Failed',
-        description: err.message || 'Could not cancel sales order',
-        type: 'error',
-      });
-    } finally {
-      setActionLoading(false);
+      showError(err.message || tc('toast.error'));
+      setBusy(false);
     }
   };
 
   if (loading) {
+    return <div className="doc-loading">{tc('states.loading')}</div>;
+  }
+
+  if (error || !order) {
     return (
-      <div className="p-12 text-center text-gray-400">
-        <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-indigo-400" />
-        Loading sales order details…
+      <div className="doc-page doc-page-narrow">
+        <ErrorState message={error || tc('states.notFound')} onRetry={fetchOrder} />
       </div>
     );
   }
 
-  if (!order) {
-    return (
-      <div className="p-12 text-center text-gray-400">
-        Sales order not found.
-      </div>
-    );
-  }
-
-  const stages = [
-    { key: 'draft', label: 'Draft' },
-    { key: 'confirmed', label: 'Confirmed' },
-    { key: 'invoiced', label: 'Invoiced' },
-    { key: 'cancelled', label: 'Cancelled' },
-  ];
+  const isDraft = order.status === 'draft';
+  const isConfirmed = order.status === 'confirmed';
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
-      {/* Document Status Bar */}
-      <DocumentStatusBar
-        documentNumber={order.so_number}
-        currentStatus={order.status}
-        stages={stages}
-        onConfirm={order.status === 'draft' ? handleConfirm : null}
-        onCreateBill={order.status === 'confirmed' ? () => setInvoiceModalOpen(true) : null}
-        createBillText="Create Invoice"
-        onCancel={order.status !== 'invoiced' && order.status !== 'cancelled' ? handleCancel : null}
-        loading={actionLoading}
-      />
-
-      {/* Form */}
-      <SalesOrderForm
-        initialData={order}
-        onSubmit={handleUpdate}
-        onCancel={() => router.push('/dashboard/sales-orders')}
-        loading={actionLoading}
-        isReadOnly={order.status !== 'draft'}
-      />
-
-      {/* Modal for Invoice Journal Selection */}
-      <Modal
-        isOpen={invoiceModalOpen}
-        onClose={() => setInvoiceModalOpen(false)}
-        title="Generate Customer Invoice"
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-gray-300">
-            Select the Sales Journal to issue this Customer Invoice against:
-          </p>
-
+    <div className="doc-page">
+      <div className="doc-page-head">
+        <div className="doc-page-head-left">
+          <Link
+            href="/dashboard/sales-orders"
+            className="doc-btn doc-btn-icon"
+            aria-label={tc('actions.back')}
+          >
+            <ArrowLeft size={15} aria-hidden="true" />
+          </Link>
           <div>
-            <label className="block text-xs font-semibold text-gray-300 mb-1.5">
-              Sales Journal
-            </label>
+            <h1 className="doc-page-title">
+              <FileText size={19} className="doc-icon-accent" aria-hidden="true" />
+              {order.so_number}
+            </h1>
+            <p className="doc-page-sub">
+              {order.customer_name} · {formatDate(order.order_date, locale)}
+            </p>
+          </div>
+        </div>
+
+        <div className="doc-page-actions">
+          <StatusPill status={order.status} />
+
+          {isDraft && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setConfirmAction('confirm')}
+              className="doc-btn doc-btn-primary"
+            >
+              <CheckCircle size={15} aria-hidden="true" />
+              {t('actions.confirm')}
+            </button>
+          )}
+
+          {isConfirmed && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setShowInvoicePanel((v) => !v)}
+              className="doc-btn doc-btn-primary"
+            >
+              <Receipt size={15} aria-hidden="true" />
+              {t('actions.createInvoice')}
+            </button>
+          )}
+
+          {(isDraft || isConfirmed) && (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => setConfirmAction('cancel')}
+              className="doc-btn"
+            >
+              <XCircle size={15} aria-hidden="true" />
+              {t('actions.cancel')}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {showInvoicePanel && isConfirmed && (
+        <div className="doc-panel">
+          <h3 className="doc-panel-title">{t('invoicePanel.title')}</h3>
+          <p className="doc-panel-body">{t('invoicePanel.body')}</p>
+
+          <div className="doc-panel-field">
             <JournalPicker
+              value={invoiceJournalId}
+              onChange={(journal) => setInvoiceJournalId(journal ? journal.id : '')}
               type="sales"
-              value={selectedJournalId}
-              onChange={(j) => setSelectedJournalId(j ? j.id : '')}
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-3 border-t border-gray-800">
+          <div>
             <button
               type="button"
-              onClick={() => setInvoiceModalOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-300 bg-gray-800 hover:bg-gray-700 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
+              disabled={busy}
               onClick={handleCreateInvoice}
-              disabled={actionLoading}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 transition-colors shadow-md disabled:opacity-50"
+              className="doc-btn doc-btn-primary"
             >
-              {actionLoading ? 'Generating…' : 'Generate Customer Invoice'}
+              {busy ? t('invoicePanel.creating') : t('invoicePanel.action')}
             </button>
           </div>
         </div>
-      </Modal>
+      )}
+
+      <SalesOrderForm initialData={order} isReadOnly onSubmit={() => {}} onCancel={() => {}} />
+
+      <div className="doc-totals-right">
+        <DocumentTotals
+          untaxedAmount={order.untaxed_amount}
+          taxAmount={order.tax_amount}
+          totalAmount={order.total_amount}
+        />
+      </div>
+
+      <ConfirmDialog
+        isOpen={confirmAction === 'confirm'}
+        title={t('confirmDialog.title')}
+        description={t('confirmDialog.body')}
+        confirmLabel={t('actions.confirm')}
+        cancelLabel={tc('actions.cancel')}
+        isSubmitting={busy}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={() => run(() => salesOrdersService.confirm(id), t('toast.confirmed'))}
+      />
+
+      <ConfirmDialog
+        isOpen={confirmAction === 'cancel'}
+        title={t('cancelDialog.title')}
+        description={t('cancelDialog.body')}
+        confirmLabel={t('actions.cancel')}
+        cancelLabel={tc('actions.close')}
+        isDestructive
+        isSubmitting={busy}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={() => run(() => salesOrdersService.cancel(id), t('toast.cancelled'))}
+      />
     </div>
   );
 }

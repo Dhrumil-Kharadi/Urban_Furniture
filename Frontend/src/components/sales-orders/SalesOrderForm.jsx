@@ -1,216 +1,187 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import ContactPicker from '../pickers/ContactPicker';
-import { DocumentLineGrid, DocumentTotals, FormActions, FormField } from '../shared';
+import React, { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
+import ContactPicker from '@/components/pickers/ContactPicker';
+import { DocumentLineGrid, DocumentTotals, FormField, FormActions } from '@/components/shared';
 
 /**
- * SalesOrderForm Component
+ * SalesOrderForm
  *
- * Form for creating & editing Sales Orders.
- * - Header: Customer picker (customer/both), Order Date, Expected Delivery Date, Notes.
- * - Lines: Reuses DocumentLineGrid (salesPrice, sales tax, analytic tag).
- * - Totals: Reuses DocumentTotals with untaxed subtotal, tax amount, and grand total.
+ * SPECIFICATION (Doc/project.md §5.2.1, Doc/phase.md Phase 9):
+ * - Customer + products + quantity + unit price + TAX (§5.2.1 lists tax on
+ *   the Sales Order explicitly, which is why the grid shows a tax column).
+ * - Lifecycle: draft → confirmed → invoiced → cancelled.
+ *
+ * REUSE: the line grid, the totals block and the field/action wrappers are all
+ * Phase 8's. Only the config differs — salesPrice instead of costPrice, the
+ * sales tax scope, and a customer rather than a vendor. A second line grid
+ * here is the failure mode phase.md Phase 8 warns about.
+ *
+ * The totals shown are a PREVIEW. The server recomputes every amount from the
+ * lines and ignores anything sent from here.
  */
 export default function SalesOrderForm({
   initialData = null,
   onSubmit,
   onCancel,
-  loading = false,
+  isSubmitting = false,
   isReadOnly = false,
 }) {
-  const [formData, setFormData] = useState({
-    customer_contact_id: '',
-    order_date: new Date().toISOString().slice(0, 10),
-    expected_date: '',
-    notes: '',
-    lines: [
-      {
-        product_id: null,
-        description: '',
-        quantity: 1,
-        unit_price: 0,
-        tax_id: null,
-        tax_rate: 0,
-        untaxed_amount: '0.00',
-        tax_amount: '0.00',
-        total_amount: '0.00',
-        analytic_account_id: null,
-      },
-    ],
-  });
+  const t = useTranslations('salesOrders');
+  const tc = useTranslations('common');
+
+  // Initialised lazily rather than synced by an effect: the detail page mounts
+  // this form only once the record has loaded, and the new page never has one.
+  const [formData, setFormData] = useState(() => ({
+    customer_contact_id: initialData?.customer_contact_id || '',
+    order_date: initialData?.order_date
+      ? initialData.order_date.slice(0, 10)
+      : new Date().toISOString().slice(0, 10),
+    expected_date: initialData?.expected_date ? initialData.expected_date.slice(0, 10) : '',
+    notes: initialData?.notes || '',
+    lines: initialData?.lines?.length
+      ? initialData.lines.map((l) => ({
+          ...l,
+          quantity: parseFloat(l.quantity) || 1,
+          unit_price: parseFloat(l.unit_price) || 0,
+          tax_rate: parseFloat(l.tax_rate) || 0,
+        }))
+      : [
+          {
+            product_id: null,
+            description: '',
+            quantity: 1,
+            unit_price: 0,
+            tax_id: null,
+            tax_rate: 0,
+            untaxed_amount: '0.00',
+            tax_amount: '0.00',
+            total_amount: '0.00',
+            analytic_account_id: null,
+            income_account_id: null,
+          },
+        ],
+  }));
 
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        customer_contact_id: initialData.customer_contact_id || '',
-        order_date: initialData.order_date ? initialData.order_date.slice(0, 10) : new Date().toISOString().slice(0, 10),
-        expected_date: initialData.expected_date ? initialData.expected_date.slice(0, 10) : '',
-        notes: initialData.notes || '',
-        lines: initialData.lines?.length
-          ? initialData.lines.map((l) => ({
-              ...l,
-              quantity: parseFloat(l.quantity) || 1,
-              unit_price: parseFloat(l.unit_price) || 0,
-              tax_rate: parseFloat(l.tax_rate) || 0,
-            }))
-          : [],
-      });
-    }
-  }, [initialData]);
+  // Preview only — the server is the authority on every one of these.
+  const { untaxedTotal, taxTotal, grandTotal } = useMemo(() => {
+    const untaxed = formData.lines.reduce((acc, l) => acc + (parseFloat(l.untaxed_amount) || 0), 0);
+    const tax = formData.lines.reduce((acc, l) => acc + (parseFloat(l.tax_amount) || 0), 0);
+    return {
+      untaxedTotal: untaxed.toFixed(2),
+      taxTotal: tax.toFixed(2),
+      grandTotal: (untaxed + tax).toFixed(2),
+    };
+  }, [formData.lines]);
 
-  // Compute overall summary totals
-  const untaxedTotal = formData.lines.reduce(
-    (acc, line) => acc + (parseFloat(line.untaxed_amount) || 0),
-    0
-  );
-  const taxTotal = formData.lines.reduce(
-    (acc, line) => acc + (parseFloat(line.tax_amount) || 0),
-    0
-  );
-  const grandTotal = untaxedTotal + taxTotal;
+  const validate = () => {
+    const next = {};
+    if (!formData.customer_contact_id) next.customer_contact_id = t('errors.customer');
+    if (!formData.order_date) next.order_date = t('errors.orderDate');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const newErrors = {};
-
-    if (!formData.customer_contact_id) {
-      newErrors.customer_contact_id = 'Please select a customer';
-    }
-    if (!formData.order_date) {
-      newErrors.order_date = 'Order date is required';
-    }
-    if (!formData.lines.length) {
-      newErrors.lines = 'At least one line item is required';
-    } else {
-      const invalidLines = formData.lines.some(
-        (l) => !l.description?.trim() || !(parseFloat(l.quantity) > 0)
-      );
-      if (invalidLines) {
-        newErrors.lines = 'All lines must have a description and quantity > 0';
-      }
+    if (!formData.lines.length) next.lines = t('errors.lines');
+    else if (formData.lines.some((l) => !l.product_id && !l.description?.trim())) {
+      next.lines = t('errors.lineProduct');
+    } else if (formData.lines.some((l) => !(parseFloat(l.quantity) > 0))) {
+      next.lines = t('errors.lineQuantity');
     }
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
+    setErrors(next);
+    return Object.keys(next).length === 0;
+  };
 
-    setErrors({});
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (isSubmitting || !validate()) return;
+
+    // Totals are deliberately not sent: the server recomputes them.
     onSubmit({
-      ...formData,
+      customer_contact_id: formData.customer_contact_id,
+      order_date: formData.order_date,
       expected_date: formData.expected_date || null,
-      lines: formData.lines.map((l, idx) => ({
-        line_no: idx + 1,
+      notes: formData.notes || null,
+      lines: formData.lines.map((l) => ({
         product_id: l.product_id || null,
-        description: l.description.trim(),
-        quantity: parseFloat(l.quantity),
-        unit_price: parseFloat(l.unit_price),
+        description: l.description || '',
+        quantity: String(l.quantity),
+        unit_price: String(l.unit_price),
         tax_id: l.tax_id || null,
-        tax_rate: parseFloat(l.tax_rate || 0),
+        tax_rate: l.tax_rate === undefined || l.tax_rate === null ? undefined : String(l.tax_rate),
         analytic_account_id: l.analytic_account_id || null,
+        income_account_id: l.income_account_id || null,
       })),
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Header Card */}
-      <div className="rounded-xl border border-gray-700/60 bg-gray-900/60 p-6 shadow-md space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-800 pb-2">
-          General Details
-        </h2>
+    <form onSubmit={handleSubmit} className="app-form doc-form-stack" noValidate>
+      <div className="app-form-grid">
+        <FormField label={t('fields.customer')} required error={errors.customer_contact_id}>
+          <ContactPicker
+            value={formData.customer_contact_id}
+            onChange={(contact) =>
+              setFormData((prev) => ({ ...prev, customer_contact_id: contact ? contact.id : '' }))
+            }
+            /* Only customers and 'both' — a vendor-only contact must never
+               appear on a sales document. The server refuses it too. */
+            type="customer"
+            disabled={isReadOnly}
+          />
+        </FormField>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          <FormField
-            label="Customer"
-            required
-            error={errors.customer_contact_id}
-          >
-            <ContactPicker
-              value={formData.customer_contact_id}
-              onChange={(c) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  customer_contact_id: c ? c.id : '',
-                }))
-              }
-              type="customer"
-              disabled={isReadOnly}
-            />
-          </FormField>
+        <FormField label={t('fields.orderDate')} required error={errors.order_date}>
+          <input
+            type="date"
+            className="form-input"
+            value={formData.order_date}
+            onChange={(e) => setFormData((prev) => ({ ...prev, order_date: e.target.value }))}
+            disabled={isReadOnly}
+          />
+        </FormField>
 
-          <FormField label="Order Date" required error={errors.order_date}>
-            <input
-              type="date"
-              className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-100 focus:outline-none focus:border-indigo-500"
-              value={formData.order_date}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, order_date: e.target.value }))
-              }
-              disabled={isReadOnly}
-            />
-          </FormField>
+        <FormField label={t('fields.expectedDate')}>
+          <input
+            type="date"
+            className="form-input"
+            value={formData.expected_date}
+            onChange={(e) => setFormData((prev) => ({ ...prev, expected_date: e.target.value }))}
+            disabled={isReadOnly}
+          />
+        </FormField>
 
-          <FormField label="Expected Delivery Date" error={errors.expected_date}>
-            <input
-              type="date"
-              className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-100 focus:outline-none focus:border-indigo-500"
-              value={formData.expected_date}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  expected_date: e.target.value,
-                }))
-              }
-              disabled={isReadOnly}
-            />
-          </FormField>
-        </div>
-
-        <div className="pt-2">
-          <FormField label="Terms & Notes">
-            <textarea
-              rows={2}
-              className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-100 focus:outline-none focus:border-indigo-500"
-              placeholder="Add payment terms, delivery instructions, or notes…"
-              value={formData.notes}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, notes: e.target.value }))
-              }
-              disabled={isReadOnly}
-            />
-          </FormField>
-        </div>
+        <FormField label={t('fields.notes')}>
+          <textarea
+            rows={2}
+            className="form-textarea"
+            value={formData.notes}
+            onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
+            disabled={isReadOnly}
+          />
+        </FormField>
       </div>
 
-      {/* Line Items Card */}
-      <div className="rounded-xl border border-gray-700/60 bg-gray-900/60 p-6 shadow-md space-y-4">
-        <div className="flex items-center justify-between border-b border-gray-800 pb-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
-            Order Line Items
-          </h2>
-          {errors.lines && (
-            <span className="text-xs text-red-400 font-medium">{errors.lines}</span>
-          )}
+      <div>
+        <div className="doc-section-head">
+          <h3 className="doc-section-title">{t('linesTitle')}</h3>
+          {errors.lines && <span className="doc-section-error">{errors.lines}</span>}
         </div>
 
         <DocumentLineGrid
           lines={formData.lines}
-          onChange={(newLines) =>
-            setFormData((prev) => ({ ...prev, lines: newLines }))
-          }
+          onChange={(newLines) => setFormData((prev) => ({ ...prev, lines: newLines }))}
           config={{
             priceField: 'salesPrice',
             taxScope: 'sales',
             showAccount: false,
+            accountField: 'income_account_id',
             readOnly: isReadOnly,
           }}
         />
 
-        <div className="pt-4 flex justify-end">
+        <div className="doc-totals-right">
           <DocumentTotals
             untaxedAmount={untaxedTotal}
             taxAmount={taxTotal}
@@ -219,12 +190,13 @@ export default function SalesOrderForm({
         </div>
       </div>
 
-      {/* Action Buttons */}
       {!isReadOnly && (
         <FormActions
           onCancel={onCancel}
-          loading={loading}
-          submitText={initialData ? 'Update Sales Order' : 'Create Sales Order'}
+          isSubmitting={isSubmitting}
+          submitLabel={initialData ? t('submit.update') : t('submit.create')}
+          submittingLabel={tc('actions.submitting')}
+          cancelLabel={tc('actions.cancel')}
         />
       )}
     </form>

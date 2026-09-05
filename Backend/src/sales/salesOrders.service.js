@@ -1,19 +1,23 @@
 /**
  * Sales Orders Service
  *
- * Business logic for Sales Order lifecycle:
- *   draft → confirmed → invoiced → cancelled
+ * Lifecycle (project.md §5.2.2): draft → confirmed → invoiced → cancelled.
  *
- * Totals are ALWAYS recomputed server-side from lines using decimal.js.
- * Client-sent totals are IGNORED.
+ * Totals are ALWAYS recomputed server-side from the lines through
+ * shared/documentLines.js. Client-sent totals are ignored — a client that can
+ * name its own total can name zero.
+ *
+ * The line arithmetic itself is NOT here: it is the shared engine that
+ * purchases also uses, configured for the sales side. Reimplementing it would
+ * be the second of the four copies phase.md warns about.
  */
 
-const { money, toDb, sum } = require('../shared/money');
+const { money } = require('../shared/money');
 const { withTransaction } = require('../shared/withTransaction');
 const sequenceService = require('../shared/sequence.service');
 const auditService = require('../shared/audit.service');
+const { resolveAndComputeLines, SALES_CONFIG } = require('../shared/documentLines');
 const salesRepository = require('./sales.repository');
-const logger = require('../utils/logger');
 
 /** @private */
 function fail(message, statusCode = 400) {
@@ -23,147 +27,63 @@ function fail(message, statusCode = 400) {
 }
 
 /**
- * Compute line-level and header-level totals from raw lines.
- * Client-sent totals are never trusted.
- *
- * @param {Array} rawLines
- * @returns {{ computedLines: Array, untaxed_amount: string, tax_amount: string, total_amount: string }}
+ * Recompute the lines of a sales document from raw input.
+ * @private
  */
-function computeLineTotals(rawLines) {
-  const computedLines = rawLines.map((line, index) => {
-    const qty = money(line.quantity);
-    const unitPrice = money(line.unit_price);
-    const taxRate = money(line.tax_rate || 0);
-
-    const untaxed = qty.times(unitPrice).toFixed(2);
-    const taxAmt = money(untaxed).times(taxRate).dividedBy(100).toFixed(2);
-    const total = money(untaxed).plus(money(taxAmt)).toFixed(2);
-
-    return {
-      line_no: index + 1,
-      product_id: line.product_id || null,
-      description: (line.description || '').trim(),
-      quantity: toDb(qty),
-      unit_price: toDb(unitPrice),
-      tax_id: line.tax_id || null,
-      tax_rate: taxRate.toFixed(4),
-      untaxed_amount: untaxed,
-      tax_amount: taxAmt,
-      total_amount: total,
-      analytic_account_id: line.analytic_account_id || null,
-      income_account_id: line.income_account_id || null,
-    };
-  });
-
-  const headerUntaxed = sum(computedLines.map(l => l.untaxed_amount));
-  const headerTax = sum(computedLines.map(l => l.tax_amount));
-  const headerTotal = sum(computedLines.map(l => l.total_amount));
-
-  return {
-    computedLines,
-    untaxed_amount: headerUntaxed,
-    tax_amount: headerTax,
-    total_amount: headerTotal,
-  };
-}
-
-/**
- * Resolve product and tax metadata from database, then recompute totals.
- */
-async function resolveAndComputeLines(client, organizationId, rawLines) {
-  const { pool } = require('../config/db');
-  const db = client || pool;
-  const productIds = [...new Set(rawLines.map(l => l.product_id).filter(Boolean))];
-  const taxIds = [...new Set(rawLines.map(l => l.tax_id).filter(Boolean))];
-
-  let productMap = {};
-  if (productIds.length > 0) {
-    const pRes = await db.query(
-      `SELECT id, name, sales_price, income_account_id, sales_tax_id
-         FROM products
-        WHERE id = ANY($1) AND organization_id = $2`,
-      [productIds, organizationId]
-    );
-    for (const row of pRes.rows) {
-      productMap[row.id] = row;
-    }
-  }
-
-  let taxMap = {};
-  if (taxIds.length > 0) {
-    const tRes = await db.query(
-      `SELECT id, rate FROM taxes WHERE id = ANY($1) AND organization_id = $2`,
-      [taxIds, organizationId]
-    );
-    for (const row of tRes.rows) {
-      taxMap[row.id] = row.rate;
-    }
-  }
-
-  const enrichedLines = rawLines.map((line) => {
-    const prod = line.product_id ? productMap[line.product_id] : null;
-    let unitPrice = (line.unit_price !== undefined && line.unit_price !== null && line.unit_price !== '')
-      ? line.unit_price
-      : (prod?.sales_price || 0);
-    let taxId = line.tax_id || prod?.sales_tax_id || null;
-    let taxRateVal = (line.tax_rate !== undefined && line.tax_rate !== null && line.tax_rate !== '')
-      ? line.tax_rate
-      : (taxId && taxMap[taxId] !== undefined ? taxMap[taxId] : 0);
-    let incomeAcc = line.income_account_id || prod?.income_account_id || null;
-
-    return {
-      ...line,
-      unit_price: unitPrice,
-      tax_id: taxId,
-      tax_rate: taxRateVal,
-      income_account_id: incomeAcc,
-      description: line.description || prod?.name || '',
-    };
-  });
-
-  return computeLineTotals(enrichedLines);
+function computeSalesLines(client, organizationId, rawLines) {
+  return resolveAndComputeLines(client, organizationId, rawLines, SALES_CONFIG);
 }
 
 const salesOrdersService = {
   /**
-   * List sales orders for an organization.
+   * @param {string} organizationId
+   * @param {object} query
+   * @returns {Promise<{ items: Array, meta: object }>}
    */
   async listSalesOrders(organizationId, query) {
     return salesRepository.listSalesOrders(null, organizationId, query);
   },
 
   /**
-   * Get a single sales order by ID.
+   * A sales order in another organization is reported as missing, never as
+   * forbidden — a 403 would confirm it exists.
+   *
+   * @param {string} organizationId
+   * @param {string} soId
+   * @returns {Promise<object>}
    */
   async getSalesOrderById(organizationId, soId) {
-    const so = await salesRepository.getSalesOrderById(null, organizationId, soId);
-    if (!so) fail('Sales order not found', 404);
-    return so;
+    const salesOrder = await salesRepository.getSalesOrderById(null, organizationId, soId);
+    if (!salesOrder) fail('Sales order not found', 404);
+    return salesOrder;
   },
 
   /**
-   * Create a new draft sales order.
+   * Create a draft sales order.
+   *
+   * @param {string} organizationId
+   * @param {string} actorUserId
+   * @param {object} data
+   * @returns {Promise<object>}
    */
   async createSalesOrder(organizationId, actorUserId, data) {
-    // Validate customer is active and of type customer/both
-    const customer = await salesRepository.findActiveCustomer(null, organizationId, data.customer_contact_id);
-    if (!customer) fail('Customer not found or is inactive', 400);
+    const customer = await salesRepository.findActiveCustomer(
+      null, organizationId, data.customer_contact_id
+    );
+    if (!customer) fail('Customer not found, inactive, or not a customer contact', 400);
 
-    return await withTransaction(async (client) => {
-      // Recompute totals server-side with DB lookup
-      const { computedLines, untaxed_amount, tax_amount, total_amount } = await resolveAndComputeLines(
-        client, organizationId, data.lines
-      );
+    return withTransaction(async (client) => {
+      const { computedLines, untaxed_amount, tax_amount, total_amount } =
+        await computeSalesLines(client, organizationId, data.lines);
 
-      // Consume SO sequence
-      const soNumber = await sequenceService.nextDocumentNumber(
-        client, organizationId, 'SO',
-        String(new Date().getFullYear())
-      );
+      // A draft carries a placeholder number. The real SO number comes from
+      // the sequence at confirmation, so abandoned drafts do not consume one
+      // and leave gaps in the numbering an auditor will ask about.
+      const draftNumber = `DRAFT-SO-${Date.now()}`;
 
-      const so = await salesRepository.insertSalesOrder(client, {
+      const salesOrder = await salesRepository.insertSalesOrder(client, {
         organization_id: organizationId,
-        so_number: soNumber,
+        so_number: draftNumber,
         customer_contact_id: data.customer_contact_id,
         order_date: data.order_date,
         expected_date: data.expected_date || null,
@@ -176,7 +96,7 @@ const salesOrdersService = {
       });
 
       await salesRepository.insertSalesOrderLines(
-        client, organizationId, so.id, computedLines
+        client, organizationId, salesOrder.id, computedLines
       );
 
       await auditService.recordAudit(client, {
@@ -184,16 +104,22 @@ const salesOrdersService = {
         actorUserId,
         action: 'create',
         entityType: 'sales_order',
-        entityId: so.id,
-        after: { so_number: so.so_number, customer: customer.name, total: total_amount },
+        entityId: salesOrder.id,
+        after: { so_number: salesOrder.so_number, customer: customer.name, total: total_amount },
       });
 
-      return salesRepository.getSalesOrderById(client, organizationId, so.id);
+      return salesRepository.getSalesOrderById(client, organizationId, salesOrder.id);
     });
   },
 
   /**
-   * Update a draft sales order.
+   * Update a DRAFT sales order. Anything else is refused with a 409.
+   *
+   * @param {string} organizationId
+   * @param {string} actorUserId
+   * @param {string} soId
+   * @param {object} data
+   * @returns {Promise<object>}
    */
   async updateSalesOrder(organizationId, actorUserId, soId, data) {
     const existing = await salesRepository.getSalesOrderById(null, organizationId, soId);
@@ -201,11 +127,13 @@ const salesOrdersService = {
     if (existing.status !== 'draft') fail('Only draft sales orders can be edited', 409);
 
     if (data.customer_contact_id) {
-      const customer = await salesRepository.findActiveCustomer(null, organizationId, data.customer_contact_id);
-      if (!customer) fail('Customer not found or is inactive', 400);
+      const customer = await salesRepository.findActiveCustomer(
+        null, organizationId, data.customer_contact_id
+      );
+      if (!customer) fail('Customer not found, inactive, or not a customer contact', 400);
     }
 
-    return await withTransaction(async (client) => {
+    return withTransaction(async (client) => {
       const updateData = {
         customer_contact_id: data.customer_contact_id,
         order_date: data.order_date,
@@ -214,10 +142,10 @@ const salesOrdersService = {
         updated_by: actorUserId,
       };
 
-      if (data.lines && Array.isArray(data.lines) && data.lines.length > 0) {
-        const { computedLines, untaxed_amount, tax_amount, total_amount } = await resolveAndComputeLines(
-          client, organizationId, data.lines
-        );
+      if (Array.isArray(data.lines) && data.lines.length > 0) {
+        const { computedLines, untaxed_amount, tax_amount, total_amount } =
+          await computeSalesLines(client, organizationId, data.lines);
+
         updateData.untaxed_amount = untaxed_amount;
         updateData.tax_amount = tax_amount;
         updateData.total_amount = total_amount;
@@ -243,17 +171,37 @@ const salesOrdersService = {
   },
 
   /**
-   * Confirm a draft sales order → confirmed.
+   * Confirm a draft: assign the real SO number and move to 'confirmed'.
+   *
+   * @param {string} organizationId
+   * @param {string} actorUserId
+   * @param {string} soId
+   * @returns {Promise<object>}
    */
   async confirmSalesOrder(organizationId, actorUserId, soId) {
-    const so = await salesRepository.getSalesOrderById(null, organizationId, soId);
-    if (!so) fail('Sales order not found', 404);
-    if (so.status !== 'draft') fail('Only draft sales orders can be confirmed', 409);
-    if (!so.lines || so.lines.length === 0) fail('Cannot confirm a sales order with no lines', 400);
+    return withTransaction(async (client) => {
+      const salesOrder = await salesRepository.getSalesOrderById(client, organizationId, soId);
+      if (!salesOrder) fail('Sales order not found', 404);
+      if (salesOrder.status !== 'draft') fail('Only draft sales orders can be confirmed', 409);
+      if (!salesOrder.lines || salesOrder.lines.length === 0) {
+        fail('Cannot confirm a sales order with no lines', 400);
+      }
+      if (money(salesOrder.total_amount).isZero()) {
+        fail('Sales order total must be greater than zero', 400);
+      }
 
-    return await withTransaction(async (client) => {
-      await salesRepository.updateSOStatus(
-        client, organizationId, soId, 'confirmed', actorUserId
+      // Consumed on the shared client, so a rollback releases the row lock and
+      // the number is never burned.
+      const fiscalYear = String(new Date(salesOrder.order_date).getFullYear());
+      const soNumber = await sequenceService.nextDocumentNumber(
+        client, organizationId, 'SO', fiscalYear
+      );
+
+      await client.query(
+        `UPDATE sales_orders
+            SET so_number = $1, status = 'confirmed', updated_by = $2, updated_at = NOW()
+          WHERE id = $3 AND organization_id = $4`,
+        [soNumber, actorUserId, soId, organizationId]
       );
 
       await auditService.recordAudit(client, {
@@ -263,7 +211,7 @@ const salesOrdersService = {
         entityType: 'sales_order',
         entityId: soId,
         before: { status: 'draft' },
-        after: { status: 'confirmed' },
+        after: { status: 'confirmed', so_number: soNumber },
       });
 
       return salesRepository.getSalesOrderById(client, organizationId, soId);
@@ -271,108 +219,89 @@ const salesOrdersService = {
   },
 
   /**
-   * Create a customer invoice from a confirmed SO.
-   * Copies lines from the SO into a new draft invoice and transitions SO to 'invoiced'.
+   * Convert a confirmed sales order into a DRAFT customer invoice
+   * (project.md §5.2.3). The invoice is not posted here — posting is a
+   * separate, deliberate act.
+   *
+   * Refuses an order that is already invoiced, which is what stops the same
+   * order being billed to the customer twice.
+   *
+   * @param {string} organizationId
+   * @param {string} actorUserId
+   * @param {string} soId
+   * @param {object} data - { invoice_date, due_date, journal_id }
+   * @returns {Promise<object>} The created draft invoice.
    */
-  async createInvoiceFromSO(organizationId, actorUserId, soId, journalId = null) {
-    const so = await salesRepository.getSalesOrderById(null, organizationId, soId);
-    if (!so) fail('Sales order not found', 404);
-    if (so.status === 'invoiced') fail('This sales order has already been invoiced', 409);
-    if (so.status !== 'confirmed') fail('Only confirmed sales orders can create invoices', 409);
+  async createInvoiceFromSO(organizationId, actorUserId, soId, data) {
+    return withTransaction(async (client) => {
+      const salesOrder = await salesRepository.getSalesOrderById(client, organizationId, soId);
+      if (!salesOrder) fail('Sales order not found', 404);
 
-    return await withTransaction(async (client) => {
-      // Resolve journal
-      let targetJournal = null;
-      if (journalId) {
-        targetJournal = await salesRepository.findActiveJournal(client, organizationId, journalId);
-        if (!targetJournal) fail('Journal not found or inactive', 400);
-        if (targetJournal.journal_type !== 'sales') {
-          fail('Customer invoices must use a sales journal', 400);
-        }
-      } else {
-        targetJournal = await salesRepository.findDefaultSalesJournal(client, organizationId);
-        if (!targetJournal) {
-          fail('No active sales journal found for this organization', 400);
-        }
+      if (salesOrder.status === 'invoiced') {
+        fail('This sales order has already been invoiced', 409);
+      }
+      if (salesOrder.status !== 'confirmed') {
+        fail('Only a confirmed sales order can be invoiced', 409);
+      }
+      if (!salesOrder.lines || salesOrder.lines.length === 0) {
+        fail('Cannot invoice a sales order with no lines', 400);
       }
 
-      // Mark SO as invoiced immediately to prevent double-invoicing
-      await salesRepository.updateSOStatus(
-        client, organizationId, so.id, 'invoiced', actorUserId
+      const journal = await salesRepository.findActiveJournal(
+        client, organizationId, data.journal_id, ['sales', 'general']
       );
+      if (!journal) fail('A sales journal is required and must be active', 400);
 
-      // Generate a draft invoice number placeholder
-      const draftInvoiceNumber = `DRAFT-${so.so_number}`;
+      // Recompute rather than copying the stored totals: the SO may have been
+      // saved before a tax rate changed, and the invoice is the document that
+      // will actually hit the ledger.
+      const { computedLines, untaxed_amount, tax_amount, total_amount } =
+        await computeSalesLines(client, organizationId, salesOrder.lines);
+
+      // Every invoice line needs somewhere to credit. An SO line may have left
+      // it blank; the invoice cannot.
+      const missingAccount = computedLines.find((line) => !line.income_account_id);
+      if (missingAccount) {
+        fail(
+          `Line ${missingAccount.line_no} has no income account — set one on the product or the line`,
+          400
+        );
+      }
 
       const invoice = await salesRepository.insertCustomerInvoice(client, {
         organization_id: organizationId,
-        invoice_number: draftInvoiceNumber,
-        sales_order_id: so.id,
-        customer_contact_id: so.customer_contact_id,
-        invoice_date: new Date().toISOString().slice(0, 10),
-        due_date: null,
+        invoice_number: `DRAFT-INV-${Date.now()}`,
+        sales_order_id: soId,
+        customer_contact_id: salesOrder.customer_contact_id,
+        invoice_date: data.invoice_date,
+        due_date: data.due_date || null,
         status: 'draft',
-        untaxed_amount: so.untaxed_amount,
-        tax_amount: so.tax_amount,
-        total_amount: so.total_amount,
+        untaxed_amount,
+        tax_amount,
+        total_amount,
         amount_due: '0.00',
         amount_paid: '0.00',
-        journal_id: targetJournal.id,
-        notes: so.notes ? `From SO: ${so.so_number}. ${so.notes}` : `From SO: ${so.so_number}`,
+        journal_id: data.journal_id,
+        notes: salesOrder.notes || null,
         actor_user_id: actorUserId,
       });
 
-      // Copy SO lines to invoice lines, resolving income accounts
-      const invoiceLines = await Promise.all(so.lines.map(async (soLine, i) => {
-        let incomeAcc = soLine.income_account_id;
-        if (!incomeAcc && soLine.product_id) {
-          const pRes = await client.query(
-            `SELECT income_account_id FROM products WHERE id = $1 AND organization_id = $2`,
-            [soLine.product_id, organizationId]
-          );
-          incomeAcc = pRes.rows[0]?.income_account_id;
-        }
-        if (!incomeAcc) {
-          incomeAcc = targetJournal.default_credit_account_id;
-        }
-        if (!incomeAcc) {
-          const accRes = await client.query(
-            `SELECT id FROM accounts WHERE organization_id = $1 AND code = '4010' AND status = 'active'`,
-            [organizationId]
-          );
-          incomeAcc = accRes.rows[0]?.id;
-        }
-        if (!incomeAcc) {
-          fail('An income account could not be resolved for invoice lines', 400);
-        }
-
-        return {
-          line_no: i + 1,
-          product_id: soLine.product_id,
-          description: soLine.description,
-          quantity: soLine.quantity,
-          unit_price: soLine.unit_price,
-          tax_id: soLine.tax_id,
-          tax_rate: soLine.tax_rate,
-          untaxed_amount: soLine.untaxed_amount,
-          tax_amount: soLine.tax_amount,
-          total_amount: soLine.total_amount,
-          analytic_account_id: soLine.analytic_account_id,
-          income_account_id: incomeAcc,
-        };
-      }));
-
       await salesRepository.insertCustomerInvoiceLines(
-        client, organizationId, invoice.id, invoiceLines
+        client, organizationId, invoice.id, computedLines
       );
+
+      // The order is marked invoiced now, so a concurrent second conversion
+      // sees 'invoiced' and is refused by the guard above.
+      await salesRepository.updateSOStatus(client, organizationId, soId, 'invoiced', actorUserId);
 
       await auditService.recordAudit(client, {
         organizationId,
         actorUserId,
-        action: 'create_invoice_from_so',
-        entityType: 'customer_invoice',
-        entityId: invoice.id,
-        after: { so_id: so.id, so_number: so.so_number, invoice_number: invoice.invoice_number },
+        action: 'convert',
+        entityType: 'sales_order',
+        entityId: soId,
+        before: { status: 'confirmed' },
+        after: { status: 'invoiced', customer_invoice_id: invoice.id },
       });
 
       return salesRepository.getCustomerInvoiceById(client, organizationId, invoice.id);
@@ -380,18 +309,24 @@ const salesOrdersService = {
   },
 
   /**
-   * Cancel a sales order (admin-only).
+   * Cancel a sales order. An invoiced order is refused: cancel the invoice
+   * first, which reverses its ledger entry.
+   *
+   * @param {string} organizationId
+   * @param {string} actorUserId
+   * @param {string} soId
+   * @returns {Promise<object>}
    */
   async cancelSalesOrder(organizationId, actorUserId, soId) {
-    const so = await salesRepository.getSalesOrderById(null, organizationId, soId);
-    if (!so) fail('Sales order not found', 404);
-    if (so.status === 'cancelled') fail('Sales order is already cancelled', 409);
-    if (so.status === 'invoiced') fail('Cannot cancel an invoiced sales order', 409);
+    return withTransaction(async (client) => {
+      const salesOrder = await salesRepository.getSalesOrderById(client, organizationId, soId);
+      if (!salesOrder) fail('Sales order not found', 404);
+      if (salesOrder.status === 'cancelled') fail('Sales order is already cancelled', 409);
+      if (salesOrder.status === 'invoiced') {
+        fail('Cancel the customer invoice first — it has already reached the ledger', 409);
+      }
 
-    return await withTransaction(async (client) => {
-      await salesRepository.updateSOStatus(
-        client, organizationId, soId, 'cancelled', actorUserId
-      );
+      await salesRepository.updateSOStatus(client, organizationId, soId, 'cancelled', actorUserId);
 
       await auditService.recordAudit(client, {
         organizationId,
@@ -399,7 +334,7 @@ const salesOrdersService = {
         action: 'cancel',
         entityType: 'sales_order',
         entityId: soId,
-        before: { status: so.status },
+        before: { status: salesOrder.status },
         after: { status: 'cancelled' },
       });
 
@@ -409,5 +344,4 @@ const salesOrdersService = {
 };
 
 module.exports = salesOrdersService;
-module.exports.computeLineTotals = computeLineTotals;
-module.exports.resolveAndComputeLines = resolveAndComputeLines;
+module.exports.computeSalesLines = computeSalesLines;

@@ -1,31 +1,40 @@
 /**
  * Migration: Create sales_orders and sales_order_lines tables
  *
- * Sales Flow (project.md §5.2):
- * - sales_orders: Header record for customer sales orders
- * - sales_order_lines: Line items with product, quantity, pricing, tax, and analytic tagging
+ * Sales Flow (project.md §5.2). The mirror of 019_create_purchase_orders —
+ * same shape, opposite side of the ledger:
+ *   - the counterparty is a customer, not a vendor
+ *   - the line carries income_account_id, not expense_account_id
  *
- * Status Lifecycle: 'draft' -> 'confirmed' -> 'invoiced' -> 'cancelled'
+ * Status Lifecycle (project.md §5.2.2):
+ *   'draft' -> 'confirmed' -> 'invoiced' -> 'cancelled'
+ *
+ * project.md §5.2.1 explicitly lists TAX on the Sales Order, which is why the
+ * line carries tax_id and tax_rate rather than deferring tax to the invoice.
+ *
+ * ANALYTIC TAGGING — project.md §8: analytic_account_id travels from this line
+ * to the invoice line to the journal line. Without it the Budget Report has no
+ * actuals.
  */
 
 const UP = `
   CREATE TABLE IF NOT EXISTS sales_orders (
-    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    organization_id     UUID NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,
-    so_number           VARCHAR(50) NOT NULL,
-    customer_contact_id UUID NOT NULL REFERENCES contacts(id) ON DELETE RESTRICT,
-    order_date          DATE NOT NULL,
-    expected_date       DATE NULL,
-    status              VARCHAR(20) NOT NULL DEFAULT 'draft'
-                        CHECK (status IN ('draft', 'confirmed', 'invoiced', 'cancelled')),
-    untaxed_amount      NUMERIC(15,2) NOT NULL DEFAULT 0 CHECK (untaxed_amount >= 0),
-    tax_amount          NUMERIC(15,2) NOT NULL DEFAULT 0 CHECK (tax_amount >= 0),
-    total_amount        NUMERIC(15,2) NOT NULL DEFAULT 0 CHECK (total_amount >= 0),
-    notes               TEXT NULL,
-    created_by          UUID REFERENCES users(id),
-    updated_by          UUID REFERENCES users(id),
-    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    organization_id       UUID NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT,
+    so_number             VARCHAR(50) NOT NULL,
+    customer_contact_id   UUID NOT NULL REFERENCES contacts(id) ON DELETE RESTRICT,
+    order_date            DATE NOT NULL,
+    expected_date         DATE NULL,
+    status                VARCHAR(20) NOT NULL DEFAULT 'draft'
+                          CHECK (status IN ('draft', 'confirmed', 'invoiced', 'cancelled')),
+    untaxed_amount        NUMERIC(15,2) NOT NULL DEFAULT 0 CHECK (untaxed_amount >= 0),
+    tax_amount            NUMERIC(15,2) NOT NULL DEFAULT 0 CHECK (tax_amount >= 0),
+    total_amount          NUMERIC(15,2) NOT NULL DEFAULT 0 CHECK (total_amount >= 0),
+    notes                 TEXT NULL,
+    created_by            UUID REFERENCES users(id),
+    updated_by            UUID REFERENCES users(id),
+    created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT uq_sales_orders_org_number UNIQUE (organization_id, so_number)
   );
 
