@@ -17,6 +17,7 @@
 
 import { NextIntlClientProvider } from 'next-intl';
 import { AuthProvider } from '@/context/AuthContext';
+import { ToastProvider } from '@/components/shared';
 
 /**
  * @param {object} props
@@ -51,7 +52,9 @@ export default function LocaleProvider({
       }
     >
       <AuthProvider>
-        {children}
+        <ToastProvider>
+          {children}
+        </ToastProvider>
       </AuthProvider>
     </NextIntlClientProvider>
   );

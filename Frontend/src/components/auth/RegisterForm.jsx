@@ -18,6 +18,7 @@ export default function RegisterForm({ onSwitchToLogin, onSwitchToVerifyEmail })
   const [formData, setFormData, clearDraft] = useFormDraft(
     'auth:register',
     {
+      organizationName: '',
       fullName: '',
       email: '',
       password: '',
@@ -72,7 +73,7 @@ export default function RegisterForm({ onSwitchToLogin, onSwitchToVerifyEmail })
     e.preventDefault();
     setErrorList([]);
 
-    if (!formData.fullName.trim() || !formData.email.trim() || !formData.password) {
+    if (!formData.organizationName.trim() || !formData.fullName.trim() || !formData.email.trim() || !formData.password) {
       setErrorList([t('errors.generic')]);
       return;
     }
@@ -99,6 +100,7 @@ export default function RegisterForm({ onSwitchToLogin, onSwitchToVerifyEmail })
         name: formData.fullName.trim(),
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
+        organizationName: formData.organizationName.trim(),
         captchaId: captcha.captchaId,
         captchaAnswer: formData.captchaAnswer.trim(),
       };
@@ -180,6 +182,24 @@ export default function RegisterForm({ onSwitchToLogin, onSwitchToVerifyEmail })
       )}
 
       <form className="login-form-auth" onSubmit={handleSubmit} noValidate>
+        {/* Organization Name */}
+        <div className="field-auth" style={{ marginBottom: '1rem' }}>
+          <label className="field-label-auth" htmlFor="reg-org">
+            {t('register.organizationLabel')}
+          </label>
+          <input
+            id="reg-org"
+            name="organizationName"
+            type="text"
+            placeholder={t('register.organizationPlaceholder')}
+            className="field-input-auth"
+            value={formData.organizationName}
+            onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })}
+            required
+            disabled={isSubmitting}
+          />
+        </div>
+
         {/* 2 by 2 Input Grid */}
         <div className="fields-grid-2x2-auth">
           {/* Full Name */}

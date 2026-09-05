@@ -30,6 +30,7 @@ export default function LoginForm({
   const [formData, setFormData, clearDraft] = useFormDraft(
     'auth:login',
     {
+      organizationSlug: '',
       email: initialEmail,
       password: '',
       captchaAnswer: '',
@@ -97,6 +98,7 @@ export default function LoginForm({
 
     try {
       const res = await login({
+        organizationSlug: formData.organizationSlug?.trim() || undefined,
         email: formData.email.trim(),
         password: formData.password,
         captchaId: captcha.captchaId,
@@ -180,6 +182,24 @@ export default function LoginForm({
       )}
 
       <form className="login-form-auth" onSubmit={handleSubmit} noValidate>
+        {/* Optional Organization Slug (Disambiguation) */}
+        <div className="field-auth">
+          <label className="field-label-auth" htmlFor="login-org">
+            {t('login.organizationLabel')}{' '}
+            <span style={{ opacity: 0.6, fontSize: '0.85em' }}>(Optional)</span>
+          </label>
+          <input
+            id="login-org"
+            name="organizationSlug"
+            type="text"
+            placeholder={t('login.organizationPlaceholder')}
+            className="field-input-auth"
+            value={formData.organizationSlug || ''}
+            onChange={(e) => setFormData({ ...formData, organizationSlug: e.target.value })}
+            disabled={isSubmitting}
+          />
+        </div>
+
         {/* Username / Email field */}
         <div className="field-auth">
           <label className="field-label-auth" htmlFor="login-email">

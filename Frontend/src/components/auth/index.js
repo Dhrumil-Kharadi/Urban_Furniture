@@ -7,3 +7,4 @@ export { default as ForgotPasswordForm } from './ForgotPasswordForm';
 export { default as VerifyEmailForm } from './VerifyEmailForm';
 export { default as VerifyResetOtpForm } from './VerifyResetOtpForm';
 export { default as ResetPasswordForm } from './ResetPasswordForm';
+export { default as SetPasswordForm } from './SetPasswordForm';

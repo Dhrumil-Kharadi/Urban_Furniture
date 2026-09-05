@@ -12,6 +12,7 @@ import ForgotPasswordForm from './ForgotPasswordForm';
 import VerifyEmailForm from './VerifyEmailForm';
 import VerifyResetOtpForm from './VerifyResetOtpForm';
 import ResetPasswordForm from './ResetPasswordForm';
+import SetPasswordForm from './SetPasswordForm';
 
 /**
  * Unified AuthPage container
@@ -65,6 +66,10 @@ export default function AuthPage({ initialMode = 'login' }) {
     artBadge = 'Access Shield';
     artTitle = t('art.resetTitle');
     artSubtitle = t('art.resetSub');
+  } else if (mode === 'set-password') {
+    artBadge = 'Team Activation';
+    artTitle = t('setPassword.title');
+    artSubtitle = t('setPassword.subtitle');
   }
 
   return (
@@ -126,6 +131,11 @@ export default function AuthPage({ initialMode = 'login' }) {
           resetToken={resetToken}
           onSwitchToLogin={() => setMode('login')}
           onSwitchToForgot={() => setMode('forgot-password')}
+        />
+      )}
+      {mode === 'set-password' && (
+        <SetPasswordForm
+          onSwitchToLogin={() => setMode('login')}
         />
       )}
     </AuthLayout>
