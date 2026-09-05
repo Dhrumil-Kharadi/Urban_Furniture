@@ -120,7 +120,8 @@ const authValidation = {
       return { isValid: false, errors: ['Request body must be a JSON object'] };
     }
 
-    const { token, password } = body;
+    const token = body.token;
+    const password = body.password || body.newPassword;
 
     if (!token || typeof token !== 'string' || token.trim().length === 0) {
       errors.push('Invitation token is required');

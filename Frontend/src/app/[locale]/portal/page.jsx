@@ -112,7 +112,7 @@ export default function PortalPage() {
       render: (row) => {
         const canPay = Number(row.amount_due) > 0 && ['posted', 'partially_paid', 'overdue'].includes(row.status);
         if (!canPay) {
-          return <span className="text-xs text-gray-500">{t('invoices.paidInFull')}</span>;
+          return <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('invoices.paidInFull')}</span>;
         }
         return (
           <RazorpayCheckoutButton

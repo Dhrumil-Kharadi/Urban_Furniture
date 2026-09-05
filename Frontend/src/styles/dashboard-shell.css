@@ -620,18 +620,29 @@
   align-items: stretch;
 }
 
-.ui-span-1  { grid-column: span 1; }
-.ui-span-2  { grid-column: span 2; }
-.ui-span-3  { grid-column: span 3; }
-.ui-span-4  { grid-column: span 4; }
-.ui-span-5  { grid-column: span 5; }
-.ui-span-6  { grid-column: span 6; }
-.ui-span-7  { grid-column: span 7; }
-.ui-span-8  { grid-column: span 8; }
-.ui-span-9  { grid-column: span 9; }
-.ui-span-10 { grid-column: span 10; }
-.ui-span-11 { grid-column: span 11; }
-.ui-span-12 { grid-column: span 12; }
+.dash-grid > .ui-span-1  { grid-column: span 1; }
+.dash-grid > .ui-span-2  { grid-column: span 2; }
+.dash-grid > .ui-span-3  { grid-column: span 3; }
+.dash-grid > .ui-span-4  { grid-column: span 4; }
+.dash-grid > .ui-span-5  { grid-column: span 5; }
+.dash-grid > .ui-span-6  { grid-column: span 6; }
+.dash-grid > .ui-span-7  { grid-column: span 7; }
+.dash-grid > .ui-span-8  { grid-column: span 8; }
+.dash-grid > .ui-span-9  { grid-column: span 9; }
+.dash-grid > .ui-span-10 { grid-column: span 10; }
+.dash-grid > .ui-span-11 { grid-column: span 11; }
+.dash-grid > .ui-span-12 { grid-column: span 12; }
+
+/* In specialized multi-column grids, child cards occupy their natural grid cell (1 column each) */
+.fin-dash-kpi-grid > .ui-card,
+.portal-stat-grid > .ui-card,
+.portal-nav-grid > .ui-card,
+.portal-grid-2 > .ui-card,
+.portal-grid-3 > .ui-card,
+.portal-grid-4 > .ui-card,
+.report-hub-grid > .ui-card {
+  grid-column: auto !important;
+}
 
 /* ============================================================
    6. CARD
@@ -1375,9 +1386,15 @@ select.ui-input {
     visibility: visible;
   }
 
-  .ui-span-3, .ui-span-4 { grid-column: span 6; }
-  .ui-span-5, .ui-span-6, .ui-span-7, .ui-span-8,
-  .ui-span-9, .ui-span-10, .ui-span-11 { grid-column: span 12; }
+  .dash-grid > .ui-span-3,
+  .dash-grid > .ui-span-4 { grid-column: span 6; }
+  .dash-grid > .ui-span-5,
+  .dash-grid > .ui-span-6,
+  .dash-grid > .ui-span-7,
+  .dash-grid > .ui-span-8,
+  .dash-grid > .ui-span-9,
+  .dash-grid > .ui-span-10,
+  .dash-grid > .ui-span-11 { grid-column: span 12; }
 }
 
 /* ---- header, breakpoint by breakpoint ------------------------------
@@ -1433,8 +1450,12 @@ select.ui-input {
   .dash-topbar { padding: 8px 10px; gap: 8px; }
   .dash-grid { gap: 9px; }
 
-  .ui-span-1, .ui-span-2, .ui-span-3, .ui-span-4,
-  .ui-span-5, .ui-span-6 { grid-column: span 12; }
+  .dash-grid > .ui-span-1,
+  .dash-grid > .ui-span-2,
+  .dash-grid > .ui-span-3,
+  .dash-grid > .ui-span-4,
+  .dash-grid > .ui-span-5,
+  .dash-grid > .ui-span-6 { grid-column: span 12; }
 
   .dash-page-actions { width: 100%; margin-left: 0; }
   .dash-page-actions .ui-btn { flex: 1; }

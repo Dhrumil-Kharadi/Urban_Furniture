@@ -236,6 +236,15 @@
   width: 100%;
 }
 
+.portal-stat-grid > *,
+.portal-nav-grid > *,
+.portal-grid-2 > *,
+.portal-grid-3 > *,
+.portal-grid-4 > * {
+  grid-column: auto !important;
+  min-width: 0;
+}
+
 /* ── Portal Table & Content Cards ── */
 .portal-table-card {
   background: var(--bg-raised);

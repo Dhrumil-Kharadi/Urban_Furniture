@@ -167,15 +167,17 @@ export default function CustomerInvoiceForm({
           />
         </FormField>
 
-        <FormField label={t('fields.notes')}>
-          <textarea
-            rows={2}
-            className="form-textarea"
-            value={formData.notes}
-            onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
-            disabled={isReadOnly}
-          />
-        </FormField>
+        <div className="is-full">
+          <FormField label={t('fields.notes')}>
+            <textarea
+              rows={2}
+              className="form-textarea"
+              value={formData.notes}
+              onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
+              disabled={isReadOnly}
+            />
+          </FormField>
+        </div>
       </div>
 
       <div>

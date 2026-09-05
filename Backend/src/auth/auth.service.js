@@ -414,6 +414,7 @@ const authService = {
       email: user.email,
       role: user.role,
       organization_id: user.organization_id || null,
+      contact_id: user.contact_id || null,
       token_version: user.token_version || 1,
       email_verified: user.email_verified,
       created_at: user.created_at,

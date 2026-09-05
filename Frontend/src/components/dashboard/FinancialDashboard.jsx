@@ -300,49 +300,6 @@ export default function FinancialDashboard() {
               </CardBody>
             </Card>
           </div>
-
-          {/* Recent Activity Section */}
-          <Card>
-            <CardHead title={t('charts.recentActivity')} subtitle={t('hints.recentActions')} />
-            <CardBody>
-              {data?.recentActivity?.length ? (
-                <table className="fin-dash-activity-table">
-                  <thead>
-                    <tr>
-                      <th>{t('activity.action')}</th>
-                      <th>{t('activity.entity')}</th>
-                      <th>{t('activity.actor')}</th>
-                      <th>{t('activity.timestamp')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.recentActivity.map((act) => (
-                      <tr key={act.id}>
-                        <td>
-                          <span className="fin-dash-activity-tag">{act.action}</span>
-                        </td>
-                        <td>
-                          <span className="fin-dash-activity-code">
-                            {act.entity_type} ({act.entity_id ? `${act.entity_id.slice(0, 8)}…` : '—'})
-                          </span>
-                        </td>
-                        <td>
-                          <span className="fin-dash-activity-actor">
-                            {act.actor_name || act.actor_email || t('activity.system')}
-                          </span>
-                        </td>
-                        <td className="fin-dash-activity-time">
-                          {act.created_at ? new Date(act.created_at).toLocaleString() : '—'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : (
-                <div className="fin-dash-state">{t('empty.activity')}</div>
-              )}
-            </CardBody>
-          </Card>
         </>
       )}
     </div>

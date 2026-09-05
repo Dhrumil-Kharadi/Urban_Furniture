@@ -63,6 +63,7 @@ export default function SetPasswordForm({
     try {
       const res = await api.post('/auth/set-password', {
         token: tokenToUse.trim(),
+        password: formData.newPassword,
         newPassword: formData.newPassword,
       });
 

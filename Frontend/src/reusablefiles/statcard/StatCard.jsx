@@ -34,7 +34,7 @@ export default function StatCard({
   icon = null,
   trend = null,
   tone = 'light',
-  span = 3,
+  span = null,
   spark = null,
   loading = false,
   textureSeed = 'stat',

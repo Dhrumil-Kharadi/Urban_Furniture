@@ -87,7 +87,7 @@ export default function PortalInvoicesPage() {
         header: t('due'),
         align: 'right',
         render: (row) => (
-          <span className={Number(row.amount_due) > 0 ? 'text-emerald-400 font-semibold' : 'text-gray-400'}>
+          <span style={{ fontWeight: 600, color: Number(row.amount_due) > 0 ? '#10b981' : 'var(--text-secondary)' }}>
             <MoneyText value={row.amount_due} />
           </span>
         ),
@@ -112,7 +112,7 @@ export default function PortalInvoicesPage() {
         render: (row) => {
           const canPay = Number(row.amount_due) > 0 && ['posted', 'partially_paid', 'overdue'].includes(row.status);
           if (!canPay) {
-            return <span className="text-xs text-gray-500">{t('paidInFull')}</span>;
+            return <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('paidInFull')}</span>;
           }
           return (
             <RazorpayCheckoutButton

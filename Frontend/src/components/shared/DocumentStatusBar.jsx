@@ -11,6 +11,8 @@ import { Link } from '@/i18n/navigation';
  * - Back button to collection list
  * - Document identifier & status breadcrumbs
  * - Action buttons based on current state & permissions
+ *
+ * Styled strictly with Frozen Lake tokens and transactions.css classes.
  */
 export default function DocumentStatusBar({
   title,
@@ -28,35 +30,37 @@ export default function DocumentStatusBar({
   const currentIdx = stages.indexOf(status);
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-gray-700/60 bg-gray-900/70 shadow-md">
-      <div className="flex items-center gap-3">
+    <div className="doc-status-bar">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         {backUrl && (
           <Link
             href={backUrl}
-            className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
+            className="doc-btn doc-btn-icon"
             title="Back to list"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft size={16} />
           </Link>
         )}
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-bold text-gray-100">{title}</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h1 className="doc-page-title" style={{ fontSize: '1rem', margin: 0 }}>{title}</h1>
             {docNumber && (
-              <span className="font-mono text-xs px-2 py-0.5 rounded bg-gray-800 text-indigo-300 font-semibold">
+              <span className="doc-cell-code" style={{ padding: '0.2rem 0.5rem', background: 'var(--bg-surface)', borderRadius: '4px', border: '1px solid var(--border-subtle)' }}>
                 {docNumber}
               </span>
             )}
           </div>
-          <p className="text-xs text-gray-400 capitalize">Current status: <span className="font-medium text-gray-200">{status}</span></p>
+          <p className="doc-page-sub" style={{ margin: '0.15rem 0 0' }}>
+            Current status: <strong style={{ color: 'var(--text-primary)', textTransform: 'capitalize' }}>{status}</strong>
+          </p>
         </div>
       </div>
 
       {/* Pipeline Status Stages */}
-      <div className="flex items-center gap-1 self-stretch sm:self-auto overflow-x-auto py-1">
+      <div className="doc-status-stages">
         {isCancelled ? (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-950/60 border border-red-800 text-red-300">
-            <XCircle className="w-3.5 h-3.5" />
+          <span className="doc-stage-badge" style={{ background: 'var(--status-error-bg)', color: 'var(--status-error)', border: '1px solid var(--status-error-border)' }}>
+            <XCircle size={13} style={{ marginRight: '4px' }} />
             Cancelled
           </span>
         ) : (
@@ -67,19 +71,25 @@ export default function DocumentStatusBar({
             return (
               <React.Fragment key={stage}>
                 <div
-                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium capitalize transition-all ${
-                    isActive
-                      ? 'bg-indigo-600 text-white font-semibold shadow-sm'
-                      : isCompleted
-                      ? 'bg-emerald-950/60 border border-emerald-700/60 text-emerald-300'
-                      : 'bg-gray-800/60 text-gray-400 border border-gray-700/50'
-                  }`}
+                  className={`doc-stage-badge ${isActive ? 'active' : ''}`}
+                  style={
+                    isCompleted
+                      ? {
+                          background: 'rgba(16, 185, 129, 0.12)',
+                          color: '#10b981',
+                          border: '1px solid rgba(16, 185, 129, 0.3)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }
+                      : { display: 'inline-flex', alignItems: 'center', gap: '4px' }
+                  }
                 >
-                  {isCompleted && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
+                  {isCompleted && <CheckCircle2 size={12} />}
                   {stage}
                 </div>
                 {idx < stages.length - 1 && (
-                  <span className="text-gray-600 text-xs select-none">→</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', userSelect: 'none' }}>→</span>
                 )}
               </React.Fragment>
             );
@@ -88,15 +98,15 @@ export default function DocumentStatusBar({
       </div>
 
       {/* Document Action Buttons */}
-      <div className="flex items-center gap-2">
+      <div className="doc-page-actions">
         {status === 'draft' && onConfirm && (
           <button
             type="button"
             onClick={onConfirm}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 transition-colors shadow-sm"
+            className="doc-btn doc-btn-primary"
           >
-            <CheckCircle2 className="w-3.5 h-3.5" />
+            <CheckCircle2 size={14} />
             Confirm Order
           </button>
         )}
@@ -106,9 +116,9 @@ export default function DocumentStatusBar({
             type="button"
             onClick={onCreateBill}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 transition-colors shadow-sm"
+            className="doc-btn doc-btn-primary"
           >
-            <FileText className="w-3.5 h-3.5" />
+            <FileText size={14} />
             Create Vendor Bill
           </button>
         )}
@@ -118,10 +128,10 @@ export default function DocumentStatusBar({
             type="button"
             onClick={onPost}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 transition-colors shadow-sm"
+            className="doc-btn doc-btn-primary"
           >
-            <Send className="w-3.5 h-3.5" />
-            Post Bill (To Ledger)
+            <Send size={14} />
+            Post to Ledger
           </button>
         )}
 
@@ -130,9 +140,9 @@ export default function DocumentStatusBar({
             type="button"
             onClick={onCancel}
             disabled={loading}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-800/40 transition-colors"
+            className="doc-btn"
           >
-            <XCircle className="w-3.5 h-3.5" />
+            <XCircle size={14} />
             Cancel
           </button>
         )}

@@ -123,7 +123,7 @@ export default function PurchaseOrderForm({
           General Details
         </h2>
 
-        <div className="tx-form-card-grid">
+        <div className="tx-form-card-grid--3col">
           <FormField
             label="Vendor / Supplier"
             required

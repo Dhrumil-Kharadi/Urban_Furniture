@@ -26,6 +26,7 @@ const { withTransaction } = require('../shared/withTransaction');
 const sequenceService = require('../shared/sequence.service');
 const auditService = require('../shared/audit.service');
 const accountingService = require('../accounting/accounting.service');
+const notificationsService = require('../notifications/notifications.service');
 const logger = require('../utils/logger');
 const salesRepository = require('./sales.repository');
 const { computeSalesLines } = require('./salesOrders.service');
@@ -224,7 +225,8 @@ const customerInvoicesService = {
    * @returns {Promise<object>}
    */
   async postCustomerInvoice(organizationId, actorUserId, invoiceId) {
-    return withTransaction(async (client) => {
+    let notificationId = null;
+    const result = await withTransaction(async (client) => {
       // 2.
       const invoice = await salesRepository.getCustomerInvoiceById(
         client, organizationId, invoiceId
@@ -384,8 +386,27 @@ const customerInvoicesService = {
         },
       });
 
+      if (customer?.email) {
+        try {
+          const notif = await notificationsService.triggerInvoicePosted(client, {
+            organizationId,
+            invoice: { ...invoice, id: invoiceId, invoice_number: invoiceNumber, total_amount, due_date: invoice.due_date },
+            customer: { name: customer.name, email: customer.email },
+          });
+          if (notif?.id) notificationId = notif.id;
+        } catch (notifErr) {
+          logger.warn('Failed to queue invoice posted notification', { error: notifErr.message });
+        }
+      }
+
       return salesRepository.getCustomerInvoiceById(client, organizationId, invoiceId);
     });
+
+    if (notificationId) {
+      notificationsService.scheduleDispatch(notificationId);
+    }
+
+    return result;
   },
 
   /**
@@ -475,11 +496,23 @@ const customerInvoicesService = {
       fail('This customer has no email address to send the invoice to', 400);
     }
 
+    let notificationId = null;
     const updated = await withTransaction(async (client) => {
       const saved = await salesRepository.updateInvoiceStatus(
         client, organizationId, invoiceId,
         { sent_at: new Date().toISOString(), updated_by: actorUserId }
       );
+
+      try {
+        const notif = await notificationsService.triggerInvoicePosted(client, {
+          organizationId,
+          invoice,
+          customer: { name: invoice.customer_name, email: invoice.customer_email },
+        });
+        if (notif?.id) notificationId = notif.id;
+      } catch (notifErr) {
+        logger.warn('Failed to queue invoice sent notification', { error: notifErr.message });
+      }
 
       await auditService.recordAudit(client, {
         organizationId,
@@ -493,12 +526,10 @@ const customerInvoicesService = {
       return saved;
     });
 
-    // COMMITTED. Only now does anything leave the building.
-    //
-    // TODO(phase-12): send the invoice email, including the portal payment
-    //   link when the contact has portal access (project.md §9.7). The
-    //   gateway adapter exists in src/gateway/; what is missing is the
-    //   templated mail, which belongs with the rest of the portal work.
+    if (notificationId) {
+      notificationsService.scheduleDispatch(notificationId);
+    }
+
     logger.info('Customer invoice marked as sent', {
       organizationId,
       invoiceId,

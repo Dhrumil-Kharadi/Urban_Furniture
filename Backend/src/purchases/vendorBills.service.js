@@ -25,6 +25,7 @@ const auditService = require('../shared/audit.service');
 const accountingService = require('../accounting/accounting.service');
 const purchasesRepository = require('./purchases.repository');
 const { computeLineTotals, resolveAndComputeLines } = require('./purchaseOrders.service');
+const notificationsService = require('../notifications/notifications.service');
 const logger = require('../utils/logger');
 
 /** @private */
@@ -184,7 +185,8 @@ const vendorBillsService = {
    *  10. Write audit; commit
    */
   async postVendorBill(organizationId, actorUserId, billId) {
-    return await withTransaction(async (client) => {
+    let notificationId = null;
+    const result = await withTransaction(async (client) => {
       // 2. Load bill with lines
       const bill = await purchasesRepository.getVendorBillById(client, organizationId, billId);
       if (!bill) fail('Vendor bill not found', 404);
@@ -345,8 +347,27 @@ const vendorBillsService = {
         },
       });
 
+      if (vendor?.email) {
+        try {
+          const notif = await notificationsService.triggerBillPosted(client, {
+            organizationId,
+            bill: { ...bill, id: billId, bill_number: billNumber, total_amount, due_date: bill.due_date },
+            vendor,
+          });
+          if (notif?.id) notificationId = notif.id;
+        } catch (notifErr) {
+          logger.warn('Failed to queue bill posted notification', { error: notifErr.message });
+        }
+      }
+
       return purchasesRepository.getVendorBillById(client, organizationId, billId);
     });
+
+    if (notificationId) {
+      notificationsService.scheduleDispatch(notificationId);
+    }
+
+    return result;
   },
 
   /**

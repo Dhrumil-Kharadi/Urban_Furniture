@@ -4,22 +4,50 @@
  * @file ReportFilterBar Component
  * @spec Doc/project.md §6, Doc/phase.md Phase 11
  * 
- * PROMPT & IMPLEMENTATION GUIDELINES:
- * - Unified filter bar across all financial reports.
- * - Controls:
- *   - Date Mode: 'As of Date' (for Balance Sheet) or 'Date Range' (for P&L / General Ledger).
- *   - Quick presets: 'This Fiscal Year', 'Last Fiscal Year', 'This Month', 'This Quarter', 'Custom Range'.
- *   - Compare with Previous Period toggle.
- *   - Analytic Account / Department filter.
+ * Unified filter bar for financial reports with Frozen Lake neumorphic styling.
  */
 
-export default function ReportFilterBar({ filters, onFilterChange, showRange = true }) {
+import React from 'react';
+import { Calendar } from 'lucide-react';
+
+export default function ReportFilterBar({
+  dates = { fromDate: '', toDate: '' },
+  onChange,
+  showRange = true,
+  extraActions = null,
+}) {
   return (
-    <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6 flex flex-wrap gap-4 items-center justify-between shadow-sm">
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-gray-700">Period:</span>
-        <input type="date" className="border rounded px-3 py-1.5 text-sm" />
+    <div className="report-toolbar">
+      <div className="report-date-input">
+        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <Calendar size={12} /> {showRange ? 'From Date' : 'As of Date'}
+        </span>
+        <input
+          type="date"
+          value={dates.fromDate}
+          onChange={(e) => onChange?.({ ...dates, fromDate: e.target.value })}
+        />
       </div>
+
+      {showRange && (
+        <>
+          <span style={{ fontFamily: 'Sora, sans-serif', fontSize: '0.8rem', color: 'var(--text-secondary)', alignSelf: 'center', marginTop: '16px' }}>
+            to
+          </span>
+          <div className="report-date-input">
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Calendar size={12} /> To Date
+            </span>
+            <input
+              type="date"
+              value={dates.toDate}
+              onChange={(e) => onChange?.({ ...dates, toDate: e.target.value })}
+            />
+          </div>
+        </>
+      )}
+
+      {extraActions}
     </div>
   );
 }

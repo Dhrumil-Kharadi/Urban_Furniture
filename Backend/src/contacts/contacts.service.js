@@ -103,7 +103,7 @@ const contactsService = {
     // may create the contact, but may not mint a login as a side effect of
     // doing so, so the flag is forced off and an admin enables it afterwards.
     const wantsPortal = Boolean(data.portal_access_enabled && data.email);
-    const provisionNow = wantsPortal && actorRole === ROLES.ADMIN;
+    const provisionNow = wantsPortal && (actorRole === ROLES.BUSINESS_OWNER || actorRole === 'admin' || actorRole === 'business_owner');
 
     const contact = await withTransaction(async (client) => {
       const created = await contactsRepository.insert(client, {

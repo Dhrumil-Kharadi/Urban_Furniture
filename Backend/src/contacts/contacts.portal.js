@@ -133,7 +133,7 @@ const contactsPortal = {
           name: contact.name,
           email: contact.email,
           passwordHash,
-          role: ROLES.USER,
+          role: contact.contact_type === 'vendor' ? ROLES.VENDOR : ROLES.CUSTOMER,
           organization_id: organizationId,
           contact_id: contact.id,
           must_change_password: true,
