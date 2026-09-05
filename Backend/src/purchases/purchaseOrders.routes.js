@@ -12,20 +12,20 @@ const router = express.Router();
  *   authenticate → resolveTenant → authorize(...roles)
  *
  * Phase 8 Security:
- * - authorize('admin', 'manager') on read, create, update, confirm, create-bill
+ * - authorize('business_owner', 'accountant') on read, create, update, confirm, create-bill
  * - cancel is admin-only
  */
 
 router.use(authMiddleware.authenticate, resolveTenant);
 
-router.get('/', authMiddleware.authorize('admin', 'manager'), purchasesController.listPurchaseOrders);
-router.post('/', authMiddleware.authorize('admin', 'manager'), purchasesController.createPurchaseOrder);
+router.get('/', authMiddleware.authorize('business_owner', 'accountant'), purchasesController.listPurchaseOrders);
+router.post('/', authMiddleware.authorize('business_owner', 'accountant'), purchasesController.createPurchaseOrder);
 
-router.get('/:id', authMiddleware.authorize('admin', 'manager'), purchasesController.getPurchaseOrder);
-router.patch('/:id', authMiddleware.authorize('admin', 'manager'), purchasesController.updatePurchaseOrder);
+router.get('/:id', authMiddleware.authorize('business_owner', 'accountant'), purchasesController.getPurchaseOrder);
+router.patch('/:id', authMiddleware.authorize('business_owner', 'accountant'), purchasesController.updatePurchaseOrder);
 
-router.post('/:id/confirm', authMiddleware.authorize('admin', 'manager'), purchasesController.confirmPurchaseOrder);
-router.post('/:id/create-bill', authMiddleware.authorize('admin', 'manager'), purchasesController.createBillFromPO);
-router.post('/:id/cancel', authMiddleware.authorize('admin'), purchasesController.cancelPurchaseOrder);
+router.post('/:id/confirm', authMiddleware.authorize('business_owner', 'accountant'), purchasesController.confirmPurchaseOrder);
+router.post('/:id/create-bill', authMiddleware.authorize('business_owner', 'accountant'), purchasesController.createBillFromPO);
+router.post('/:id/cancel', authMiddleware.authorize('business_owner'), purchasesController.cancelPurchaseOrder);
 
 module.exports = router;

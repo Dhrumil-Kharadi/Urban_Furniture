@@ -1,0 +1,334 @@
+/* ============================================================
+   FILE: src/styles/auditlogs.css
+   Phase 13 — System Audit Logs Styles
+   Neumorphic design per strict.md. Frozen Lake root tokens only.
+   Typography: Orbitron for titles/numbers; Sora for body/UI controls
+   ============================================================ */
+
+.audit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.audit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.audit-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.audit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.audit-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.audit-subtitle {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 650px;
+  line-height: 1.5;
+}
+
+/* ─── Controls & Filters ─────────────────────────────────── */
+.audit-controls-card {
+  background: var(--bg-raised);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 8px 8px 16px var(--nm-shadow-dark),
+              -4px -4px 10px var(--nm-shadow-light);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.audit-filters-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.audit-search-input {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  box-shadow: inset 2px 2px 5px var(--nm-inset-dark),
+              inset -2px -2px 5px var(--nm-inset-light);
+  outline: none;
+  min-width: 240px;
+  transition: border-color 0.2s ease;
+}
+
+.audit-search-input:focus {
+  border-color: var(--accent-primary);
+}
+
+.audit-select {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 4px 4px 8px var(--nm-shadow-dark),
+              -2px -2px 6px var(--nm-shadow-light);
+  outline: none;
+  cursor: pointer;
+}
+
+.audit-select:focus {
+  border-color: var(--accent-primary);
+}
+
+/* ─── Table Card ─────────────────────────────────────────── */
+.audit-table-card {
+  background: var(--bg-raised);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 8px 8px 16px var(--nm-shadow-dark),
+              -4px -4px 10px var(--nm-shadow-light);
+  border: 1px solid var(--border-subtle);
+  overflow-x: auto;
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+}
+
+.audit-table th {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.85rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.audit-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.audit-table tr:last-child td {
+  border-bottom: none;
+}
+
+.audit-table tr:hover td {
+  background: var(--bg-surface);
+}
+
+.audit-time-cell {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.audit-actor-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.audit-actor-email {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.audit-badge-action {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  color: var(--accent-primary);
+}
+
+.audit-badge-action.post {
+  color: var(--status-success);
+  border-color: var(--status-success-border);
+}
+
+.audit-badge-action.create {
+  color: var(--status-info);
+  border-color: var(--status-info-border);
+}
+
+.audit-badge-action.delete {
+  color: var(--status-error);
+  border-color: var(--status-error-border);
+}
+
+.audit-btn-diff {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--accent-primary);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  box-shadow: 2px 2px 4px var(--nm-shadow-dark),
+              -1px -1px 3px var(--nm-shadow-light);
+  transition: all 0.2s ease;
+}
+
+.audit-btn-diff:hover {
+  box-shadow: inset 2px 2px 4px var(--nm-inset-dark),
+              inset -1px -1px 3px var(--nm-inset-light);
+}
+
+/* ─── Diff Modal ─────────────────────────────────────────── */
+.audit-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.audit-modal-card {
+  background: var(--bg-raised);
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 840px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.audit-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.audit-modal-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.audit-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .audit-modal-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.audit-diff-pane {
+  background: var(--bg-surface);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  box-shadow: inset 2px 2px 6px var(--nm-inset-dark),
+              inset -2px -2px 6px var(--nm-inset-light);
+}
+
+.audit-diff-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+}
+
+.audit-diff-title.before {
+  color: var(--status-error);
+}
+
+.audit-diff-title.after {
+  color: var(--status-success);
+}
+
+.audit-diff-pre {
+  margin: 0;
+  font-family: monospace;
+  font-size: 0.78rem;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.audit-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: flex-end;
+}

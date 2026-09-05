@@ -24,7 +24,7 @@ const usersController = {
 
   /**
    * POST /api/users/invite
-   * Invite an Accountant (role='manager').
+   * Invite an Accountant (role='accountant').
    */
   async inviteUser(req, res, next) {
     try {

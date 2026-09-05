@@ -63,9 +63,9 @@ export default function Navbar({ hideCta = false }) {
       <div className="nav-actions">
         <LanguageSwitcher />
         {!shouldHideCta && (
-          <a href="/auth/login" onClick={handleGetStarted} className="nav-cta">
+          <Link href="/auth/login" onClick={handleGetStarted} className="nav-cta">
             {t('getStarted')}
-          </a>
+          </Link>
         )}
       </div>
     </nav>

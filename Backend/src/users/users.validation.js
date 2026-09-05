@@ -41,8 +41,8 @@ const usersValidation = {
       }
     }
 
-    // Role restriction: Admin may only invite role='manager'
-    if (role && role !== 'manager') {
+    // Role restriction: Admin may only invite role='accountant'
+    if (role && role !== 'accountant') {
       errors.push('Only manager accounts can be created via invite');
     }
 
@@ -56,7 +56,7 @@ const usersValidation = {
       data: {
         name: name.trim(),
         email: email.trim().toLowerCase(),
-        role: 'manager',
+        role: 'accountant',
       },
     };
   },

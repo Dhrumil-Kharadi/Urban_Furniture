@@ -62,6 +62,15 @@ const env = {
 
   // Refresh Token (Remember Me)
   refreshTokenExpiresDays: parseInt(process.env.REFRESH_TOKEN_EXPIRES_DAYS, 10) || 30,
+
+  // Payment Gateway
+  gateway: {
+    provider: process.env.PAYMENT_GATEWAY_PROVIDER || 'razorpay',
+    keyId: process.env.PAYMENT_GATEWAY_KEY_ID,
+    keySecret: process.env.PAYMENT_GATEWAY_KEY_SECRET,
+    webhookSecret: process.env.PAYMENT_GATEWAY_WEBHOOK_SECRET,
+    currency: process.env.PAYMENT_CURRENCY || 'INR',
+  },
 };
 
 /**
@@ -80,6 +89,11 @@ function validateEnv() {
   if (!env.smtp.user) warnings.push('SMTP_USER');
   if (!env.smtp.pass) warnings.push('SMTP_PASS');
 
+  // Gateway secrets — fail fast if portal payments are expected
+  if (!env.gateway.keyId) warnings.push('PAYMENT_GATEWAY_KEY_ID');
+  if (!env.gateway.keySecret) warnings.push('PAYMENT_GATEWAY_KEY_SECRET');
+  if (!env.gateway.webhookSecret) warnings.push('PAYMENT_GATEWAY_WEBHOOK_SECRET');
+
   if (critical.length > 0) {
     console.error(`[ENV] FATAL: Missing critical environment variables: ${critical.join(', ')}`);
     console.error('[ENV] Please check your .env file.');
@@ -88,7 +102,7 @@ function validateEnv() {
 
   if (warnings.length > 0 && !env.isProduction) {
     console.warn(`[ENV] Warning: Missing optional environment variables: ${warnings.join(', ')}`);
-    console.warn('[ENV] Email functionality will not work until these are configured.');
+    console.warn('[ENV] Email and payment gateway functionality may not work until these are configured.');
   }
 }
 

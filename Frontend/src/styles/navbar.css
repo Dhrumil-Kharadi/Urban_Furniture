@@ -151,7 +151,7 @@ body:has(.auth-viewport-auth) .nav-cta,
 .lang-switcher__chevron {
   width: 11px;
   height: 11px;
-  stroke: var(--accent-primary, #000080);
+  stroke: var(--accent-primary);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
 }
@@ -166,7 +166,7 @@ body:has(.auth-viewport-auth) .nav-cta,
   top: calc(100% + 7px);
   right: 0;
   min-width: 136px;
-  background: var(--bg-raised, #ffffff);
+  background: var(--bg-raised);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1.5px solid var(--border-medium);

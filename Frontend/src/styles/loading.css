@@ -59,10 +59,10 @@
   inset: 0;
   background: linear-gradient(
     175deg,
-    #000028 0%,
-    #000048 25%,
-    #000080 65%,
-    #132b5e 100%
+    var(--loading-deep-bg-start) 0%,
+    var(--loading-deep-bg-mid) 25%,
+    var(--loading-deep-bg-core) 65%,
+    var(--loading-deep-bg-end) 100%
   );
   box-shadow: inset 0 0 100px rgba(0, 0, 40, 0.6);
 }
@@ -294,7 +294,7 @@
   font-size: clamp(1.1rem, 2.2vw, 1.4rem);
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: #ffffff;
+  color: var(--loading-text);
   margin: 0;
   display: inline-flex;
   flex-wrap: wrap;
@@ -325,8 +325,8 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #22c3e0;
-  box-shadow: 0 0 8px #22c3e0;
+  background: var(--loading-accent);
+  box-shadow: 0 0 8px var(--loading-accent);
   animation: dotPulse-loading 1.4s ease-in-out infinite alternate;
 }
 

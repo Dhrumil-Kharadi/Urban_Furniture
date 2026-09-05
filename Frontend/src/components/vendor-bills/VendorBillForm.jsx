@@ -124,14 +124,14 @@ export default function VendorBillForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="app-form">
       {/* Header Card */}
-      <div className="rounded-xl border border-gray-700/60 bg-gray-900/60 p-6 shadow-md space-y-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400 border-b border-gray-800 pb-2">
+      <div className="tx-form-card">
+        <h2 className="tx-form-card-title">
           Bill Details
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="tx-form-card-grid--4col">
           <FormField
             label="Vendor / Supplier"
             required
@@ -171,7 +171,7 @@ export default function VendorBillForm({
           <FormField label="Bill Date" required error={errors.bill_date}>
             <input
               type="date"
-              className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-100 focus:outline-none focus:border-indigo-500"
+              className="tx-form-input"
               value={formData.bill_date}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, bill_date: e.target.value }))
@@ -183,7 +183,7 @@ export default function VendorBillForm({
           <FormField label="Payment Due Date" error={errors.due_date}>
             <input
               type="date"
-              className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-100 focus:outline-none focus:border-indigo-500"
+              className="tx-form-input"
               value={formData.due_date}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -196,11 +196,11 @@ export default function VendorBillForm({
           </FormField>
         </div>
 
-        <div className="pt-2">
+        <div className="tx-form-card-notes">
           <FormField label="Reference / Notes">
             <textarea
               rows={2}
-              className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-100 focus:outline-none focus:border-indigo-500"
+              className="tx-form-textarea"
               placeholder="Vendor invoice number, notes, or payment terms…"
               value={formData.notes}
               onChange={(e) =>
@@ -213,13 +213,13 @@ export default function VendorBillForm({
       </div>
 
       {/* Line Items Card */}
-      <div className="rounded-xl border border-gray-700/60 bg-gray-900/60 p-6 shadow-md space-y-4">
-        <div className="flex items-center justify-between border-b border-gray-800 pb-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
+      <div className="tx-form-card">
+        <div className="tx-form-card-header">
+          <h2 className="tx-form-card-title" style={{ border: 'none', paddingBottom: 0 }}>
             Bill Expense Lines
           </h2>
           {errors.lines && (
-            <span className="text-xs text-red-400 font-medium">{errors.lines}</span>
+            <span className="tx-line-error">{errors.lines}</span>
           )}
         </div>
 
@@ -236,7 +236,7 @@ export default function VendorBillForm({
           }}
         />
 
-        <div className="pt-4 flex justify-end">
+        <div className="tx-form-card-totals">
           <DocumentTotals
             untaxedAmount={untaxedTotal}
             taxAmount={taxTotal}

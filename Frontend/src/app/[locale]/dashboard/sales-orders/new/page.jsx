@@ -1,20 +1,64 @@
-/**
- * @file New Sales Order Form Page
- * @route /dashboard/sales-orders/new
- * @spec Doc/project.md §5.2, Doc/phase.md Phase 9
- * 
- * REQUIREMENTS & SPECIFICATION:
- * - Create a new customer Sales Order.
- * - Header Fields: Customer (/api/contacts?type=customer|both), Order Date, Expiration/Delivery Date, Payment Terms.
- * - Dynamic Line Items: Product (/api/products), Qty, Sales Price (prefilled), Tax Rate, Analytic Tag.
- * - Real-time totals with strict rounding rules (round per line after tax).
- */
+'use client';
+
+import React, { useState } from 'react';
+import { useRouter } from '@/i18n/navigation';
+import { useToast } from '@/components/shared';
+import SalesOrderForm from '@/components/sales-orders/SalesOrderForm';
+import { salesOrdersService } from '@/services/sales.service';
+import { ArrowLeft, ShoppingCart } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
 
 export default function NewSalesOrderPage() {
+  const router = useRouter();
+  const { addToast } = useToast();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (formData) => {
+    setLoading(true);
+    try {
+      const created = await salesOrdersService.create(formData);
+      addToast({
+        title: 'Success',
+        description: `Sales order ${created.so_number} created in draft`,
+        type: 'success',
+      });
+      router.push(`/dashboard/sales-orders/${created.id}`);
+    } catch (err) {
+      addToast({
+        title: 'Creation Failed',
+        description: err.message || 'Could not create sales order',
+        type: 'error',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">New Sales Order</h1>
-      <p className="text-gray-500 mt-2">Create a sales order for products or services to a customer.</p>
+    <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <div className="flex items-center gap-3">
+        <Link
+          href="/dashboard/sales-orders"
+          className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </Link>
+        <div>
+          <h1 className="text-xl font-bold text-gray-100 flex items-center gap-2">
+            <ShoppingCart className="w-5 h-5 text-indigo-400" />
+            Create Sales Order
+          </h1>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Draft a customer sales order with line items and automatic tax calculations
+          </p>
+        </div>
+      </div>
+
+      <SalesOrderForm
+        onSubmit={handleSubmit}
+        onCancel={() => router.push('/dashboard/sales-orders')}
+        loading={loading}
+      />
     </div>
   );
 }

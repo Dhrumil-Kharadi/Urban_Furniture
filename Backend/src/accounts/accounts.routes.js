@@ -18,19 +18,19 @@ const router = express.Router();
 router.use(authMiddleware.authenticate, resolveTenant);
 
 // ─── Read ───────────────────────────────────────────────
-router.get('/', authMiddleware.authorize('admin', 'manager'), accountsController.listAccounts);
+router.get('/', authMiddleware.authorize('business_owner', 'accountant'), accountsController.listAccounts);
 
 // Declared before '/:id' so the literal segment is not captured as an id.
-router.get('/tree', authMiddleware.authorize('admin', 'manager'), accountsController.getAccountTree);
+router.get('/tree', authMiddleware.authorize('business_owner', 'accountant'), accountsController.getAccountTree);
 
-router.get('/:id', authMiddleware.authorize('admin', 'manager'), accountsController.getAccount);
+router.get('/:id', authMiddleware.authorize('business_owner', 'accountant'), accountsController.getAccount);
 
 // ─── Create — both roles ────────────────────────────────
-router.post('/', authMiddleware.authorize('admin', 'manager'), accountsController.createAccount);
+router.post('/', authMiddleware.authorize('business_owner', 'accountant'), accountsController.createAccount);
 
 // ─── Modify / archive — admin only ──────────────────────
-router.patch('/:id', authMiddleware.authorize('admin'), accountsController.updateAccount);
-router.patch('/:id/archive', authMiddleware.authorize('admin'), accountsController.archiveAccount);
-router.patch('/:id/unarchive', authMiddleware.authorize('admin'), accountsController.unarchiveAccount);
+router.patch('/:id', authMiddleware.authorize('business_owner'), accountsController.updateAccount);
+router.patch('/:id/archive', authMiddleware.authorize('business_owner'), accountsController.archiveAccount);
+router.patch('/:id/unarchive', authMiddleware.authorize('business_owner'), accountsController.unarchiveAccount);
 
 module.exports = router;

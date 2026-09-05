@@ -13,21 +13,21 @@
 
 export default function PurchaseOrderLines({ lines = [], onChange, isReadOnly = false }) {
   return (
-    <div className="mt-4 border rounded-md overflow-hidden">
-      <table className="w-full text-left border-collapse">
-        <thead className="bg-gray-50 border-b">
+    <div className="tx-legacy-table-wrap">
+      <table className="tx-legacy-table">
+        <thead className="tx-legacy-thead">
           <tr>
-            <th className="p-3 text-sm font-semibold">Product</th>
-            <th className="p-3 text-sm font-semibold">Quantity</th>
-            <th className="p-3 text-sm font-semibold">Unit Price</th>
-            <th className="p-3 text-sm font-semibold">Tax</th>
-            <th className="p-3 text-sm font-semibold">Analytic Account</th>
-            <th className="p-3 text-sm font-semibold">Total</th>
+            <th className="tx-legacy-th">Product</th>
+            <th className="tx-legacy-th">Quantity</th>
+            <th className="tx-legacy-th">Unit Price</th>
+            <th className="tx-legacy-th">Tax</th>
+            <th className="tx-legacy-th">Analytic Account</th>
+            <th className="tx-legacy-th">Total</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td colSpan={6} className="p-4 text-center text-gray-400">No items added yet.</td>
+            <td colSpan={6} className="tx-legacy-empty-cell">No items added yet.</td>
           </tr>
         </tbody>
       </table>

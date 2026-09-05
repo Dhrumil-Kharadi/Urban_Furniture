@@ -5,7 +5,7 @@ const { env } = require('../config/env');
  * Auth Session Store
  *
  * Server-side session management for privileged users
- * (manager, admin, super_admin).
+ * (business_owner, accountant).
  *
  * Uses an in-memory Map() for the hackathon.
  *
@@ -29,7 +29,7 @@ const { env } = require('../config/env');
 const sessionStore = new Map();
 
 // Allowed privileged roles for server-side sessions
-const PRIVILEGED_ROLES = ['manager', 'admin', 'super_admin'];
+const PRIVILEGED_ROLES = ['business_owner', 'accountant'];
 
 const authSession = {
   /**

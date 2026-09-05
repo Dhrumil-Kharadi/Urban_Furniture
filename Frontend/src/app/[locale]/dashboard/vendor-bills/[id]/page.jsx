@@ -111,8 +111,8 @@ export default function VendorBillDetailPage({ params }) {
 
   if (loading) {
     return (
-      <div className="p-12 text-center text-gray-500 italic flex items-center justify-center gap-2">
-        <RefreshCw className="w-5 h-5 animate-spin text-indigo-400" />
+      <div className="tx-loading-center">
+        <RefreshCw className="tx-loading-spinner" />
         Loading vendor bill details…
       </div>
     );
@@ -120,14 +120,14 @@ export default function VendorBillDetailPage({ params }) {
 
   if (!bill) {
     return (
-      <div className="p-12 text-center text-gray-400">
+      <div className="tx-not-found">
         Vendor bill not found.
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="tx-page tx-page--narrow">
       {/* Workflow Action & Status Bar */}
       <DocumentStatusBar
         title="Vendor Bill"
@@ -142,13 +142,13 @@ export default function VendorBillDetailPage({ params }) {
       />
 
       {/* Linked Cross-References */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="tx-xref-bar">
         {bill.journal_entry_id && (
           <Link
             href={`/dashboard/journal-entries/${bill.journal_entry_id}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-300 bg-indigo-950/60 border border-indigo-800 hover:bg-indigo-900/80 transition-colors shadow-sm"
+            className="tx-xref-link tx-xref-link--journal"
           >
-            <BookOpen className="w-3.5 h-3.5" />
+            <BookOpen className="tx-xref-icon" />
             View Linked Journal Entry
           </Link>
         )}
@@ -156,9 +156,9 @@ export default function VendorBillDetailPage({ params }) {
         {bill.purchase_order_id && (
           <Link
             href={`/dashboard/purchase-orders/${bill.purchase_order_id}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-300 bg-emerald-950/60 border border-emerald-800 hover:bg-emerald-900/80 transition-colors shadow-sm"
+            className="tx-xref-link tx-xref-link--po"
           >
-            <FileText className="w-3.5 h-3.5" />
+            <FileText className="tx-xref-icon" />
             View Originating Purchase Order
           </Link>
         )}

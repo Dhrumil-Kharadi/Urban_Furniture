@@ -21,16 +21,16 @@ const router = express.Router();
 router.use(authMiddleware.authenticate, resolveTenant);
 
 // ─── Read ───────────────────────────────────────────────
-router.get('/', authMiddleware.authorize('admin', 'manager'), taxesController.listTaxes);
+router.get('/', authMiddleware.authorize('business_owner', 'accountant'), taxesController.listTaxes);
 
-router.get('/:id', authMiddleware.authorize('admin', 'manager'), taxesController.getTax);
+router.get('/:id', authMiddleware.authorize('business_owner', 'accountant'), taxesController.getTax);
 
 // ─── Create — both roles ────────────────────────────────
-router.post('/', authMiddleware.authorize('admin', 'manager'), taxesController.createTax);
+router.post('/', authMiddleware.authorize('business_owner', 'accountant'), taxesController.createTax);
 
 // ─── Modify / archive — admin only ──────────────────────
-router.patch('/:id', authMiddleware.authorize('admin'), taxesController.updateTax);
-router.patch('/:id/archive', authMiddleware.authorize('admin'), taxesController.archiveTax);
-router.patch('/:id/unarchive', authMiddleware.authorize('admin'), taxesController.unarchiveTax);
+router.patch('/:id', authMiddleware.authorize('business_owner'), taxesController.updateTax);
+router.patch('/:id/archive', authMiddleware.authorize('business_owner'), taxesController.archiveTax);
+router.patch('/:id/unarchive', authMiddleware.authorize('business_owner'), taxesController.unarchiveTax);
 
 module.exports = router;

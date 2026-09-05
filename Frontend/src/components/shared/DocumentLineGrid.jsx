@@ -105,7 +105,8 @@ export default function DocumentLineGrid({
       description: lines[index].description || product.name,
       unit_price: parseFloat(price) || 0,
       tax_id: defaultTaxId || lines[index].tax_id,
-      expense_account_id: defaultAccount || lines[index].expense_account_id,
+      expense_account_id: priceField === 'costPrice' ? (defaultAccount || lines[index].expense_account_id) : lines[index].expense_account_id,
+      income_account_id: priceField === 'salesPrice' ? (defaultAccount || lines[index].income_account_id) : lines[index].income_account_id,
     };
 
     const updatedLine = recalculateLine(line);
@@ -195,13 +196,16 @@ export default function DocumentLineGrid({
                   {showAccount && (
                     <td className="py-2 px-2">
                       {readOnly ? (
-                        <span className="text-xs text-gray-300">{line.account_name || '—'}</span>
+                        <span className="text-xs text-gray-300">
+                          {line.income_account_name || line.expense_account_name || line.account_name || '—'}
+                        </span>
                       ) : (
                         <AccountPicker
-                          value={line.expense_account_id}
-                          onChange={(acc) =>
-                            handleFieldChange(idx, 'expense_account_id', acc ? acc.id : null)
-                          }
+                          value={priceField === 'salesPrice' ? (line.income_account_id || line.expense_account_id) : line.expense_account_id}
+                          onChange={(acc) => {
+                            const field = priceField === 'salesPrice' ? 'income_account_id' : 'expense_account_id';
+                            handleFieldChange(idx, field, acc ? acc.id : null);
+                          }}
                           type={priceField === 'costPrice' ? 'expense' : 'income'}
                           disabled={readOnly}
                         />

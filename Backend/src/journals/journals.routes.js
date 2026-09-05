@@ -21,15 +21,15 @@ const router = express.Router();
 router.use(authMiddleware.authenticate, resolveTenant);
 
 // ─── Read ───────────────────────────────────────────────
-router.get('/', authMiddleware.authorize('admin', 'manager'), journalsController.listJournals);
-router.get('/:id', authMiddleware.authorize('admin', 'manager'), journalsController.getJournal);
+router.get('/', authMiddleware.authorize('business_owner', 'accountant'), journalsController.listJournals);
+router.get('/:id', authMiddleware.authorize('business_owner', 'accountant'), journalsController.getJournal);
 
 // ─── Create — both roles ────────────────────────────────
-router.post('/', authMiddleware.authorize('admin', 'manager'), journalsController.createJournal);
+router.post('/', authMiddleware.authorize('business_owner', 'accountant'), journalsController.createJournal);
 
 // ─── Modify / archive — admin only ──────────────────────
-router.patch('/:id', authMiddleware.authorize('admin'), journalsController.updateJournal);
-router.patch('/:id/archive', authMiddleware.authorize('admin'), journalsController.archiveJournal);
-router.patch('/:id/unarchive', authMiddleware.authorize('admin'), journalsController.unarchiveJournal);
+router.patch('/:id', authMiddleware.authorize('business_owner'), journalsController.updateJournal);
+router.patch('/:id/archive', authMiddleware.authorize('business_owner'), journalsController.archiveJournal);
+router.patch('/:id/unarchive', authMiddleware.authorize('business_owner'), journalsController.unarchiveJournal);
 
 module.exports = router;

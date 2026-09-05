@@ -46,7 +46,7 @@ export default function ContactDetailPage() {
   const toast = useToast();
   const { role } = useAuth();
 
-  const canManage = role === 'admin';
+  const canManage = role === 'business_owner';
 
   const { record: contact, loading, error, refetch, setRecord } =
     useResourceRecord(contactsService, id);

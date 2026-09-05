@@ -1,0 +1,222 @@
+/* ============================================================
+   FILE: src/styles/financial-dashboard.css
+   Phase 13 — Executive Financial Dashboard Styles
+   Neumorphic design per strict.md. Frozen Lake root tokens only.
+   Typography: Orbitron for titles/numbers; Sora for body/UI controls
+   ============================================================ */
+
+.fin-dash-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.fin-dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.fin-dash-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fin-dash-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.fin-dash-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.fin-dash-subtitle {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 680px;
+  line-height: 1.5;
+}
+
+/* ─── Period Selector (Neumorphic Segmented Control) ───── */
+.fin-dash-period-selector {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-surface);
+  border-radius: 12px;
+  padding: 4px;
+  border: 1px solid var(--border-subtle);
+  box-shadow: inset 2px 2px 5px var(--nm-inset-dark),
+              inset -2px -2px 5px var(--nm-inset-light);
+  gap: 4px;
+}
+
+.fin-dash-period-btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fin-dash-period-btn:hover {
+  color: var(--text-primary);
+}
+
+.fin-dash-period-btn.active {
+  background: var(--bg-raised);
+  color: var(--accent-primary);
+  box-shadow: 3px 3px 6px var(--nm-shadow-dark),
+              -2px -2px 5px var(--nm-shadow-light);
+}
+
+/* ─── KPI Cards Grid ─────────────────────────────────────── */
+.fin-dash-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.fin-dash-stat-card {
+  background: var(--bg-raised);
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: 8px 8px 16px var(--nm-shadow-dark),
+              -4px -4px 10px var(--nm-shadow-light);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.fin-dash-stat-card.deep {
+  background: linear-gradient(135deg, rgba(0, 0, 128, 0.25), var(--bg-raised));
+  border-color: rgba(0, 0, 128, 0.4);
+}
+
+.fin-dash-stat-label {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.fin-dash-stat-val {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.fin-dash-stat-val.positive {
+  color: var(--status-success);
+}
+
+.fin-dash-stat-val.alert {
+  color: var(--status-warning);
+}
+
+/* ─── Charts Grid ────────────────────────────────────────── */
+.fin-dash-charts-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+@media (max-width: 960px) {
+  .fin-dash-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fin-dash-chart-card {
+  background: var(--bg-raised);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 8px 8px 16px var(--nm-shadow-dark),
+              -4px -4px 10px var(--nm-shadow-light);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.fin-dash-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fin-dash-chart-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ─── Recent Activity Section ────────────────────────────── */
+.fin-dash-activity-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.84rem;
+}
+
+.fin-dash-activity-table th {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+}
+
+.fin-dash-activity-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.fin-dash-activity-table tr:last-child td {
+  border-bottom: none;
+}

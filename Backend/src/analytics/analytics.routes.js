@@ -18,15 +18,15 @@ const router = express.Router();
 router.use(authMiddleware.authenticate, resolveTenant);
 
 // ─── Read ───────────────────────────────────────────────
-router.get('/', authMiddleware.authorize('admin', 'manager'), analyticsController.listAnalyticAccounts);
-router.get('/:id', authMiddleware.authorize('admin', 'manager'), analyticsController.getAnalyticAccount);
+router.get('/', authMiddleware.authorize('business_owner', 'accountant'), analyticsController.listAnalyticAccounts);
+router.get('/:id', authMiddleware.authorize('business_owner', 'accountant'), analyticsController.getAnalyticAccount);
 
 // ─── Create — both roles ────────────────────────────────
-router.post('/', authMiddleware.authorize('admin', 'manager'), analyticsController.createAnalyticAccount);
+router.post('/', authMiddleware.authorize('business_owner', 'accountant'), analyticsController.createAnalyticAccount);
 
 // ─── Modify / archive — admin only ──────────────────────
-router.patch('/:id', authMiddleware.authorize('admin'), analyticsController.updateAnalyticAccount);
-router.patch('/:id/archive', authMiddleware.authorize('admin'), analyticsController.archiveAnalyticAccount);
-router.patch('/:id/unarchive', authMiddleware.authorize('admin'), analyticsController.unarchiveAnalyticAccount);
+router.patch('/:id', authMiddleware.authorize('business_owner'), analyticsController.updateAnalyticAccount);
+router.patch('/:id/archive', authMiddleware.authorize('business_owner'), analyticsController.archiveAnalyticAccount);
+router.patch('/:id/unarchive', authMiddleware.authorize('business_owner'), analyticsController.unarchiveAnalyticAccount);
 
 module.exports = router;

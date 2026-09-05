@@ -18,7 +18,7 @@ import React from 'react';
 import DashboardFrame from '@/components/dashboard/DashboardFrame';
 import { useAuth } from '@/context/AuthContext';
 
-const MASTER_DATA_ROLES = ['admin', 'manager'];
+const MASTER_DATA_ROLES = ['business_owner', 'accountant'];
 
 /**
  * @param {string} props.activeKey - Sidebar entry to highlight.
@@ -29,7 +29,7 @@ export default function MasterDataFrame({ activeKey, children }) {
 
   return (
     <DashboardFrame
-      role={MASTER_DATA_ROLES.includes(role) ? role : 'manager'}
+      role={MASTER_DATA_ROLES.includes(role) ? role : 'accountant'}
       activeKey={activeKey}
       allowedRoles={MASTER_DATA_ROLES}
     >

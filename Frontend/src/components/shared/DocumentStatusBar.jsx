@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ArrowLeft, CheckCircle2, FileText, Send, XCircle } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 /**
  * DocumentStatusBar Component

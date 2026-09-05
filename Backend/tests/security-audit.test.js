@@ -76,7 +76,7 @@ async function runSecurityAudit() {
   const pepperTestEmail = `pepper_audit_${testSuffix}@example.com`;
   await pool.query(
     'INSERT INTO users (name, email, password_hash, role, email_verified, token_version) VALUES ($1, $2, $3, $4, $5, $6)',
-    ['Pepper Auditor', pepperTestEmail, passwordHash, 'user', true, 1]
+    ['Pepper Auditor', pepperTestEmail, passwordHash, 'customer', true, 1]
   );
   const dbHashRes = await pool.query('SELECT password_hash FROM users WHERE email = $1', [pepperTestEmail]);
   const storedDbHash = dbHashRes.rows[0].password_hash;
@@ -90,7 +90,7 @@ async function runSecurityAudit() {
   console.log('\n[SECTION 4: Registration, Role Escalation & Duplicate Defense]');
   const regEmail = `reg_audit_${testSuffix}@example.com`;
 
-  // Role escalation attempt: client passes role: 'super_admin'
+  // Role escalation attempt: client passes role: 'business_owner'
   const regRes = await fetch(`${BASE_URL}/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -98,12 +98,12 @@ async function runSecurityAudit() {
       name: 'Role Escalation Tester',
       email: regEmail,
       password: passwordPlain,
-      role: 'super_admin', // Attacker payload
+      role: 'business_owner', // Attacker payload
     }),
   });
   const regData = await regRes.json();
   assert(regRes.status === 201, 'Registration returns 201 Created');
-  assert(regData.data?.user?.role === 'user', 'Client-supplied role: super_admin ignored; role forced to user');
+  assert(regData.data?.user?.role === 'customer', 'Client-supplied role: super_admin ignored; role forced to customer');
   assert(regData.data?.user?.email_verified === false, 'New user account created with email_verified: false');
   assert(!regData.data?.user?.password_hash, 'Password hash is NEVER leaked in registration response');
 
@@ -176,18 +176,19 @@ async function runSecurityAudit() {
     body: JSON.stringify({ email: regEmail, password: passwordPlain }),
   });
   const userLoginData = await userLoginRes.json();
+  if (userLoginRes.status !== 200) console.error('userLoginRes failed:', userLoginRes.status, userLoginData);
   const userJwt = userLoginData.data?.token;
   assert(userLoginRes.status === 200, 'Verified user logs in successfully');
   assert(Boolean(userJwt), 'Standard user receives signed JWT token');
 
   const decodedJwt = jwt.verify(userJwt, env.jwtSecret);
-  assert(decodedJwt.sub === userId && decodedJwt.role === 'user' && decodedJwt.tokenVersion === 1, 'JWT payload contains sub, role: user, and tokenVersion');
+  assert(decodedJwt.sub === userId && decodedJwt.role === 'customer' && decodedJwt.tokenVersion === 1, 'JWT payload contains sub, role: user, and tokenVersion');
 
   // Admin user setup -> Session cookie
   const adminAuditEmail = `admin_audit_${testSuffix}@example.com`;
   const adminCreateRes = await pool.query(
     'INSERT INTO users (name, email, password_hash, role, email_verified, token_version) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-    ['Admin Auditor', adminAuditEmail, passwordHash, 'admin', true, 1]
+    ['Admin Auditor', adminAuditEmail, passwordHash, 'business_owner', true, 1]
   );
   const adminId = adminCreateRes.rows[0].id;
 
@@ -320,7 +321,7 @@ async function runSecurityAudit() {
   const superEmail = `super_audit_${testSuffix}@example.com`;
   const superCreate = await pool.query(
     'INSERT INTO users (name, email, password_hash, role, email_verified, token_version) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-    ['Super Auditor', superEmail, passwordHash, 'super_admin', true, 1]
+    ['Super Auditor', superEmail, passwordHash, 'business_owner', true, 1]
   );
   const superId = superCreate.rows[0].id;
   const superLoginRes = await fetch(`${BASE_URL}/login`, {
@@ -328,7 +329,9 @@ async function runSecurityAudit() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: superEmail, password: passwordPlain }),
   });
-  const superSid = superLoginRes.headers.get('set-cookie')?.match(/sid=([^;]+)/)?.[1];
+  const superCookieHeader = superLoginRes.headers.get('set-cookie');
+  const superSid = superCookieHeader?.match(/sid=([^;]+)/)?.[1];
+  const superCsrf = superCookieHeader?.match(/csrf_token=([^;]+)/)?.[1];
 
   // Re-login standard user with new password
   const newLoginUserRes = await fetch(`${BASE_URL}/login`, {
@@ -353,11 +356,20 @@ async function runSecurityAudit() {
   assert(userAdminRes.status === 403, 'Standard user accessing /admin/users returns 403 Forbidden (RBAC enforced)');
 
   // SuperAdmin role update
+  const roleUpdateHeaders = {
+    'Content-Type': 'application/json',
+    Cookie: `sid=${superSid}${superCsrf ? `; csrf_token=${superCsrf}` : ''}`,
+  };
+  if (superCsrf) {
+    roleUpdateHeaders['x-csrf-token'] = superCsrf;
+  }
   const roleUpdateRes = await fetch(`${BASE_URL}/admin/users/${userId}/role`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Cookie: `sid=${superSid}` },
-    body: JSON.stringify({ role: 'manager' }),
+    headers: roleUpdateHeaders,
+    body: JSON.stringify({ role: 'accountant' }),
   });
+  const roleUpdateData = await roleUpdateRes.json();
+  if (roleUpdateRes.status !== 200) console.error('DEBUG roleUpdateRes:', roleUpdateRes.status, roleUpdateData);
   assert(roleUpdateRes.status === 200, 'SuperAdmin successfully updates user role to manager on /admin/users/:id/role');
 
   // IDOR / Ownership Check
@@ -380,7 +392,7 @@ async function runSecurityAudit() {
   const remEmail = `rem_user_${testSuffix}@example.com`;
   const remUserCreate = await pool.query(
     'INSERT INTO users (name, email, password_hash, role, email_verified, token_version) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-    ['Remember Me Tester', remEmail, passwordHash, 'user', true, 1]
+    ['Remember Me Tester', remEmail, passwordHash, 'customer', true, 1]
   );
   const remUserId = remUserCreate.rows[0].id;
 
@@ -557,9 +569,11 @@ async function runSecurityAudit() {
 
   // 13.8 Privileged Users: Remember Me = extended server session lifetime (NOT JWT)
   const mgrEmail = `mgr_rem_${testSuffix}@example.com`;
+  const defaultOrgRes = await pool.query('SELECT id FROM organizations LIMIT 1');
+  const testOrgId = defaultOrgRes.rows[0]?.id || null;
   await pool.query(
-    'INSERT INTO users (name, email, password_hash, role, email_verified, token_version) VALUES ($1, $2, $3, $4, $5, $6)',
-    ['Manager Rem Tester', mgrEmail, passwordHash, 'manager', true, 1]
+    'INSERT INTO users (name, email, password_hash, role, email_verified, token_version, organization_id) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+    ['Manager Rem Tester', mgrEmail, passwordHash, 'accountant', true, 1, testOrgId]
   );
 
   const mgrLoginOff = await fetch(`${BASE_URL}/login`, {
@@ -605,6 +619,53 @@ async function runSecurityAudit() {
   const statuses = [raceRes1.status, raceRes2.status];
   const okCount = statuses.filter(s => s === 200).length;
   assert(okCount === 1, 'Transactional rotation prevents concurrent token races: exactly one request succeeds');
+
+  // ─── 14. CSRF DOUBLE-SUBMIT TOKEN PROTECTION (PHASE 14) ───
+  console.log('\n[SECTION 14: CSRF Double-Submit Token & Cross-Tenant Protection]');
+  const setCookieHeader = mgrLoginOn.headers.get('set-cookie') || '';
+  const csrfCookieMatch = setCookieHeader.match(/csrf_token=([^;]+)/);
+  const mgrSidMatch = mgrOnCookies.match(/sid=([^;]+)/);
+  const mgrSid = mgrSidMatch ? mgrSidMatch[1] : null;
+  const csrfCookieVal = csrfCookieMatch ? csrfCookieMatch[1] : null;
+
+  assert(Boolean(csrfCookieVal), 'Session login issues non-HttpOnly csrf_token cookie for client-side inclusion');
+
+  // 14.1 State-changing request with session auth but NO x-csrf-token header -> 403
+  const csrfMissingRes = await fetch(`http://localhost:${env.port}/api/contacts`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Cookie: `sid=${mgrSid}; csrf_token=${csrfCookieVal}`,
+    },
+    body: JSON.stringify({ name: 'CSRF Exploit Contact', type: 'customer' }),
+  });
+  assert(csrfMissingRes.status === 403, 'State-changing session request without x-csrf-token header is blocked (403 Forbidden)');
+
+  // 14.2 State-changing request with mismatched x-csrf-token header -> 403
+  const csrfMismatchRes = await fetch(`http://localhost:${env.port}/api/contacts`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Cookie: `sid=${mgrSid}; csrf_token=${csrfCookieVal}`,
+      'x-csrf-token': 'bad_token_value_0000000000000000000000000000000000000000000000000000',
+    },
+    body: JSON.stringify({ name: 'CSRF Exploit Contact', type: 'customer' }),
+  });
+  assert(csrfMismatchRes.status === 403, 'State-changing session request with mismatched x-csrf-token is blocked (403 Forbidden)');
+
+  // 14.3 State-changing request with valid x-csrf-token header passes CSRF verification
+  const csrfValidRes = await fetch(`http://localhost:${env.port}/api/contacts`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Cookie: `sid=${mgrSid}; csrf_token=${csrfCookieVal}`,
+      'x-csrf-token': csrfCookieVal,
+    },
+    body: JSON.stringify({ name: 'Legitimate Contact', type: 'customer' }),
+  });
+  const csrfValidData = await csrfValidRes.json().catch(() => null);
+  if (csrfValidRes.status === 403) console.error('DEBUG csrfValidRes:', csrfValidRes.status, csrfValidData);
+  assert(csrfValidRes.status !== 403, 'State-changing session request with valid x-csrf-token passes CSRF verification');
 
   console.log('\n========================================================================');
   console.log(`🏆 SECURITY AUDIT COMPLETE: ${passedTests}/${totalTests} TESTS PASSED WITH ZERO VULNERABILITIES`);

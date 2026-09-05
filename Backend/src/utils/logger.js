@@ -21,6 +21,16 @@ const SENSITIVE_FIELDS = [
   'sessionId',
   'secret',
   'authorization',
+  // Gateway & payment — Phase 14 security audit
+  'gateway_signature',
+  'razorpay_signature',
+  'stripe_signature',
+  'card_number',
+  'card_data',
+  'cvv',
+  'cvc',
+  'gateway_key_secret',
+  'webhook_secret',
 ];
 
 /**

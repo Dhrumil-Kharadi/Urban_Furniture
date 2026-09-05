@@ -32,6 +32,7 @@ import {
 import useDashboardData from '@/hooks/useDashboardData';
 import { lastMonths } from '@/services/dashboard.service';
 import { STAT_ICONS, ICON_SM } from '@/config/dashboard.config';
+import FinancialDashboard from '@/components/dashboard/FinancialDashboard';
 
 const Icon = ({ as: C, size = ICON_SM }) =>
   C ? <C size={size} strokeWidth={2} aria-hidden="true" /> : null;
@@ -39,6 +40,7 @@ const Icon = ({ as: C, size = ICON_SM }) =>
 export default function AdminDashboard() {
   const t = useTranslations('dashboard');
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('financial');
   const [search, setSearch] = useState('');
   const { users, metrics, loading, error, refresh } = useDashboardData({ scope: 'directory' });
 
@@ -136,10 +138,54 @@ export default function AdminDashboard() {
         }
       />
 
-      {loading && !users.length ? (
+      {/* View Switcher: Financial Overview vs Directory */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', padding: '0 0.5rem' }}>
+        <button
+          type="button"
+          onClick={() => setActiveTab('financial')}
+          style={{
+            fontFamily: 'Orbitron, monospace',
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            padding: '0.6rem 1.25rem',
+            borderRadius: '8px',
+            border: activeTab === 'financial' ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
+            background: activeTab === 'financial' ? 'var(--bg-surface)' : 'transparent',
+            color: activeTab === 'financial' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            boxShadow: activeTab === 'financial' ? '4px 4px 8px var(--nm-shadow-dark), -2px -2px 6px var(--nm-shadow-light)' : 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          Financial Overview
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('directory')}
+          style={{
+            fontFamily: 'Orbitron, monospace',
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            padding: '0.6rem 1.25rem',
+            borderRadius: '8px',
+            border: activeTab === 'directory' ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
+            background: activeTab === 'directory' ? 'var(--bg-surface)' : 'transparent',
+            color: activeTab === 'directory' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            boxShadow: activeTab === 'directory' ? '4px 4px 8px var(--nm-shadow-dark), -2px -2px 6px var(--nm-shadow-light)' : 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          Directory & Roles
+        </button>
+      </div>
+
+      {activeTab === 'financial' ? (
+        <FinancialDashboard />
+      ) : loading && !users.length ? (
         <DashboardSkeleton layout="directory" />
       ) : (
-      <div className="dash-grid">
+        <div className="dash-grid">
         {/* ---------------- directory metrics ---------------- */}
         <StatCard
           tone="deep"

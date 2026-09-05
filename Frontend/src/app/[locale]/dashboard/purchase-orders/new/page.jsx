@@ -35,20 +35,20 @@ export default function NewPurchaseOrderPage() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
+    <div className="tx-page tx-page--narrow">
+      <div className="tx-detail-header">
         <Link
           href="/dashboard/purchase-orders"
-          className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
+          className="tx-back-btn"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="tx-back-icon" />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-gray-100 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-indigo-400" />
+          <h1 className="tx-detail-title">
+            <FileText className="tx-detail-title-icon" />
             Create Purchase Order
           </h1>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="tx-detail-subtitle">
             Draft a procurement order for goods or materials from a vendor
           </p>
         </div>

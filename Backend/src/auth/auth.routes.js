@@ -60,12 +60,12 @@ const captchaRateLimiter = rateLimit({
  * Protected user routes:
  * POST /logout                — Invalidate session / clear cookies
  * GET  /me                    — Retrieve current authenticated profile
- * GET  /users/:id             — Resource ownership protected endpoint (owner OR admin/super_admin)
+ * GET  /users/:id             — Resource ownership protected endpoint (owner OR business_owner)
  *
  * Protected privileged routes (RBAC):
- * GET  /manager/dashboard     — Manager / Admin / SuperAdmin only
- * GET  /admin/users           — Admin / SuperAdmin only
- * PATCH /admin/users/:id/role — SuperAdmin only
+ * GET  /manager/dashboard     — Accountant / Business Owner only
+ * GET  /admin/users           — Business Owner only
+ * PATCH /admin/users/:id/role — Business Owner only
  */
 
 // Public endpoints
@@ -91,7 +91,7 @@ router.get('/me', authMiddleware.authenticate, authController.getMe);
 router.get(
   '/users/:id',
   authMiddleware.authenticate,
-  authMiddleware.authorizeOwnerOrRoles((req) => req.params.id, 'admin', 'super_admin'),
+  authMiddleware.authorizeOwnerOrRoles((req) => req.params.id, 'business_owner'),
   authController.getUserProfileById
 );
 
@@ -99,21 +99,21 @@ router.get(
 router.get(
   '/manager/dashboard',
   authMiddleware.authenticate,
-  authMiddleware.authorize('manager', 'admin', 'super_admin'),
+  authMiddleware.authorize('business_owner', 'accountant'),
   authController.getManagerDashboard
 );
 
 router.get(
   '/admin/users',
   authMiddleware.authenticate,
-  authMiddleware.authorize('admin', 'super_admin'),
+  authMiddleware.authorize('business_owner'),
   authController.listUsers
 );
 
 router.patch(
   '/admin/users/:id/role',
   authMiddleware.authenticate,
-  authMiddleware.authorize('super_admin'),
+  authMiddleware.authorize('business_owner'),
   authController.updateUserRole
 );
 

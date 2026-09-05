@@ -23,13 +23,13 @@ const inviteRateLimiter = rateLimit({
 router.use(
   authMiddleware.authenticate,
   resolveTenant,
-  authMiddleware.authorize('admin')
+  authMiddleware.authorize('business_owner')
 );
 
 // GET /api/users - List org users
 router.get('/', usersController.listUsers);
 
-// POST /api/users/invite - Invite Accountant (role='manager')
+// POST /api/users/invite - Invite Accountant (role='accountant')
 router.post('/invite', inviteRateLimiter, usersController.inviteUser);
 
 // PATCH /api/users/:id/status - Activate/deactivate user

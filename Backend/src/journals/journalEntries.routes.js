@@ -25,25 +25,25 @@ const router = express.Router();
 router.use(authMiddleware.authenticate, resolveTenant);
 
 // ─── Read ───────────────────────────────────────────────
-router.get('/', authMiddleware.authorize('admin', 'manager'), journalEntriesController.listEntries);
+router.get('/', authMiddleware.authorize('business_owner', 'accountant'), journalEntriesController.listEntries);
 
 // ─── Post ───────────────────────────────────────────────
-router.post('/', authMiddleware.authorize('admin', 'manager'), journalEntriesController.createEntry);
+router.post('/', authMiddleware.authorize('business_owner', 'accountant'), journalEntriesController.createEntry);
 
 // Declared before '/:id' so the literal segment is not captured as an id.
 // Seeding the opening position is a one-time act of setting up the books.
 router.post(
   '/opening-balances',
-  authMiddleware.authorize('admin'),
+  authMiddleware.authorize('business_owner'),
   journalEntriesController.postOpeningBalances
 );
 
-router.get('/:id', authMiddleware.authorize('admin', 'manager'), journalEntriesController.getEntry);
+router.get('/:id', authMiddleware.authorize('business_owner', 'accountant'), journalEntriesController.getEntry);
 
 // ─── Correct ────────────────────────────────────────────
 router.post(
   '/:id/reverse',
-  authMiddleware.authorize('admin', 'manager'),
+  authMiddleware.authorize('business_owner', 'accountant'),
   journalEntriesController.reverseEntry
 );
 

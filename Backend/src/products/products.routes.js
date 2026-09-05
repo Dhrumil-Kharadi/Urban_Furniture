@@ -19,15 +19,15 @@ const router = express.Router();
 router.use(authMiddleware.authenticate, resolveTenant);
 
 // ─── Read ───────────────────────────────────────────────
-router.get('/', authMiddleware.authorize('admin', 'manager'), productsController.listProducts);
-router.get('/:id', authMiddleware.authorize('admin', 'manager'), productsController.getProduct);
+router.get('/', authMiddleware.authorize('business_owner', 'accountant'), productsController.listProducts);
+router.get('/:id', authMiddleware.authorize('business_owner', 'accountant'), productsController.getProduct);
 
 // ─── Create — both roles (project.md §3) ────────────────
-router.post('/', authMiddleware.authorize('admin', 'manager'), productsController.createProduct);
+router.post('/', authMiddleware.authorize('business_owner', 'accountant'), productsController.createProduct);
 
 // ─── Modify / archive — admin only ──────────────────────
-router.patch('/:id', authMiddleware.authorize('admin'), productsController.updateProduct);
-router.patch('/:id/archive', authMiddleware.authorize('admin'), productsController.archiveProduct);
-router.patch('/:id/unarchive', authMiddleware.authorize('admin'), productsController.unarchiveProduct);
+router.patch('/:id', authMiddleware.authorize('business_owner'), productsController.updateProduct);
+router.patch('/:id/archive', authMiddleware.authorize('business_owner'), productsController.archiveProduct);
+router.patch('/:id/unarchive', authMiddleware.authorize('business_owner'), productsController.unarchiveProduct);
 
 module.exports = router;

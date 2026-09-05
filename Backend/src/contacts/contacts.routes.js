@@ -58,21 +58,21 @@ const imageBodyParser = express.raw({
 router.use(authMiddleware.authenticate, resolveTenant);
 
 // ─── Read ───────────────────────────────────────────────
-router.get('/', authMiddleware.authorize('admin', 'manager'), contactsController.listContacts);
-router.get('/:id', authMiddleware.authorize('admin', 'manager'), contactsController.getContact);
+router.get('/', authMiddleware.authorize('business_owner', 'accountant'), contactsController.listContacts);
+router.get('/:id', authMiddleware.authorize('business_owner', 'accountant'), contactsController.getContact);
 
 // ─── Create — both roles (project.md §3) ────────────────
-router.post('/', authMiddleware.authorize('admin', 'manager'), contactsController.createContact);
+router.post('/', authMiddleware.authorize('business_owner', 'accountant'), contactsController.createContact);
 
 // ─── Modify / archive — admin only (§10 Decision 1) ─────
-router.patch('/:id', authMiddleware.authorize('admin'), contactsController.updateContact);
-router.patch('/:id/archive', authMiddleware.authorize('admin'), contactsController.archiveContact);
-router.patch('/:id/unarchive', authMiddleware.authorize('admin'), contactsController.unarchiveContact);
+router.patch('/:id', authMiddleware.authorize('business_owner'), contactsController.updateContact);
+router.patch('/:id/archive', authMiddleware.authorize('business_owner'), contactsController.archiveContact);
+router.patch('/:id/unarchive', authMiddleware.authorize('business_owner'), contactsController.unarchiveContact);
 
 // ─── Portal provisioning — admin only ───────────────────
 router.post(
   '/:id/portal-access',
-  authMiddleware.authorize('admin'),
+  authMiddleware.authorize('business_owner'),
   portalRateLimiter,
   contactsController.setPortalAccess
 );
@@ -80,7 +80,7 @@ router.post(
 // ─── Profile image — admin only (it is a modification) ──
 router.post(
   '/:id/profile-image',
-  authMiddleware.authorize('admin'),
+  authMiddleware.authorize('business_owner'),
   uploadRateLimiter,
   imageBodyParser,
   contactsController.uploadProfileImage

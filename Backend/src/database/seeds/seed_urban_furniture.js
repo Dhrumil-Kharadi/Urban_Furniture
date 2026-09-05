@@ -3,7 +3,7 @@
  *
  * Seeds:
  * - 1 Organization: Urban Furniture Pvt Ltd (slug: urban-furniture)
- * - 8 Users with varied roles (Admin, Senior Accountants, Staff Accountants, Controller, SuperAdmin, Portal Users)
+ * - 7 Users with varied roles (Business Owner, Accountants, Customer, Vendor)
  * - 18 Product Categories
  * - 6 GST Taxes
  * - 70 Chart of Accounts across Asset, Liability, Capital, Income, Expense
@@ -62,58 +62,51 @@ async function seedUrbanFurniture() {
       {
         name: 'Rajesh Sharma',
         email: 'admin@urbanfurniture.com',
-        role: 'admin',
+        role: 'business_owner',
         orgId: organizationId,
-        title: 'Business Owner & Admin',
+        title: 'Business Owner',
       },
       {
         name: 'Pooja Patel',
         email: 'accountant@urbanfurniture.com',
-        role: 'manager',
+        role: 'accountant',
         orgId: organizationId,
         title: 'Lead Chief Accountant',
       },
       {
         name: 'Kavya Desai',
         email: 'kavya.accountant@urbanfurniture.com',
-        role: 'manager',
+        role: 'accountant',
         orgId: organizationId,
         title: 'Senior Financial Accountant',
       },
       {
         name: 'Neel Mehta',
         email: 'neel.accountant@urbanfurniture.com',
-        role: 'manager',
+        role: 'accountant',
         orgId: organizationId,
         title: 'Audit & Compliance Accountant',
       },
       {
         name: 'Vikram Singhania',
         email: 'controller@urbanfurniture.com',
-        role: 'manager',
+        role: 'accountant',
         orgId: organizationId,
         title: 'Financial Controller',
       },
       {
         name: 'Amit Shah',
         email: 'customer@azurefurniture.com',
-        role: 'user',
+        role: 'customer',
         orgId: organizationId,
         title: 'Portal Customer User',
       },
       {
         name: 'Suresh Gupta',
         email: 'vendor@woodkraft.com',
-        role: 'user',
+        role: 'vendor',
         orgId: organizationId,
         title: 'Portal Vendor User',
-      },
-      {
-        name: 'Platform SuperAdmin',
-        email: 'superadmin@urbanfurniture.com',
-        role: 'super_admin',
-        orgId: null,
-        title: 'System Super Administrator',
       },
     ];
 
@@ -1109,7 +1102,6 @@ async function seedUrbanFurniture() {
     console.log('🎉 URBAN FURNITURE SEED COMPLETED SUCCESSFULLY!');
     console.log('================================================================');
     console.log(`Organization: ${orgName} (slug: ${orgSlug})`);
-    console.log(`Default Password: ${DEFAULT_PASSWORD}`);
     console.log('----------------------------------------------------------------');
     console.log('Credentials Summary:');
     console.log(` 1. Admin (Business Owner): admin@urbanfurniture.com`);

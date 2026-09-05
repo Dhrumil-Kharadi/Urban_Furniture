@@ -23,22 +23,22 @@ const { env } = require('../config/env');
 
 const authJwt = {
   /**
-   * Generate a short-lived JWT for a standard user.
+   * Generate a short-lived JWT for a standard user (customer / vendor).
    *
    * @param {Object} user User entity
    * @param {string} user.id User UUID
-   * @param {string} user.role Must be 'user'
+   * @param {string} user.role Must be 'customer' or 'vendor'
    * @param {number} [user.token_version=1] Current user token version
    * @returns {string} Signed JWT
    */
   generateToken(user) {
-    if (user.role !== 'user') {
+    if (!['customer', 'vendor'].includes(user.role)) {
       throw new Error('JWT authentication is restricted to standard users only.');
     }
 
     const payload = {
       sub: user.id,
-      role: 'user',
+      role: user.role,
       tokenVersion: user.token_version !== undefined ? user.token_version : 1,
     };
 

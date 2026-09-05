@@ -16,22 +16,16 @@ import { useAuth, getDashboardPath } from '@/context/AuthContext';
 export default function DashboardIndexPage() {
   const t = useTranslations('dashboard');
   const { role, loading, isAuthenticated } = useAuth();
-  const router = useRouter();
-  const routerRef = React.useRef(router);
-  routerRef.current = router;
-
   useEffect(() => {
     if (loading) return;
 
     if (!isAuthenticated) {
-      routerRef.current.replace('/auth/login');
+      router.replace('/auth/login');
       return;
     }
 
-    routerRef.current.replace(getDashboardPath(role));
-    // router is accessed via stable ref — not needed in deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, isAuthenticated, role]);
+    router.replace(getDashboardPath(role));
+  }, [loading, isAuthenticated, role, router]);
 
   return (
     <div className="dashboard-viewport-dash">

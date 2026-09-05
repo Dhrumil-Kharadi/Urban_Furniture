@@ -35,7 +35,7 @@ export default function AuthPage({ initialMode = 'login' }) {
   // an auth URL (e.g. typing /auth/login while already authenticated).
   useEffect(() => {
     if (!loading && isAuthenticated) {
-      const targetDashboard = getDashboardPath(role || 'user');
+      const targetDashboard = getDashboardPath(role || 'customer');
       router.replace(targetDashboard);
     }
   }, [loading, isAuthenticated, role, router]);

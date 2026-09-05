@@ -5,115 +5,115 @@
  * The backend authorize() middleware remains the actual security boundary.
  *
  * Roles:
- *   admin       — Full access (Master data CRUD, Transactions, Reports, Users, Org Settings)
- *   manager     — Accountant (Master data Create/Read ONLY, Transactions CRUD, Reports, NO Users/Settings)
- *   user        — Contact (Portal ONLY: own Invoices, Bills, Payments)
- *   super_admin — Platform operator
+ *   business_owner — Full access (Master data CRUD, Transactions, Reports, Users, Org Settings)
+ *   accountant     — Accountant (Master data Create/Read ONLY, Transactions CRUD, Reports, NO Users/Settings)
+ *   customer       — Customer Contact (Portal ONLY: own Invoices, Payments)
+ *   vendor         — Vendor Contact (Portal ONLY: own Bills)
  */
 
 export const MODULE_PERMISSIONS = {
   // Master data
   contacts: {
-    view: ['admin', 'manager'],
-    create: ['admin', 'manager'],
-    edit: ['admin'],
-    archive: ['admin'],
+    view: ['business_owner', 'accountant'],
+    create: ['business_owner', 'accountant'],
+    edit: ['business_owner'],
+    archive: ['business_owner'],
   },
   products: {
-    view: ['admin', 'manager'],
-    create: ['admin', 'manager'],
-    edit: ['admin'],
-    archive: ['admin'],
+    view: ['business_owner', 'accountant'],
+    create: ['business_owner', 'accountant'],
+    edit: ['business_owner'],
+    archive: ['business_owner'],
   },
   accounts: {
-    view: ['admin', 'manager'],
-    create: ['admin', 'manager'],
-    edit: ['admin'],
-    archive: ['admin'],
+    view: ['business_owner', 'accountant'],
+    create: ['business_owner', 'accountant'],
+    edit: ['business_owner'],
+    archive: ['business_owner'],
   },
   journals: {
-    view: ['admin', 'manager'],
-    create: ['admin', 'manager'],
-    edit: ['admin'],
-    archive: ['admin'],
+    view: ['business_owner', 'accountant'],
+    create: ['business_owner', 'accountant'],
+    edit: ['business_owner'],
+    archive: ['business_owner'],
   },
   taxes: {
-    view: ['admin', 'manager'],
-    create: ['admin', 'manager'],
-    edit: ['admin'],
-    archive: ['admin'],
+    view: ['business_owner', 'accountant'],
+    create: ['business_owner', 'accountant'],
+    edit: ['business_owner'],
+    archive: ['business_owner'],
   },
   analyticAccounts: {
-    view: ['admin', 'manager'],
-    create: ['admin', 'manager'],
-    edit: ['admin'],
-    archive: ['admin'],
+    view: ['business_owner', 'accountant'],
+    create: ['business_owner', 'accountant'],
+    edit: ['business_owner'],
+    archive: ['business_owner'],
   },
   // Transactions & Financials
   purchaseOrders: {
-    view: ['admin', 'manager'],
-    create: ['admin', 'manager'],
-    edit: ['admin', 'manager'],
-    post: ['admin', 'manager'],
-    cancel: ['admin', 'manager'],
+    view: ['business_owner', 'accountant'],
+    create: ['business_owner', 'accountant'],
+    edit: ['business_owner', 'accountant'],
+    post: ['business_owner', 'accountant'],
+    cancel: ['business_owner', 'accountant'],
   },
   vendorBills: {
-    view: ['admin', 'manager'],
-    create: ['admin', 'manager'],
-    edit: ['admin', 'manager'],
-    post: ['admin', 'manager'],
-    cancel: ['admin', 'manager'],
+    view: ['business_owner', 'accountant'],
+    create: ['business_owner', 'accountant'],
+    edit: ['business_owner', 'accountant'],
+    post: ['business_owner', 'accountant'],
+    cancel: ['business_owner', 'accountant'],
   },
   salesOrders: {
-    view: ['admin', 'manager'],
-    create: ['admin', 'manager'],
-    edit: ['admin', 'manager'],
-    post: ['admin', 'manager'],
-    cancel: ['admin', 'manager'],
+    view: ['business_owner', 'accountant'],
+    create: ['business_owner', 'accountant'],
+    edit: ['business_owner', 'accountant'],
+    post: ['business_owner', 'accountant'],
+    cancel: ['business_owner', 'accountant'],
   },
   customerInvoices: {
-    view: ['admin', 'manager'],
-    create: ['admin', 'manager'],
-    edit: ['admin', 'manager'],
-    post: ['admin', 'manager'],
-    cancel: ['admin', 'manager'],
+    view: ['business_owner', 'accountant'],
+    create: ['business_owner', 'accountant'],
+    edit: ['business_owner', 'accountant'],
+    post: ['business_owner', 'accountant'],
+    cancel: ['business_owner', 'accountant'],
   },
   journalEntries: {
-    view: ['admin', 'manager'],
-    create: ['admin', 'manager'],
-    edit: ['admin', 'manager'],
-    post: ['admin', 'manager'],
-    reverse: ['admin', 'manager'],
+    view: ['business_owner', 'accountant'],
+    create: ['business_owner', 'accountant'],
+    edit: ['business_owner', 'accountant'],
+    post: ['business_owner', 'accountant'],
+    reverse: ['business_owner', 'accountant'],
   },
   payments: {
-    view: ['admin', 'manager'],
-    create: ['admin', 'manager'],
-    edit: ['admin', 'manager'],
-    post: ['admin', 'manager'],
+    view: ['business_owner', 'accountant'],
+    create: ['business_owner', 'accountant'],
+    edit: ['business_owner', 'accountant'],
+    post: ['business_owner', 'accountant'],
   },
   budgets: {
-    view: ['admin', 'manager'],
-    create: ['admin', 'manager'],
-    edit: ['admin', 'manager'],
+    view: ['business_owner', 'accountant'],
+    create: ['business_owner', 'accountant'],
+    edit: ['business_owner', 'accountant'],
   },
   reports: {
-    view: ['admin', 'manager'],
+    view: ['business_owner', 'accountant'],
   },
   // Platform & Team Admin
   users: {
-    view: ['admin'],
-    create: ['admin'],
-    edit: ['admin'],
-    deactivate: ['admin'],
+    view: ['business_owner'],
+    create: ['business_owner'],
+    edit: ['business_owner'],
+    deactivate: ['business_owner'],
   },
   settings: {
-    view: ['admin'],
-    edit: ['admin'],
+    view: ['business_owner'],
+    edit: ['business_owner'],
   },
   // Contact Portal
   portal: {
-    view: ['user'],
-    pay: ['user'],
+    view: ['customer', 'vendor'],
+    pay: ['customer', 'vendor'],
   },
 };
 
@@ -127,7 +127,6 @@ export const MODULE_PERMISSIONS = {
  */
 export function canAccess(module, role, action = 'view') {
   if (!role || !module) return false;
-  if (role === 'super_admin') return true;
 
   const rules = MODULE_PERMISSIONS[module];
   if (!rules) return false;

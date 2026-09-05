@@ -35,20 +35,20 @@ export default function NewVendorBillPage() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
+    <div className="tx-page tx-page--narrow">
+      <div className="tx-detail-header">
         <Link
           href="/dashboard/vendor-bills"
-          className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 transition-colors"
+          className="tx-back-btn"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="tx-back-icon" />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-gray-100 flex items-center gap-2">
-            <Receipt className="w-5 h-5 text-indigo-400" />
+          <h1 className="tx-detail-title">
+            <Receipt className="tx-detail-title-icon" />
             Create Vendor Bill
           </h1>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="tx-detail-subtitle">
             Record a vendor bill with GL expense allocations and tax credits
           </p>
         </div>

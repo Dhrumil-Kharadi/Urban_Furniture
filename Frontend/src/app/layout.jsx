@@ -8,6 +8,11 @@ import '../styles/dashboard.css';
 import '../styles/dashboard-shell.css';
 import '../styles/graphs.css';
 import '../styles/masterdata.css';
+import '../styles/budgets.css';
+import '../styles/reports.css';
+import '../styles/portal.css';
+import '../styles/auditlogs.css';
+import '../styles/financial-dashboard.css';
 
 export const metadata = {
   title: 'Furnova — Accounting Built for Furniture Businesses',

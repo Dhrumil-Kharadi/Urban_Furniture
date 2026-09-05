@@ -231,17 +231,14 @@ export function useAuth() {
  */
 export function getDashboardPath(role) {
   switch (role) {
-    case 'manager':
-      return '/dashboard/manager';
-    case 'admin':
-      return '/dashboard/admin';
-    case 'super_admin':
-      return '/dashboard/super-admin';
-    case 'user':
+    case 'business_owner':
+      return '/dashboard/business-owner';
+    case 'accountant':
+      return '/dashboard/accountant';
+    case 'vendor':
+      return '/portal/vendor';
+    case 'customer':
     default:
-      // A Contact is not a member of staff. Their landing place is the
-      // portal — their own invoices, bills and payments — never the
-      // organization-wide dashboard (project.md §3).
       return '/portal';
   }
 }

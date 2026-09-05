@@ -93,7 +93,7 @@ export async function fetchManagerSummary() {
 
 /** Change a user's role. Never accepts `super_admin` — that is provisioned server-side. */
 export async function updateUserRole(userId, role) {
-  if (!['user', 'manager', 'admin'].includes(role)) {
+  if (!['customer', 'vendor', 'accountant', 'business_owner'].includes(role)) {
     throw new Error('Unsupported role');
   }
   return api.patch(`/auth/admin/users/${userId}/role`, { role });
@@ -101,7 +101,7 @@ export async function updateUserRole(userId, role) {
 
 /* --------------------------------------------- derived directory metrics */
 
-export const ROLE_KEYS = ['user', 'manager', 'admin', 'super_admin'];
+export const ROLE_KEYS = ['customer', 'vendor', 'accountant', 'business_owner'];
 
 /**
  * Everything the admin / super-admin charts need, computed from the

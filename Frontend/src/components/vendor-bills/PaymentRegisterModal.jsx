@@ -13,10 +13,10 @@
 export default function PaymentRegisterModal({ isOpen, onClose, bill, onPaymentComplete }) {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-        <h3 className="text-lg font-bold">Register Payment</h3>
-        <p className="text-sm text-gray-500 mt-1">Record outgoing payment for bill {bill?.bill_number}.</p>
+    <div className="tx-modal-overlay">
+      <div className="tx-modal-dialog">
+        <h3 className="tx-modal-title">Register Payment</h3>
+        <p className="tx-modal-desc">Record outgoing payment for bill {bill?.bill_number}.</p>
       </div>
     </div>
   );

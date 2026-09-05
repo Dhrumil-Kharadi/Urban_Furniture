@@ -14,8 +14,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 /**
  * In-memory JWT store. Never persisted to localStorage/sessionStorage.
- * Only used for 'user' role authentication (short-lived 15m JWT).
- * Privileged roles (manager/admin/super_admin) rely on HttpOnly session cookies.
+ * Only used for 'customer'/'vendor' role authentication (short-lived 15m JWT).
+ * Privileged roles (business_owner/accountant) rely on HttpOnly session cookies.
  */
 let _token = null;
 let _refreshPromise = null;
@@ -78,9 +78,16 @@ async function performTokenRefresh() {
  * @param {boolean} [options._isRetry=false]
  * @returns {Promise<{ success: boolean, message: string, data?: any, errors?: string[] }>}
  */
+function getCookie(name) {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+  return match ? decodeURIComponent(match[3]) : null;
+}
+
 export async function apiFetch(endpoint, { method = 'GET', body, headers = {}, signal, _isRetry = false } = {}) {
+  const upperMethod = method.toUpperCase();
   const config = {
-    method,
+    method: upperMethod,
     credentials: 'include', // Always include cookies for session & refresh token auth
     headers: {
       'Content-Type': 'application/json',
@@ -93,12 +100,20 @@ export async function apiFetch(endpoint, { method = 'GET', body, headers = {}, s
     signal,
   };
 
+  // Attach CSRF double-submit token for state-changing requests
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(upperMethod) && !config.headers['x-csrf-token']) {
+    const csrfToken = getCookie('csrf_token');
+    if (csrfToken) {
+      config.headers['x-csrf-token'] = csrfToken;
+    }
+  }
+
   // Attach JWT for user-role requests (memory-only)
   if (_token) {
     config.headers['Authorization'] = `Bearer ${_token}`;
   }
 
-  if (body && method !== 'GET') {
+  if (body && upperMethod !== 'GET') {
     config.body = JSON.stringify(body);
   }
 

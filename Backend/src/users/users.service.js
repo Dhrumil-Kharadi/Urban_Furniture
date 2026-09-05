@@ -33,10 +33,10 @@ const usersService = {
   },
 
   /**
-   * Invite an Accountant (role='manager') to the organization.
+   * Invite an Accountant (role='accountant') to the organization.
    *
    * Security & spec requirements:
-   * - Admin may ONLY create role='manager' (cannot mint another Admin).
+   * - Admin may ONLY create role='accountant' (cannot mint another Admin).
    * - Invite token is single-use, hashed at rest (SHA-256), 72-hour expiry.
    * - Initial random password is never returned and never logged.
    * - Identical response whether email already exists or not (enumeration defense).
@@ -66,7 +66,7 @@ const usersService = {
           id: existingUser.id,
           name: existingUser.name,
           email: existingUser.email,
-          role: 'manager',
+          role: 'accountant',
           status: 'invited',
         },
       };
@@ -84,12 +84,12 @@ const usersService = {
 
     let createdUser;
     await withTransaction(async (client) => {
-      // Create user as role='manager'
+      // Create user as role='accountant'
       createdUser = await authRepository.createUser({
         name: name.trim(),
         email: normalizedEmail,
         passwordHash,
-        role: 'manager',
+        role: 'accountant',
         organization_id: organizationId,
         must_change_password: true,
         status: 'invited',

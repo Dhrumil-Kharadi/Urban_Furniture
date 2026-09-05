@@ -2,6 +2,7 @@ const { error } = require('../utils/response');
 const authJwt = require('./auth.jwt');
 const authSession = require('./auth.session');
 const authRepository = require('./auth.repository');
+const { verifyCsrf } = require('../shared/csrf.middleware');
 
 /**
  * Auth Middleware
@@ -59,6 +60,7 @@ const authMiddleware = {
           email: user.email,
           role: user.role,
           organization_id: user.organization_id || null,
+          contact_id: user.contact_id || null,
           token_version: user.token_version,
           email_verified: user.email_verified,
           created_at: user.created_at,
@@ -66,7 +68,7 @@ const authMiddleware = {
         req.authType = 'session';
         req.sessionId = sessionCookie;
 
-        return next();
+        return verifyCsrf(req, res, next);
       }
 
       // ─── Path 2: JWT Bearer Token (Standard Users) ────────
@@ -86,7 +88,7 @@ const authMiddleware = {
           return error(res, 'Invalid access token', 401);
         }
 
-        if (!payload.sub || payload.role !== 'user') {
+        if (!payload.sub || !['customer', 'vendor'].includes(payload.role)) {
           return error(res, 'Invalid token payload', 401);
         }
 
@@ -96,8 +98,8 @@ const authMiddleware = {
           return error(res, 'User account not found', 401);
         }
 
-        // Enforce that user is indeed a standard user (not elevated)
-        if (user.role !== 'user') {
+        // Enforce that user is indeed a standard (non-privileged) role
+        if (!['customer', 'vendor'].includes(user.role)) {
           return error(res, 'Role mismatch: privileged roles must authenticate via server session', 403);
         }
 
@@ -118,6 +120,7 @@ const authMiddleware = {
           email: user.email,
           role: user.role,
           organization_id: user.organization_id || null,
+          contact_id: user.contact_id || null,
           token_version: user.token_version,
           email_verified: user.email_verified,
           created_at: user.created_at,

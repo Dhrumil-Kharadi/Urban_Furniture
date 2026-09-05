@@ -109,7 +109,7 @@ export default function LoginForm({
 
       if (res.success) {
         clearDraft(); // the form served its purpose — drop the retained email
-        const userRole = res.data?.user?.role || 'user';
+        const userRole = res.data?.user?.role || 'customer';
         const targetDashboard = getDashboardPath(userRole);
         trigger({
           to: targetDashboard,

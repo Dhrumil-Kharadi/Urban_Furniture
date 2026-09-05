@@ -166,12 +166,12 @@ const authService = {
           name: organizationName,
         });
 
-        // 2. Insert user with role='admin' and organization_id (ignoring any client role/org)
+        // 2. Insert user with role='business_owner' and organization_id
         createdUser = await authRepository.createUser({
           name,
           email,
           passwordHash,
-          role: 'admin',
+          role: 'business_owner',
           organization_id: createdOrg.id,
         }, client);
 
@@ -233,7 +233,7 @@ const authService = {
       name,
       email,
       passwordHash,
-      role: 'user',
+      role: 'customer',
     });
 
     await this.generateAndSendVerificationOtp(createdUser, 'email_verification');
@@ -400,7 +400,7 @@ const authService = {
       };
     }
 
-    // Standard user role: issue 15-minute JWT
+    // Standard (non-privileged) role: issue 15-minute JWT
     const token = authJwt.generateToken(sanitizedUser);
 
     // Generate refresh token for standard user (only when remember is true)
@@ -493,7 +493,7 @@ const authService = {
 
     // Load user and verify account state
     const user = await authRepository.findUserById(tokenRecord.user_id);
-    if (!user || !user.email_verified || user.role !== 'user') {
+    if (!user || !user.email_verified || !['customer', 'vendor'].includes(user.role)) {
       await authRepository.revokeRefreshToken(tokenHash);
       const error = new Error('User account is invalid or unverified.');
       error.statusCode = 401;
@@ -729,8 +729,14 @@ const authService = {
     const limit = Math.min(parseInt(pagination.limit, 10) || 50, 100);
     const offset = Math.max(parseInt(pagination.offset, 10) || 0, 0);
 
-    if (actor.role === 'super_admin') {
-      return authRepository.listUsers({ limit, offset, organizationId: null });
+    if (actor.role === 'business_owner') {
+      // Business owner scoped to their organization
+      if (!actor.organization_id) return [];
+      return authRepository.listUsers({
+        limit,
+        offset,
+        organizationId: actor.organization_id,
+      });
     }
 
     // Any other role without an organization has nothing to list. Falling
@@ -777,7 +783,7 @@ const authService = {
    * @returns {Promise<Object>}
    */
   async updateUserRole({ userId, newRole }) {
-    const allowedRoles = ['user', 'manager', 'admin', 'super_admin'];
+    const allowedRoles = ['business_owner', 'accountant', 'customer', 'vendor'];
     if (!allowedRoles.includes(newRole)) {
       const error = new Error(`Invalid role '${newRole}'. Allowed roles: ${allowedRoles.join(', ')}`);
       error.statusCode = 400;

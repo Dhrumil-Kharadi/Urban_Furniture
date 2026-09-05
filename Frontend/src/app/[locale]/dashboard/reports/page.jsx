@@ -1,25 +1,82 @@
-/**
- * @file Reports Hub / Dashboard Page
- * @route /dashboard/reports
- * @spec Doc/project.md §6, Doc/phase.md Phase 11
- * 
- * REQUIREMENTS & SPECIFICATION:
- * - Financial reports center for Admin and Accountant roles.
- * - Quick cards navigating to:
- *   1. Balance Sheet (Assets, Liabilities, Capital as of date)
- *   2. Profit & Loss (Sales Income - Expenses = Net Profit for period)
- *   3. Budget Report (Planned vs Actual variance per Analytic Account)
- *   4. Trial Balance (Debit vs Credit balance per account)
- *   5. General Ledger (Account-wise transaction book)
- *   6. Partner Ledger (Customer & Vendor statements)
- *   7. Aged Receivables & Payables (30/60/90+ days aging buckets)
- */
+'use client';
+
+// ============================================================
+// FILE: src/app/[locale]/dashboard/reports/page.jsx
+//
+// Financial Reports Hub (project.md §6, §8 · phase.md Phase 11).
+// Strictly follows strict.md: pure CSS classes from reports.css,
+// zero Tailwind utility classes, Orbitron/Sora typography.
+// ============================================================
+
+import React from 'react';
+import { useTranslations } from 'next-intl';
+import { Scale, TrendingUp, BarChart2, ArrowRight } from 'lucide-react';
+import { Link } from '@/i18n/navigation';
 
 export default function ReportsHubPage() {
+  const t = useTranslations('reports');
+
+  const reportCards = [
+    {
+      title: t('hub.balanceSheetTitle'),
+      desc: t('hub.balanceSheetDesc'),
+      href: '/dashboard/reports/balance-sheet',
+      icon: <Scale size={26} />,
+    },
+    {
+      title: t('hub.profitLossTitle'),
+      desc: t('hub.profitLossDesc'),
+      href: '/dashboard/reports/profit-loss',
+      icon: <TrendingUp size={26} />,
+    },
+    {
+      title: t('hub.budgetReportTitle'),
+      desc: t('hub.budgetReportDesc'),
+      href: '/dashboard/reports/budget-report',
+      icon: <BarChart2 size={26} />,
+    },
+  ];
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Financial Reports</h1>
-      <p className="text-gray-500 mt-2">Access real-time balance sheet, profit & loss, budget analysis, and ledger reports.</p>
+    <div className="report-container">
+      {/* Page Header */}
+      <div className="report-header">
+        <div className="report-header-content">
+          <span className="report-badge">
+            {t('badge')}
+          </span>
+          <h1 className="report-title">
+            {t('title')}
+          </h1>
+          <p className="report-subtitle">
+            {t('subtitle')}
+          </p>
+        </div>
+      </div>
+
+      {/* Reports Grid */}
+      <div className="report-hub-grid">
+        {reportCards.map((card) => (
+          <Link key={card.href} href={card.href} className="report-hub-card">
+            <div>
+              <div className="report-hub-icon-wrap">
+                {card.icon}
+              </div>
+              <h2 className="report-hub-card-title">
+                {card.title}
+              </h2>
+              <p className="report-hub-card-desc">
+                {card.desc}
+              </p>
+            </div>
+
+            <div className="report-hub-card-action">
+              <span>{t('hub.viewReport')}</span>
+              <ArrowRight size={14} />
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

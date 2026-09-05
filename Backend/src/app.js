@@ -22,6 +22,15 @@ const productsRoutes = require('./products/products.routes');
 const productCategoriesRoutes = require('./product-categories/product-categories.routes');
 const purchaseOrdersRoutes = require('./purchases/purchaseOrders.routes');
 const vendorBillsRoutes = require('./purchases/vendorBills.routes');
+const salesOrdersRoutes = require('./sales/salesOrders.routes');
+const customerInvoicesRoutes = require('./sales/customerInvoices.routes');
+const budgetsRoutes = require('./budgets/budgets.routes');
+const reportsRoutes = require('./reports/reports.routes');
+const portalRoutes = require('./portal/portal.routes');
+const dashboardRoutes = require('./dashboard/dashboard.routes');
+const notificationsRoutes = require('./notifications/notifications.routes');
+const attachmentsRoutes = require('./attachments/attachments.routes');
+const auditRoutes = require('./audit/audit.routes');
 
 // Uploaded files (contact profile images) live outside src/ and are served
 // read-only from a fixed root. Filenames are random UUIDs chosen by the
@@ -51,7 +60,7 @@ app.use(cors({
   origin: env.corsOrigin,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
 }));
 
 // ─── Body Parsing ───────────────────────────────────────
@@ -85,6 +94,19 @@ app.use('/api/products', productsRoutes);
 app.use('/api/product-categories', productCategoriesRoutes);
 app.use('/api/purchase-orders', purchaseOrdersRoutes);
 app.use('/api/vendor-bills', vendorBillsRoutes);
+app.use('/api/sales-orders', salesOrdersRoutes);
+app.use('/api/customer-invoices', customerInvoicesRoutes);
+app.use('/api/budgets', budgetsRoutes);
+app.use('/api/reports', reportsRoutes);
+app.use('/api/portal', portalRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/attachments', attachmentsRoutes);
+app.use('/api/audit-logs', auditRoutes);
+app.use('/api/webhooks/payments', (req, res, next) => {
+  req.url = '/webhooks' + req.url;
+  portalRoutes(req, res, next);
+});
 
 // ─── Uploaded Files ─────────────────────────────────────
 // `dotfiles: 'deny'` and an explicit Content-Type stop a stored file being

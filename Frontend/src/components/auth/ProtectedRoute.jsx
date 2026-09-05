@@ -22,24 +22,20 @@ export default function ProtectedRoute({ children, allowedRoles = [] }) {
   const t = useTranslations('dashboard');
   const { user, role, loading, isAuthenticated } = useAuth();
   const router = useRouter();
-  const routerRef = useRef(router);
-  routerRef.current = router;
 
   useEffect(() => {
     if (loading) return;
 
     if (!isAuthenticated) {
-      routerRef.current.replace('/auth/login');
+      router.replace('/auth/login');
       return;
     }
 
     if (allowedRoles.length > 0 && role && !allowedRoles.includes(role)) {
       const correctDashboard = getDashboardPath(role);
-      routerRef.current.replace(correctDashboard);
+      router.replace(correctDashboard);
     }
-    // router is accessed via stable ref — not needed in deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, isAuthenticated, role, allowedRoles]);
+  }, [loading, isAuthenticated, role, allowedRoles, router]);
 
   if (loading) {
     return (

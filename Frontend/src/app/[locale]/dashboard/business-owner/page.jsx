@@ -1,20 +1,19 @@
 'use client';
 
 // ============================================================
-// FILE: src/app/[locale]/dashboard/super-admin/page.jsx
+// FILE: src/app/[locale]/dashboard/admin/page.jsx
 //
-// Super administrator console. Everything the admin view shows, plus
-// role provisioning.
+// Administrator dashboard. Read-only view of the platform directory —
+// role changes stay exclusive to the super-admin console.
 //
-// SECURITY: `super_admin` is never offered as a selectable role and
-// existing super-admin rows are not editable — that role is
-// provisioned server-side only. `updateUserRole` in the service layer
-// enforces the same allowlist a second time.
+// Every number and chart on this page is DERIVED FROM THE REAL user
+// rows returned by /auth/admin/users (see buildDirectoryMetrics), so
+// nothing here is decorative.
 // ============================================================
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { CircleAlert, CircleCheck, RefreshCw, Search } from 'lucide-react';
+import { RefreshCw, Search } from 'lucide-react';
 
 import DashboardFrame from '@/components/dashboard/DashboardFrame';
 import { useAuth } from '@/context/AuthContext';
@@ -27,55 +26,27 @@ import InputBox from '@/reusablefiles/inputbox';
 import Button from '@/reusablefiles/button';
 import Pill, { RolePill } from '@/reusablefiles/pill';
 import {
-  AreaChart, BoxPlot, DonutChart, GroupedBarChart, SemiCircleGauge, seriesColor,
+  BarChart, BoxPlot, DonutChart, LineChart, SemiCircleGauge, seriesColor,
 } from '@/reusablefiles/graphs';
 
 import useDashboardData from '@/hooks/useDashboardData';
-import { lastMonths, updateUserRole } from '@/services/dashboard.service';
+import { lastMonths } from '@/services/dashboard.service';
 import { STAT_ICONS, ICON_SM } from '@/config/dashboard.config';
+import FinancialDashboard from '@/components/dashboard/FinancialDashboard';
 
 const Icon = ({ as: C, size = ICON_SM }) =>
   C ? <C size={size} strokeWidth={2} aria-hidden="true" /> : null;
 
-/** Roles a super admin may assign. `super_admin` is deliberately absent. */
-const ASSIGNABLE_ROLES = ['user', 'manager', 'admin'];
-
-export default function SuperAdminDashboard() {
+export default function AdminDashboard() {
   const t = useTranslations('dashboard');
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState('financial');
   const [search, setSearch] = useState('');
-  const [updatingId, setUpdatingId] = useState(null);
-  const [statusMessage, setStatusMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-
   const { users, metrics, loading, error, refresh } = useDashboardData({ scope: 'directory' });
 
   const months = useMemo(
     () => lastMonths(6).map(({ month }) => t(`months.${month}`)),
     [t],
-  );
-
-  const handleRoleChange = useCallback(
-    async (userId, nextRole) => {
-      if (!ASSIGNABLE_ROLES.includes(nextRole)) return;
-
-      setUpdatingId(userId);
-      setStatusMessage('');
-      setErrorMessage('');
-
-      try {
-        const res = await updateUserRole(userId, nextRole);
-        if (res.success) {
-          setStatusMessage(t('superAdmin.roleUpdated'));
-          await refresh();
-        }
-      } catch (err) {
-        setErrorMessage(err?.message || t('common.noData'));
-      } finally {
-        setUpdatingId(null);
-      }
-    },
-    [refresh, t],
   );
 
   const filtered = useMemo(() => {
@@ -94,17 +65,6 @@ export default function SuperAdminDashboard() {
     [metrics, t],
   );
 
-  const verification = useMemo(
-    () =>
-      metrics
-        ? [
-            { label: t('statusLabels.verified'), value: metrics.verified, color: seriesColor(0) },
-            { label: t('statusLabels.pending'), value: metrics.pending, color: seriesColor(5) },
-          ]
-        : [],
-    [metrics, t],
-  );
-
   const ageGroups = useMemo(
     () =>
       (metrics?.ageByRole || []).map((g, i) => ({
@@ -115,9 +75,15 @@ export default function SuperAdminDashboard() {
     [metrics, t],
   );
 
-  const roleOptions = useMemo(
-    () => ASSIGNABLE_ROLES.map((role) => ({ value: role, label: t(`superAdmin.roles.${role}`) })),
-    [t],
+  const verification = useMemo(
+    () =>
+      metrics
+        ? [
+            { label: t('statusLabels.verified'), value: metrics.verified, color: seriesColor(0) },
+            { label: t('statusLabels.pending'), value: metrics.pending, color: seriesColor(5) },
+          ]
+        : [],
+    [metrics, t],
   );
 
   const columns = useMemo(
@@ -143,37 +109,24 @@ export default function SuperAdminDashboard() {
         ),
       },
       {
-        key: 'roleChange',
-        header: t('superAdmin.roleChange'),
-        render: (u) =>
-          u.role === 'super_admin' ? (
-            <span className="ui-cell-locked">{t('statusLabels.protectedRoot')}</span>
-          ) : (
-            <InputBox
-              as="select"
-              size="sm"
-              value={u.role}
-              options={roleOptions}
-              disabled={updatingId === u.id}
-              onChange={(value) => handleRoleChange(u.id, value)}
-              aria-label={t('superAdmin.selectRole')}
-            />
-          ),
+        key: 'joined',
+        header: t('admin.table.joined'),
+        render: (u) => (u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'),
       },
     ],
-    [t, roleOptions, updatingId, handleRoleChange],
+    [t],
   );
 
   return (
     <DashboardFrame
-      role="super_admin"
+      role="business_owner"
       activeKey="overview"
       search={search}
       onSearchChange={setSearch}
     >
       <PageHead
-        title={user?.name ? `${t('superAdmin.welcome')}, ${user.name}` : t('superAdmin.welcome')}
-        subtitle={error || t('superAdmin.subtitle')}
+        title={user?.name ? `${t('admin.welcome')}, ${user.name}` : t('admin.welcome')}
+        subtitle={error || t('admin.subtitle')}
         actions={
           <Button
             variant="primary"
@@ -185,24 +138,54 @@ export default function SuperAdminDashboard() {
         }
       />
 
-      {statusMessage ? (
-        <div className="status-banner-auth ui-dash-banner">
-          <CircleCheck className="status-icon-auth" size={17} strokeWidth={2} aria-hidden="true" />
-          <p className="status-desc-auth">{statusMessage}</p>
-        </div>
-      ) : null}
+      {/* View Switcher: Financial Overview vs Directory */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem', padding: '0 0.5rem' }}>
+        <button
+          type="button"
+          onClick={() => setActiveTab('financial')}
+          style={{
+            fontFamily: 'Orbitron, monospace',
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            padding: '0.6rem 1.25rem',
+            borderRadius: '8px',
+            border: activeTab === 'financial' ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
+            background: activeTab === 'financial' ? 'var(--bg-surface)' : 'transparent',
+            color: activeTab === 'financial' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            boxShadow: activeTab === 'financial' ? '4px 4px 8px var(--nm-shadow-dark), -2px -2px 6px var(--nm-shadow-light)' : 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          Financial Overview
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('directory')}
+          style={{
+            fontFamily: 'Orbitron, monospace',
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            padding: '0.6rem 1.25rem',
+            borderRadius: '8px',
+            border: activeTab === 'directory' ? '1px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
+            background: activeTab === 'directory' ? 'var(--bg-surface)' : 'transparent',
+            color: activeTab === 'directory' ? 'var(--accent-primary)' : 'var(--text-secondary)',
+            boxShadow: activeTab === 'directory' ? '4px 4px 8px var(--nm-shadow-dark), -2px -2px 6px var(--nm-shadow-light)' : 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          Directory & Roles
+        </button>
+      </div>
 
-      {errorMessage ? (
-        <div className="error-banner-auth ui-dash-banner">
-          <CircleAlert className="error-icon-auth" size={17} strokeWidth={2} aria-hidden="true" />
-          <p className="error-title-auth">{errorMessage}</p>
-        </div>
-      ) : null}
-
-      {loading && !users.length ? (
+      {activeTab === 'financial' ? (
+        <FinancialDashboard />
+      ) : loading && !users.length ? (
         <DashboardSkeleton layout="directory" />
       ) : (
-      <div className="dash-grid">
+        <div className="dash-grid">
         {/* ---------------- directory metrics ---------------- */}
         <StatCard
           tone="deep"
@@ -235,20 +218,15 @@ export default function SuperAdminDashboard() {
           icon={<Icon as={STAT_ICONS.roles} />}
         />
 
-        {/* ---------------- registrations vs verification ---------------- */}
+        {/* ---------------- registrations ---------------- */}
         <Card span={6}>
           <CardHead title={t('charts.signups')} subtitle={t('charts.signupsSub')} />
           <CardBody>
-            <GroupedBarChart
-              categories={months}
-              series={[
-                { name: t('series.signups'), data: metrics?.signups || [] },
-                {
-                  name: t('series.verified'),
-                  data: metrics?.verifiedByMonth || [],
-                  color: seriesColor(4),
-                },
-              ]}
+            <BarChart
+              data={months.map((label, i) => ({
+                label,
+                value: metrics?.signups?.[i] ?? 0,
+              }))}
               height={206}
               ariaLabel={t('charts.signups')}
               emptyLabel={t('common.noData')}
@@ -256,6 +234,7 @@ export default function SuperAdminDashboard() {
           </CardBody>
         </Card>
 
+        {/* ---------------- role mix ---------------- */}
         <Card span={3}>
           <CardHead title={t('charts.roleMix')} />
           <CardBody>
@@ -269,6 +248,7 @@ export default function SuperAdminDashboard() {
           </CardBody>
         </Card>
 
+        {/* ---------------- verification gauge ---------------- */}
         <Card span={3}>
           <CardHead title={t('charts.verification')} />
           <CardBody>
@@ -281,25 +261,35 @@ export default function SuperAdminDashboard() {
           </CardBody>
         </Card>
 
+        {/* ---------------- signup vs verified trend ---------------- */}
         <Card span={6}>
           <CardHead title={t('charts.analytics')} subtitle={t('charts.signupsSub')} />
           <CardBody>
-            <AreaChart
+            <LineChart
               categories={months}
-              series={[{ name: t('series.signups'), data: metrics?.signups || [] }]}
-              height={190}
+              series={[
+                { name: t('series.signups'), data: metrics?.signups || [], area: true },
+                {
+                  name: t('series.verified'),
+                  data: metrics?.verifiedByMonth || [],
+                  color: seriesColor(4),
+                  dashed: true,
+                },
+              ]}
+              height={206}
               ariaLabel={t('charts.analytics')}
               emptyLabel={t('common.noData')}
             />
           </CardBody>
         </Card>
 
+        {/* ---------------- account age distribution ---------------- */}
         <Card span={6}>
           <CardHead title={t('charts.accountAge')} subtitle={t('charts.accountAgeSub')} />
           <CardBody>
             <BoxPlot
               groups={ageGroups}
-              height={190}
+              height={206}
               formatValue={(v) => Math.round(v)}
               labels={{
                 min: t('box.min'), q1: t('box.q1'), median: t('box.median'),
@@ -311,10 +301,10 @@ export default function SuperAdminDashboard() {
           </CardBody>
         </Card>
 
-        {/* ---------------- role provisioning table ---------------- */}
+        {/* ---------------- user directory ---------------- */}
         <Card span={12}>
           <CardHead
-            title={t('superAdmin.userManagement')}
+            title={t('admin.userDirectory')}
             action={
               <InputBox
                 value={search}

@@ -18,13 +18,13 @@ const router = express.Router();
 
 router.use(authMiddleware.authenticate, resolveTenant);
 
-router.get('/', authMiddleware.authorize('admin', 'manager'), productCategoriesController.listCategories);
-router.get('/:id', authMiddleware.authorize('admin', 'manager'), productCategoriesController.getCategory);
+router.get('/', authMiddleware.authorize('business_owner', 'accountant'), productCategoriesController.listCategories);
+router.get('/:id', authMiddleware.authorize('business_owner', 'accountant'), productCategoriesController.getCategory);
 
-router.post('/', authMiddleware.authorize('admin', 'manager'), productCategoriesController.createCategory);
+router.post('/', authMiddleware.authorize('business_owner', 'accountant'), productCategoriesController.createCategory);
 
-router.patch('/:id', authMiddleware.authorize('admin'), productCategoriesController.updateCategory);
-router.patch('/:id/archive', authMiddleware.authorize('admin'), productCategoriesController.archiveCategory);
-router.patch('/:id/unarchive', authMiddleware.authorize('admin'), productCategoriesController.unarchiveCategory);
+router.patch('/:id', authMiddleware.authorize('business_owner'), productCategoriesController.updateCategory);
+router.patch('/:id/archive', authMiddleware.authorize('business_owner'), productCategoriesController.archiveCategory);
+router.patch('/:id/unarchive', authMiddleware.authorize('business_owner'), productCategoriesController.unarchiveCategory);
 
 module.exports = router;

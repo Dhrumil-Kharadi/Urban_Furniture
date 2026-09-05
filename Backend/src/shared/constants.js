@@ -13,9 +13,10 @@
 
 /** Maps to the `role` column on the `users` table. */
 const ROLES = Object.freeze({
-  ADMIN: 'admin',       // full access; manages org settings
-  MANAGER: 'manager',   // accountant; create-only master data
-  USER: 'user',         // contact-provisioned login; view-only
+  BUSINESS_OWNER: 'business_owner', // full access; manages org settings
+  ACCOUNTANT: 'accountant',         // invited staff; create-only master data
+  CUSTOMER: 'customer',             // customer contact; portal view-only
+  VENDOR: 'vendor',                 // vendor contact; portal view-only
 });
 
 /** Values accepted by the `status` column on `users`. */

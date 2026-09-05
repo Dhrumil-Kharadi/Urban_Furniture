@@ -58,7 +58,7 @@ export default function ResourceDetailPage({
   // project.md §3 as finalised by §10 Decision 1: modify and archive are the
   // business owner's alone. The server enforces it; hiding the controls just
   // stops offering an accountant a button that would 403.
-  const canManage = role === 'admin';
+  const canManage = role === 'business_owner';
 
   const { record, loading, error, refetch } = useResourceRecord(service, id);
 

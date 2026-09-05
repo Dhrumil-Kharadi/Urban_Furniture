@@ -41,7 +41,7 @@ export default function ProductDetailPage() {
   const toast = useToast();
   const { role } = useAuth();
 
-  const canManage = role === 'admin';
+  const canManage = role === 'business_owner';
 
   const { record: product, loading, error, refetch } = useResourceRecord(productsService, id);
 

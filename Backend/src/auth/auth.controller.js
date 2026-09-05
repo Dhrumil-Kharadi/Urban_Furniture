@@ -4,6 +4,7 @@ const authValidation = require('./auth.validation');
 const authService = require('./auth.service');
 const authSession = require('./auth.session');
 const organizationsRepository = require('../organizations/organizations.repository');
+const { generateCsrfToken, setCsrfCookie, clearCsrfCookie } = require('../shared/csrf.middleware');
 
 /**
  * Auth Controller
@@ -84,6 +85,7 @@ const authController = {
 
       if (result.authType === 'session') {
         res.cookie('sid', result.sessionId, result.cookieOptions);
+        setCsrfCookie(res, generateCsrfToken(), env.isProduction);
         res.clearCookie('refreshToken', {
           path: '/api/auth',
           httpOnly: true,
@@ -97,6 +99,7 @@ const authController = {
       }
 
       res.clearCookie('sid', { path: '/' });
+      clearCsrfCookie(res);
 
       if (result.rawRefreshToken) {
         res.cookie('refreshToken', result.rawRefreshToken, result.cookieOptions);
@@ -163,6 +166,7 @@ const authController = {
       });
 
       res.clearCookie('sid', { path: '/' });
+      clearCsrfCookie(res);
       res.clearCookie('refreshToken', {
         path: '/api/auth',
         httpOnly: true,

@@ -140,8 +140,8 @@ export default function PurchaseOrderDetailPage({ params }) {
 
   if (loading) {
     return (
-      <div className="p-12 text-center text-gray-500 italic flex items-center justify-center gap-2">
-        <RefreshCw className="w-5 h-5 animate-spin text-indigo-400" />
+      <div className="tx-loading-center">
+        <RefreshCw className="tx-loading-spinner" />
         Loading purchase order details…
       </div>
     );
@@ -149,14 +149,14 @@ export default function PurchaseOrderDetailPage({ params }) {
 
   if (!order) {
     return (
-      <div className="p-12 text-center text-gray-400">
+      <div className="tx-not-found">
         Purchase order not found.
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="tx-page tx-page--narrow">
       {/* Workflow Action & Status Bar */}
       <DocumentStatusBar
         title="Purchase Order"
@@ -186,15 +186,15 @@ export default function PurchaseOrderDetailPage({ params }) {
           title="Create Vendor Bill"
           onClose={() => setBillModalOpen(false)}
         >
-          <div className="space-y-4">
-            <p className="text-sm text-gray-300">
+          <div className="tx-modal-body">
+            <p className="tx-modal-desc">
               Select the purchase journal to record this vendor bill. All items from PO{' '}
-              <strong className="text-indigo-400">{order.po_number}</strong> will be copied into the bill.
+              <strong className="tx-modal-strong">{order.po_number}</strong> will be copied into the bill.
             </p>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-300">
-                Purchase Journal <span className="text-red-400">*</span>
+            <div>
+              <label className="tx-modal-field-label">
+                Purchase Journal <span className="tx-modal-required">*</span>
               </label>
               <JournalPicker
                 value={selectedJournalId}
@@ -203,11 +203,11 @@ export default function PurchaseOrderDetailPage({ params }) {
               />
             </div>
 
-            <div className="pt-3 flex justify-end gap-2 border-t border-gray-800">
+            <div className="tx-modal-footer">
               <button
                 type="button"
                 onClick={() => setBillModalOpen(false)}
-                className="px-3.5 py-1.5 rounded-lg text-xs text-gray-300 hover:bg-gray-800"
+                className="tx-modal-cancel-btn"
               >
                 Cancel
               </button>
@@ -215,9 +215,9 @@ export default function PurchaseOrderDetailPage({ params }) {
                 type="button"
                 onClick={handleCreateBill}
                 disabled={!selectedJournalId || actionLoading}
-                className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 flex items-center gap-1.5"
+                className="tx-modal-confirm-btn"
               >
-                <FileText className="w-3.5 h-3.5" />
+                <FileText className="tx-modal-confirm-icon" />
                 {actionLoading ? 'Creating Bill…' : 'Proceed & Create Bill'}
               </button>
             </div>

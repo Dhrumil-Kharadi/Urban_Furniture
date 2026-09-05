@@ -1,0 +1,319 @@
+/* ============================================================
+   FILE: src/styles/budgets.css
+   Phase 11 — Budgets Management Styles (Neumorphic Design per strict.md)
+   Strict rule: all colors use var(--*) from globals.css
+   Typography: 'Orbitron', monospace for titles/numbers; 'Sora', sans-serif for body/UI
+   ============================================================ */
+
+.budget-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.budget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.budget-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.budget-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.budget-title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.budget-subtitle {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  max-width: 680px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.budget-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.budget-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  box-shadow: 4px 4px 12px var(--nm-shadow-dark),
+              -2px -2px 8px var(--nm-shadow-light);
+}
+
+.budget-search-box {
+  width: 100%;
+  max-width: 340px;
+}
+
+.budget-select {
+  height: 38px;
+  padding: 0 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-medium);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  box-shadow: inset 2px 2px 4px var(--nm-inset-dark),
+              inset -1px -1px 3px var(--nm-inset-light);
+  transition: border-color 0.2s ease;
+}
+
+.budget-select:focus {
+  border-color: var(--accent-primary);
+}
+
+.budget-table-card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 8px 8px 18px var(--nm-shadow-dark),
+              -4px -4px 12px var(--nm-shadow-light);
+}
+
+.budget-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.budget-link {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  color: var(--accent-primary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.budget-link:hover {
+  text-decoration: underline;
+  color: var(--color-secondary);
+}
+
+.budget-date-sub {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.budget-analytic-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-family: 'Sora', sans-serif;
+}
+
+.budget-analytic-name {
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.budget-analytic-code {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.budget-val-positive {
+  font-family: 'Orbitron', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--status-success);
+}
+
+.budget-val-negative {
+  font-family: 'Orbitron', monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--status-error);
+}
+
+.budget-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-raised);
+  color: var(--text-secondary);
+  cursor: pointer;
+  box-shadow: 2px 2px 6px var(--nm-shadow-dark),
+              -1px -1px 4px var(--nm-shadow-light);
+  transition: all 0.15s ease;
+}
+
+.budget-action-btn:hover {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  box-shadow: inset 2px 2px 4px var(--nm-inset-dark),
+              inset -1px -1px 3px var(--nm-inset-light);
+}
+
+/* ── Modal / Drawer ── */
+.budget-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 40, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.budget-modal-dialog {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  box-shadow: 12px 12px 28px var(--nm-shadow-dark),
+              -6px -6px 20px var(--nm-shadow-light);
+  width: 100%;
+  max-width: 520px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.budget-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.budget-modal-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0.2rem 0 0;
+}
+
+.budget-modal-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.budget-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.budget-form-label {
+  display: block;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.budget-modal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+/* ── Detail Page ── */
+.budget-back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-raised);
+  color: var(--text-primary);
+  cursor: pointer;
+  box-shadow: 4px 4px 8px var(--nm-shadow-dark),
+              -2px -2px 6px var(--nm-shadow-light);
+  transition: all 0.15s ease;
+}
+
+.budget-back-btn:hover {
+  box-shadow: inset 2px 2px 5px var(--nm-inset-dark),
+              inset -1px -1px 3px var(--nm-inset-light);
+}
+
+.budget-card-frame {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 8px 8px 18px var(--nm-shadow-dark),
+              -4px -4px 12px var(--nm-shadow-light);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.budget-card-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}

@@ -32,7 +32,7 @@ router.get(
   '/current',
   authMiddleware.authenticate,
   resolveTenant,
-  authMiddleware.authorize('admin', 'manager'),
+  authMiddleware.authorize('business_owner', 'accountant'),
   organizationsController.getCurrent
 );
 
@@ -45,7 +45,7 @@ router.patch(
   '/current',
   authMiddleware.authenticate,
   resolveTenant,
-  authMiddleware.authorize('admin'),
+  authMiddleware.authorize('business_owner'),
   organizationsController.updateCurrent
 );
 

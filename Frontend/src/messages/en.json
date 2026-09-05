@@ -406,6 +406,45 @@
         "admin": "Business Owner"
       }
     },
+    "summary": {
+      "title": "Executive Financial Dashboard",
+      "subtitle": "Single-request real-time overview of cash flow, receivables, payables, and profitability.",
+      "period": "Period",
+      "periods": {
+        "this_month": "This Month",
+        "this_quarter": "This Quarter",
+        "this_year": "This Fiscal Year"
+      },
+      "kpis": {
+        "totalReceivable": "Total Receivable",
+        "totalPayable": "Total Payable",
+        "totalIncome": "Operating Income",
+        "totalExpenses": "Total Expenses",
+        "netProfit": "Net Profit",
+        "overdueCount": "Overdue Documents"
+      },
+      "charts": {
+        "incomeVsExpense": "Monthly Income vs Expense",
+        "topCustomers": "Top 5 Customers by Revenue",
+        "receivableAging": "Receivable Aging",
+        "cashTrend": "Cash & Bank Balance Movement",
+        "expenseBreakdown": "Expense Breakdown",
+        "recentActivity": "Recent Financial Activity"
+      },
+      "portal": {
+        "title": "Customer Financial Overview",
+        "subtitle": "Your outstanding balances, overdue bills, and documents.",
+        "totalOutstanding": "Total Outstanding",
+        "totalOverdue": "Overdue Balance",
+        "paidThisYear": "Settled This Year",
+        "recentDocuments": "Recent Documents",
+        "invoiceNumber": "Invoice #",
+        "date": "Date",
+        "amount": "Total Amount",
+        "due": "Amount Due",
+        "status": "Status"
+      }
+    },
     "nav": {
       "menu": "Menu",
       "general": "General",
@@ -434,7 +473,8 @@
       "productCategories": "Product categories",
       "taxes": "Taxes",
       "analyticAccounts": "Analytic accounts",
-      "journalEntries": "Journal entries"
+      "journalEntries": "Journal entries",
+      "auditLogs": "Audit Logs"
     },
     "promo": {
       "title": "Your books on",
@@ -802,7 +842,61 @@
     "subtitle": "Invoices and bills raised for your account.",
     "welcome": "Welcome, {name}",
     "comingSoon": "Your invoices, bills and online payments will appear here.",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "tabs": {
+      "overview": "Overview",
+      "invoices": "Invoices",
+      "bills": "Bills Statement"
+    },
+    "kpi": {
+      "outstanding": "Total Outstanding",
+      "overdue": "Total Overdue",
+      "paidThisYear": "Paid This Year",
+      "unpaidInvoices": "Unpaid Invoices"
+    },
+    "invoices": {
+      "title": "Customer Invoices",
+      "subtitle": "View your invoices and pay outstanding balances securely online.",
+      "invoiceNumber": "Invoice #",
+      "date": "Date",
+      "dueDate": "Due Date",
+      "total": "Total Amount",
+      "paid": "Paid",
+      "due": "Balance Due",
+      "status": "Status",
+      "payNow": "Pay Now",
+      "paidInFull": "Paid in Full",
+      "empty": "No invoices found for your account."
+    },
+    "bills": {
+      "title": "Statement of Account",
+      "subtitle": "Historical statement of bills raised by the organization for your vendor account.",
+      "billNumber": "Bill #",
+      "date": "Date",
+      "dueDate": "Due Date",
+      "total": "Total Amount",
+      "paid": "Paid",
+      "due": "Balance Due",
+      "status": "Status",
+      "notice": "This is a read-only statement of account. Vendor disbursements are processed directly by the organization.",
+      "empty": "No bills found on this account."
+    },
+    "payment": {
+      "modalTitle": "Card Payment Checkout",
+      "invoiceSummary": "Invoice Summary",
+      "amountToPay": "Amount to Pay",
+      "cardNotice": "Secure card payment simulated via Razorpay gateway adapter.",
+      "cardNumber": "Card Number",
+      "expiry": "MM / YY",
+      "cvv": "CVV",
+      "nameOnCard": "Name on Card",
+      "payButton": "Pay {amount}",
+      "processing": "Authorizing & posting payment…",
+      "success": "Payment successful! Your invoice is updated and receipt recorded.",
+      "failure": "Payment failed or was declined.",
+      "cancel": "Cancel",
+      "close": "Close"
+    }
   },
   "accounts": {
     "badge": "Accounting core",
@@ -1075,5 +1169,152 @@
       "to": "To",
       "allJournals": "All journals"
     }
+  },
+  "budgets": {
+    "badge": "Cost Management",
+    "title": "Budgets",
+    "subtitle": "Track planned expenditure against real-time actual journal movements tagged to analytic accounts.",
+    "newBudget": "Create Budget",
+    "editBudget": "Edit Budget",
+    "save": "Save Budget",
+    "cancel": "Cancel",
+    "fields": {
+      "name": "Budget Name",
+      "analyticAccount": "Analytic Account",
+      "periodStart": "Period Start",
+      "periodEnd": "Period End",
+      "plannedAmount": "Planned Amount",
+      "status": "Status"
+    },
+    "placeholders": {
+      "name": "e.g. Showroom Renovation 2026",
+      "analyticAccount": "Select analytic account",
+      "plannedAmount": "50000.00"
+    },
+    "table": {
+      "name": "Budget",
+      "analytic": "Analytic Account",
+      "period": "Period",
+      "planned": "Planned",
+      "actual": "Actual",
+      "variance": "Variance",
+      "usage": "Usage",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived",
+      "draft": "Draft"
+    },
+    "kpi": {
+      "totalPlanned": "Total Planned",
+      "totalActual": "Total Actual",
+      "netVariance": "Net Variance",
+      "activeBudgets": "Active Budgets"
+    },
+    "overBudget": "Over Budget",
+    "onTrack": "Within Budget",
+    "detail": {
+      "back": "Back to Budgets",
+      "overview": "Performance Overview",
+      "monthlyBreakdown": "Monthly Planned vs Actual",
+      "contributingTransactions": "Contributing Journal Lines",
+      "date": "Date",
+      "entry": "Entry #",
+      "account": "Account",
+      "partner": "Partner",
+      "description": "Description",
+      "amount": "Debit Amount",
+      "noLines": "No journal entries recorded for this analytic account in the budget period."
+    },
+    "empty": {
+      "title": "No budgets created yet",
+      "body": "Set up your first budget to start monitoring cost center variance."
+    }
+  },
+  "reports": {
+    "badge": "Financial Intelligence",
+    "title": "Financial Reports",
+    "subtitle": "Real-time, double-entry financial statements and variance reports directly from the ledger.",
+    "hub": {
+      "balanceSheetTitle": "Balance Sheet",
+      "balanceSheetDesc": "Real-time assets, liabilities, and equity with the fundamental equation guarantee.",
+      "profitLossTitle": "Profit & Loss",
+      "profitLossDesc": "Operating revenue, cost of goods sold, expenses, and net profit for the selected period.",
+      "budgetReportTitle": "Budget Report",
+      "budgetReportDesc": "Variance analysis comparing planned budgets against actual journal transactions.",
+      "viewReport": "Open Report"
+    },
+    "balanceSheet": {
+      "title": "Balance Sheet",
+      "subtitle": "Real-time financial position statement as of a selected date.",
+      "asOfDate": "As of Date",
+      "assets": "Assets",
+      "liabilities": "Liabilities",
+      "equity": "Equity & Capital",
+      "netProfit": "Current Period Net Profit / (Loss)",
+      "totalAssets": "Total Assets",
+      "totalLiabilitiesEquity": "Total Liabilities & Equity",
+      "balanced": "Ledger is in perfect balance (Assets = Liabilities + Equity)",
+      "unbalanced": "Warning: Balance sheet equation mismatch",
+      "exportCsv": "Export CSV",
+      "accountCode": "Code",
+      "accountName": "Account",
+      "balance": "Balance"
+    },
+    "profitLoss": {
+      "title": "Profit & Loss Statement",
+      "subtitle": "Operating revenue, direct costs, expenses, and net profit for the period.",
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "income": "Income / Revenue",
+      "cogs": "Cost of Goods Sold / Purchases",
+      "grossProfit": "Gross Profit",
+      "expenses": "Operating Expenses",
+      "netProfit": "Net Profit",
+      "netLoss": "Net Loss",
+      "profitTrend": "Monthly Profit Trend",
+      "expenseBreakdown": "Expense Breakdown",
+      "exportCsv": "Export CSV",
+      "accountCode": "Code",
+      "accountName": "Account",
+      "amount": "Amount"
+    },
+    "budgetReport": {
+      "title": "Budget Report",
+      "subtitle": "Variance analysis comparing planned budgets against actual journal transactions.",
+      "selectBudget": "Filter by Budget",
+      "allBudgets": "All Budgets",
+      "planned": "Planned Amount",
+      "actual": "Actual Expense",
+      "variance": "Variance",
+      "percent": "Consumption %",
+      "status": "Over / Under",
+      "underBudget": "Under Budget",
+      "overBudget": "Over Budget",
+      "chartTitle": "Planned vs Actual by Budget",
+      "exportCsv": "Export CSV"
+    }
+  },
+  "audit": {
+    "title": "System Audit Logs",
+    "subtitle": "Immutable regulatory audit trail capturing all state transitions across financial documents.",
+    "allTypes": "All Entity Types",
+    "allActions": "All Actions",
+    "search": "Filter by Entity ID...",
+    "timestamp": "Timestamp",
+    "actor": "Actor",
+    "action": "Action",
+    "entityType": "Entity Type",
+    "entityId": "Entity ID",
+    "changes": "Changes (Diff)",
+    "ipAddress": "IP Address",
+    "viewDiff": "View Diff",
+    "modalTitle": "Audit State Diff",
+    "before": "State Before Change",
+    "after": "State After Change",
+    "noChanges": "No state diff recorded",
+    "close": "Close",
+    "noLogs": "No audit records found"
   }
 }

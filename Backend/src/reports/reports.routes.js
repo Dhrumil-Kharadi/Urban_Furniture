@@ -1,0 +1,24 @@
+/**
+ * Reports Routes
+ *
+ * Middleware chain:
+ *   authenticate → resolveTenant → authorize('business_owner', 'accountant')
+ *
+ * Contacts (role 'user') have zero access to financial reports (project.md §3).
+ */
+
+const express = require('express');
+const authMiddleware = require('../auth/auth.middleware');
+const { resolveTenant } = require('../shared/tenant.middleware');
+const reportsController = require('./reports.controller');
+
+const router = express.Router();
+
+router.use(authMiddleware.authenticate, resolveTenant, authMiddleware.authorize('business_owner', 'accountant'));
+
+router.get('/balance-sheet', reportsController.getBalanceSheet);
+router.get('/profit-loss', reportsController.getProfitLoss);
+router.get('/budget', reportsController.getBudgetReport);
+router.get('/:type/export', reportsController.exportReport);
+
+module.exports = router;
