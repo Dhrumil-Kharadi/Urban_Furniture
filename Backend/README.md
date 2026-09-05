@@ -56,4 +56,29 @@ npm test
 7. **Role-Based Access Control (RBAC)**: Strict separation across `user`, `manager`, `admin`, and `super_admin` with precise `401 Unauthorized` vs `403 Forbidden` status codes.
 8. **Insecure Direct Object Reference (IDOR) Defense**: Resource ownership authorization ensures standard users cannot access another user's records.
 
-Detailed documentation and mermaid flow diagrams are in [auth.md](file:///d:/ODOO_Pre/Backend/auth.md).
+Detailed documentation and mermaid flow diagrams are in [auth.md](file:///d:/Urban_Furniture/Doc/auth.md).
+
+---
+
+## Multi-Tenancy Architecture & Conventions
+
+Urban Furniture Accounting is a multi-tenant system where each Organization is strictly isolated. The tenant boundary is non-negotiable across every domain module.
+
+### The Six Tenancy Conventions (technicalrequirement.md §3.1)
+Every subsequent phase and module **must** obey these six rules:
+
+1. **Mandatory Foreign Key**: Every domain table must have `organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE RESTRICT`.
+2. **Leading Composite Indexes**: Every index on a domain table must lead with `organization_id` (e.g. `CREATE INDEX idx_<table>_org_<col> ON <table>(organization_id, <col>)`).
+3. **Tenant-Scoped Uniqueness**: Uniqueness constraints are always scoped to the organization (`UNIQUE (organization_id, <key>)`) — **never** globally unique.
+4. **Universal Query Filtering**: Every repository query must filter on `organization_id`. No exceptions.
+5. **Server-Authoritative Tenant Context**: `organization_id` is derived server-side from `req.user.organization_id` via `resolveTenant` middleware. It is **never** read from `req.body`, `req.query`, `req.params`, or request headers. The validation layer strips any incoming `organization_id` from request bodies.
+6. **404 on Cross-Tenant Access (Anti-Enumeration)**: Resolving an entity by ID always uses `WHERE id = $1 AND organization_id = $2`. Attempting to access an entity belonging to another organization must return **`404 Not Found`, never `403 Forbidden`** (a 403 leaks data by confirming the entity's existence in another tenant).
+
+### Middleware Chain on Domain Routes
+Every route serving domain resources must wire middleware in this exact order:
+```javascript
+router.get('/', authenticate, resolveTenant, authorize('admin', 'manager'), controller.list);
+```
+- `authenticate`: Validates session cookie or JWT and attaches `req.user`.
+- `resolveTenant`: Checks `req.user.organization_id`, attaches `req.organizationId`, and rejects unassigned users with 403.
+- `authorize`: Enforces role-based access control.

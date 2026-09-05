@@ -79,6 +79,7 @@ router.get('/captcha', captchaRateLimiter, authController.getCaptcha);
 router.post('/forgot-password', otpRateLimiter, authController.forgotPassword);
 router.post('/verify-reset-otp', otpRateLimiter, authController.verifyResetOtp);
 router.post('/reset-password', authRateLimiter, authController.resetPassword);
+router.post('/set-password', authRateLimiter, authController.setPassword);
 
 // Logout (can be called by any client to revoke cookies & session)
 router.post('/logout', authController.logout);
