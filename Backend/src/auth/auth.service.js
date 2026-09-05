@@ -7,6 +7,10 @@ const authEmail = require('./auth.email');
 const authJwt = require('./auth.jwt');
 const authSession = require('./auth.session');
 const authCaptcha = require('./auth.captcha');
+const logger = require('../utils/logger');
+const { withTransaction } = require('../shared/withTransaction');
+const organizationsService = require('../organizations/organizations.service');
+const organizationsSeed = require('../organizations/organizations.seed');
 
 /**
  * In-memory store for short-lived password reset authorizations.
@@ -121,11 +125,17 @@ const authService = {
 
   /**
    * Register a new user and trigger email verification OTP.
+   * If organizationName is provided (Phase 3 Business-Owner Signup):
+   * - Creates organization with unique slug
+   * - Inserts user with role='admin' and organization_id
+   * - Seeds 10 system accounts, 4 journals, 6 sequences in ONE transaction
+   * - Issues OTP inside transaction
+   * - Commits, then sends email (mail failures never rollback the organization)
    *
    * @param {Object} registrationData
-   * @returns {Promise<Object>} Sanitized user object
+   * @returns {Promise<Object>} Created user and organization
    */
-  async register({ name, email, password, captchaId, captchaAnswer }) {
+  async register({ name, email, password, organizationName, captchaId, captchaAnswer }) {
     if (captchaId) {
       const captchaResult = authCaptcha.verifyCaptcha(captchaId, captchaAnswer);
       if (!captchaResult.isValid) {
@@ -145,6 +155,80 @@ const authService = {
     const pepperedPassword = password + env.passwordPepper;
     const passwordHash = await bcrypt.hash(pepperedPassword, env.bcryptRounds);
 
+    if (organizationName) {
+      let createdUser;
+      let createdOrg;
+      let generatedOtp;
+
+      await withTransaction(async (client) => {
+        // 1. Create Organization (unique slug)
+        createdOrg = await organizationsService.createOrganization(client, {
+          name: organizationName,
+        });
+
+        // 2. Insert user with role='admin' and organization_id (ignoring any client role/org)
+        createdUser = await authRepository.createUser({
+          name,
+          email,
+          passwordHash,
+          role: 'admin',
+          organization_id: createdOrg.id,
+        }, client);
+
+        // Update org creator
+        await client.query(
+          'UPDATE organizations SET created_by = $1, updated_by = $1 WHERE id = $2',
+          [createdUser.id, createdOrg.id]
+        );
+
+        // 3. Seed Chart of Accounts, Journals, Sequences inside transaction
+        await organizationsSeed.seedOrganizationMasterData(client, createdOrg.id, createdUser.id);
+
+        // 4. Issue verification OTP inside transaction
+        await authRepository.invalidatePreviousOtps(createdUser.id, 'email_verification', client);
+        generatedOtp = authOtp.generateOtp();
+        const otpHash = authOtp.hashOtp(generatedOtp);
+        const expiresAt = authOtp.getExpirationDate();
+
+        await authRepository.createOtp({
+          userId: createdUser.id,
+          purpose: 'email_verification',
+          otpHash,
+          expiresAt,
+        }, client);
+      });
+
+      // 5. COMMIT, THEN send email (A mail failure must NEVER roll back a created organization)
+      try {
+        await authEmail.sendVerificationEmail(createdUser.email, generatedOtp);
+      } catch (mailErr) {
+        logger.error('Mail failure after organization signup — transaction preserved', {
+          userId: createdUser.id,
+          email: createdUser.email,
+          error: mailErr.message,
+        });
+      }
+
+      return {
+        user: {
+          id: createdUser.id,
+          name: createdUser.name,
+          email: createdUser.email,
+          role: createdUser.role,
+          organization_id: createdOrg.id,
+          email_verified: createdUser.email_verified,
+          created_at: createdUser.created_at,
+        },
+        organization: {
+          id: createdOrg.id,
+          name: createdOrg.name,
+          slug: createdOrg.slug,
+          currency_code: createdOrg.currency_code,
+        },
+      };
+    }
+
+    // Legacy standard user signup (supports existing security audit tests that pass no organizationName)
     const createdUser = await authRepository.createUser({
       name,
       email,
@@ -316,28 +400,30 @@ const authService = {
       };
     }
 
-    // Standard user role: always issue 15-minute JWT
+    // Standard user role: issue 15-minute JWT
     const token = authJwt.generateToken(sanitizedUser);
 
-    // Generate refresh token for standard user (session-scoped if remember is false, 30-day persistent if remember is true)
-    const rawRefreshToken = crypto.randomBytes(32).toString('hex');
-    const tokenHash = crypto.createHash('sha256').update(rawRefreshToken).digest('hex');
+    // Generate refresh token for standard user (only when remember is true)
     const maxAgeMs = (env.refreshTokenExpiresDays || 30) * 24 * 60 * 60 * 1000;
-    const expiresAt = new Date(Date.now() + (remember ? maxAgeMs : 24 * 60 * 60 * 1000));
-
-    await authRepository.createRefreshToken({
-      userId: user.id,
-      tokenHash,
-      expiresAt,
-      userAgent,
-      ipAddress,
-    });
+    let rawRefreshToken;
+    if (remember) {
+      rawRefreshToken = crypto.randomBytes(32).toString('hex');
+      const tokenHash = crypto.createHash('sha256').update(rawRefreshToken).digest('hex');
+      const expiresAt = new Date(Date.now() + maxAgeMs);
+      await authRepository.createRefreshToken({
+        userId: user.id,
+        tokenHash,
+        expiresAt,
+        userAgent,
+        ipAddress,
+      });
+    }
 
     const cookieOptions = {
       httpOnly: true,
       secure: env.isProduction,
       sameSite: env.isProduction ? 'strict' : 'lax',
-      path: '/',
+      path: '/api/auth',
     };
 
     if (remember) {
@@ -454,7 +540,7 @@ const authService = {
         httpOnly: true,
         secure: env.isProduction,
         sameSite: env.isProduction ? 'strict' : 'lax',
-        path: '/',
+        path: '/api/auth',
         maxAge: maxAgeMs,
       },
       user: sanitizedUser,
@@ -694,6 +780,54 @@ const authService = {
     await authRepository.revokeAllUserRefreshTokens(userId);
 
     return updated;
+  },
+
+  /**
+   * Set password using single-use invitation token.
+   *
+   * @param {Object} params
+   * @param {string} params.token - Raw 64-character invite token
+   * @param {string} params.password - New password
+   * @returns {Promise<{ message: string, user: Object }>}
+   */
+  async setPassword({ token, password }) {
+    if (!token || !password) {
+      const error = new Error('Token and password are required');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const tokenHash = crypto.createHash('sha256').update(token.trim()).digest('hex');
+    const otpRecord = await authRepository.findInviteOtpByHash(tokenHash);
+
+    if (!otpRecord) {
+      const error = new Error('Invalid, expired, or already used invitation token');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const pepperedPassword = password + env.passwordPepper;
+    const passwordHash = await bcrypt.hash(pepperedPassword, env.bcryptRounds);
+
+    let updatedUser;
+    await withTransaction(async (client) => {
+      // Invalidate the token (single use)
+      await client.query(
+        'UPDATE otp_verifications SET used = true WHERE id = $1',
+        [otpRecord.id]
+      );
+
+      // Set user's password, verify email, set status active, clear must_change_password
+      updatedUser = await authRepository.setPasswordAfterInvite({
+        userId: otpRecord.user_id,
+        passwordHash,
+      }, client);
+    });
+
+    return {
+      message: 'Password set successfully. You can now log in.',
+      user: updatedUser,
+    };
   },
 };
 

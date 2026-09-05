@@ -51,12 +51,13 @@ const authRepository = {
    * @param {string} [userData.role='user']
    * @returns {Promise<Object>} created user row
    */
-  async createUser({ name, email, passwordHash, role = 'user' }) {
-    const result = await pool.query(
-      `INSERT INTO users (name, email, password_hash, role)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, name, email, role, email_verified, created_at`,
-      [name, email, passwordHash, role]
+  async createUser({ name, email, passwordHash, role = 'user', organization_id = null, contact_id = null, must_change_password = false, status = 'active' }, client = null) {
+    const db = client || pool;
+    const result = await db.query(
+      `INSERT INTO users (name, email, password_hash, role, organization_id, contact_id, must_change_password, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id, name, email, role, organization_id, contact_id, must_change_password, status, email_verified, created_at`,
+      [name, email, passwordHash, role, organization_id, contact_id, must_change_password, status]
     );
     return result.rows[0];
   },
@@ -143,8 +144,9 @@ const authRepository = {
    * @param {Date} otpData.expiresAt
    * @returns {Promise<Object>}
    */
-  async createOtp({ userId, purpose, otpHash, expiresAt }) {
-    const result = await pool.query(
+  async createOtp({ userId, purpose, otpHash, expiresAt }, client = null) {
+    const db = client || pool;
+    const result = await db.query(
       `INSERT INTO otp_verifications (user_id, purpose, otp_hash, expires_at)
        VALUES ($1, $2, $3, $4)
        RETURNING id, user_id, purpose, expires_at, created_at`,
@@ -224,12 +226,56 @@ const authRepository = {
    * @param {string} purpose
    * @returns {Promise<void>}
    */
-  async invalidatePreviousOtps(userId, purpose) {
-    await pool.query(
+  async invalidatePreviousOtps(userId, purpose, client = null) {
+    const db = client || pool;
+    await db.query(
       `UPDATE otp_verifications SET used = true
        WHERE user_id = $1 AND purpose = $2 AND used = false`,
       [userId, purpose]
     );
+  },
+
+  /**
+   * Find an active invite token by its SHA-256 hash.
+   * @param {string} otpHash
+   * @returns {Promise<Object|null>}
+   */
+  async findInviteOtpByHash(otpHash) {
+    const result = await pool.query(
+      `SELECT * FROM otp_verifications
+       WHERE otp_hash = $1
+         AND purpose = 'invite'
+         AND used = false
+         AND expires_at > NOW()
+       LIMIT 1`,
+      [otpHash]
+    );
+    return result.rows[0] || null;
+  },
+
+  /**
+   * Set password after invite acceptance.
+   * @param {Object} params
+   * @param {string} params.userId
+   * @param {string} params.passwordHash
+   * @param {object|null} [client]
+   * @returns {Promise<Object>}
+   */
+  async setPasswordAfterInvite({ userId, passwordHash }, client = null) {
+    const db = client || pool;
+    const result = await db.query(
+      `UPDATE users
+       SET password_hash = $1,
+           token_version = token_version + 1,
+           must_change_password = false,
+           status = 'active',
+           email_verified = true,
+           updated_at = NOW()
+       WHERE id = $2
+       RETURNING id, name, email, role, organization_id, status, email_verified`,
+      [passwordHash, userId]
+    );
+    return result.rows[0];
   },
 
   // ─── Refresh Token Queries (Remember Me) ──────────────

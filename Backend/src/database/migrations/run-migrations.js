@@ -33,6 +33,12 @@ const migrations = [
   require('./003_drop_duplicate_email_index'),
   require('./004_add_token_version_to_users'),
   require('./005_create_refresh_tokens_table'),
+  require('./006_create_organizations'),
+  require('./007_add_organization_to_users'),
+  require('./008_create_accounts'),
+  require('./013_create_journals'),
+  require('./018_create_document_sequences'),
+  require('./026_create_audit_logs'),
 ];
 
 /**

@@ -55,13 +55,25 @@ const authValidation = {
       return { isValid: false, errors: ['Request body must be a JSON object'] };
     }
 
-    const { name, email, password, captchaId, captchaAnswer } = body;
+    const { name, email, password, organizationName, captchaId, captchaAnswer } = body;
 
     // Validate Name
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
       errors.push('Name is required');
     } else if (name.trim().length < 2 || name.trim().length > 100) {
       errors.push('Name must be between 2 and 100 characters');
+    }
+
+    // Validate organizationName if provided (2–150 characters)
+    let sanitizedOrgName;
+    if (organizationName !== undefined && organizationName !== null) {
+      if (typeof organizationName !== 'string' || organizationName.trim().length === 0) {
+        errors.push('Organization name must be a valid non-empty string');
+      } else if (organizationName.trim().length < 2 || organizationName.trim().length > 150) {
+        errors.push('Organization name must be between 2 and 150 characters');
+      } else {
+        sanitizedOrgName = organizationName.trim();
+      }
     }
 
     // Validate Email
@@ -88,8 +100,44 @@ const authValidation = {
         name: name.trim(),
         email: email.trim().toLowerCase(),
         password,
+        organizationName: sanitizedOrgName,
         captchaId: captchaId ? String(captchaId).trim() : undefined,
         captchaAnswer: captchaAnswer !== undefined ? String(captchaAnswer).trim() : undefined,
+      },
+    };
+  },
+
+  /**
+   * Validate set-password payload (for invited users).
+   *
+   * @param {Object} body
+   * @returns {{ isValid: boolean, errors: string[], data?: { token: string, password: string } }}
+   */
+  validateSetPassword(body) {
+    const errors = [];
+
+    if (!body || typeof body !== 'object') {
+      return { isValid: false, errors: ['Request body must be a JSON object'] };
+    }
+
+    const { token, password } = body;
+
+    if (!token || typeof token !== 'string' || token.trim().length === 0) {
+      errors.push('Invitation token is required');
+    }
+
+    validatePasswordComplexity(password, errors);
+
+    if (errors.length > 0) {
+      return { isValid: false, errors };
+    }
+
+    return {
+      isValid: true,
+      errors: [],
+      data: {
+        token: token.trim(),
+        password,
       },
     };
   },

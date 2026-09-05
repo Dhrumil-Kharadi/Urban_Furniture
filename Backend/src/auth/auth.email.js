@@ -118,6 +118,56 @@ const authEmail = {
       return false;
     }
   },
+
+  /**
+   * Send invitation email with set-password link.
+   *
+   * @param {string} to
+   * @param {string} inviteToken Raw hex token
+   * @returns {Promise<boolean>}
+   */
+  async sendInviteEmail(to, inviteToken) {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const setPasswordLink = `${frontendUrl}/en/auth/set-password?token=${inviteToken}`;
+
+    if (!env.smtp.user || !env.smtp.pass || env.smtp.pass === 'your-gmail-app-password') {
+      logger.warn('SMTP credentials not configured. Skipping email dispatch.', {
+        recipient: to,
+      });
+      return false;
+    }
+
+    const mailOptions = {
+      from: `"${env.smtp.fromName}" <${env.smtp.user}>`,
+      to,
+      subject: 'You have been invited to join an Organization',
+      text: `You have been invited to join Urban Furniture as an Accountant.\n\nPlease set your password using this link (valid for 72 hours):\n${setPasswordLink}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+          <h2 style="color: #1a73e8; text-align: center;">You're Invited!</h2>
+          <p style="color: #555555; font-size: 15px;">You have been invited to join Urban Furniture as an Accountant.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${setPasswordLink}" style="display: inline-block; background-color: #1a73e8; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+              Set Your Password
+            </a>
+          </div>
+          <p style="color: #777777; font-size: 13px;">This invitation link will expire in <strong>72 hours</strong> and can only be used once.</p>
+        </div>
+      `,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      logger.info('Invite email dispatched', { recipient: to });
+      return true;
+    } catch (err) {
+      logger.error('Failed to send invite email', {
+        recipient: to,
+        error: err.message,
+      });
+      return false;
+    }
+  },
 };
 
 module.exports = authEmail;

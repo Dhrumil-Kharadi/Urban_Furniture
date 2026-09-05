@@ -3,6 +3,7 @@ const { success, created, error } = require('../utils/response');
 const authValidation = require('./auth.validation');
 const authService = require('./auth.service');
 const authSession = require('./auth.session');
+const organizationsRepository = require('../organizations/organizations.repository');
 
 /**
  * Auth Controller
@@ -22,9 +23,15 @@ const authController = {
         return error(res, 'Validation failed', 400, validation.errors);
       }
 
-      const newUser = await authService.register(validation.data);
+      const result = await authService.register(validation.data);
+      if (result.organization) {
+        return created(res, 'Organization created. Check your email for the verification code.', {
+          user: result.user,
+          organization: result.organization,
+        });
+      }
       return created(res, 'Registration successful. A verification code has been sent to your email.', {
-        user: newUser,
+        user: result.user || result,
       });
     } catch (err) {
       next(err);
@@ -78,7 +85,7 @@ const authController = {
       if (result.authType === 'session') {
         res.cookie('sid', result.sessionId, result.cookieOptions);
         res.clearCookie('refreshToken', {
-          path: '/',
+          path: '/api/auth',
           httpOnly: true,
           secure: env.isProduction,
           sameSite: env.isProduction ? 'strict' : 'lax',
@@ -112,7 +119,7 @@ const authController = {
 
       if (!rawRefreshToken) {
         res.clearCookie('refreshToken', {
-          path: '/',
+          path: '/api/auth',
           httpOnly: true,
           secure: env.isProduction,
           sameSite: env.isProduction ? 'strict' : 'lax',
@@ -136,7 +143,7 @@ const authController = {
     } catch (err) {
       // Clear refresh token cookie on failure
       res.clearCookie('refreshToken', {
-        path: '/',
+        path: '/api/auth',
         httpOnly: true,
         secure: env.isProduction,
         sameSite: env.isProduction ? 'strict' : 'lax',
@@ -157,7 +164,7 @@ const authController = {
 
       res.clearCookie('sid', { path: '/' });
       res.clearCookie('refreshToken', {
-        path: '/',
+        path: '/api/auth',
         httpOnly: true,
         secure: env.isProduction,
         sameSite: env.isProduction ? 'strict' : 'lax',
@@ -171,9 +178,28 @@ const authController = {
 
   async getMe(req, res, next) {
     try {
+      let organization = null;
+      if (req.user?.organization_id) {
+        organization = await organizationsRepository.findById(null, req.user.organization_id);
+      }
       return success(res, 'User profile retrieved successfully', {
         user: req.user,
+        organization,
       });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async setPassword(req, res, next) {
+    try {
+      const validation = authValidation.validateSetPassword(req.body);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
+
+      const result = await authService.setPassword(validation.data);
+      return success(res, result.message, { user: result.user });
     } catch (err) {
       next(err);
     }

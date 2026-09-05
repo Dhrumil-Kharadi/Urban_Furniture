@@ -217,17 +217,20 @@ These weren't in the doc or your interpretation but are needed for a working sys
 
 ---
 
-## 10. Open Decisions You Should Confirm Before Coding
+## 10. Open Decisions You Should Confirm Before Coding (FINALIZED — Phase 0)
 
-| # | Decision Needed | Options |
-|---|---|---|
-| 1 | Accountant permission on Modify (Products/CoA/etc.) | Follow doc strictly (Create only) vs. your original rule (allow price edits) |
-| 2 | Contact portal access | Auto-create login for every Contact vs. toggle per Contact |
-| 3 | Payment gateway for Card payments | Stripe / Razorpay / other |
-| 4 | Tax applicability | Sales only vs. Sales + Purchase |
-| 5 | Multi-currency support | Single currency (INR) vs. multi-currency |
-| 6 | Report export | In-app view only vs. PDF/Excel export in v1 |
-| 7 | Inventory/stock tracking depth | Simple cost tracking vs. full stock ledger (doc mentions "stock reports" in overview but doesn't detail a stock module — flag this, it may need its own section) |
+| # | Decision Needed | Options | Confirmed Decision | Notes / Impact |
+|---|---|---|---|---|
+| 1 | Accountant permission on Modify (Products/CoA/etc.) | Follow doc strictly (Create only) vs. allow price edits | **Create Only** (Doc Strict) | Manager (`accountant`) has create-only permissions on master data. Modify/Archive/Delete is strictly reserved for Admin (`admin`). |
+| 2 | Contact portal access | Auto-create login for every Contact vs. toggle per Contact | **Automatic for all contacts (No toggle)** | When any Contact record with an email is created, an account is auto-provisioned and an invite/login email is dispatched immediately. |
+| 3 | Payment gateway for Card payments | Stripe / Razorpay / other | Deferred to Phase 12 | Gateway adapter will be built in Phase 12 (Razorpay/Stripe). |
+| 4 | Tax applicability | Sales only vs. Sales + Purchase | **Sales + Purchase (Both)** | Built with `tax_scope` covering both. Tax accounts (Output Tax Payable / Input Tax Credit) both post to GL. |
+| 5 | Multi-currency support | Single currency (INR) vs. multi-currency | **Single Currency (INR)** | Default `currency_code = 'INR'` across the organization and all monetary columns. |
+| 6 | Report export | In-app view only vs. PDF/Excel in v1 | Deferred to Phase 11 | Decided at Phase 11 boundary. |
+| 7 / A1 | Inventory/stock tracking depth | Simple cost tracking vs. full stock ledger | **Out of scope for v1** | No physical stock ledger or stock movement entries. Bill posting debits Purchase Expense. |
+| §3.2 | Role Mapping | Admin/Accountant/Contact → DB roles | **Admin = `admin`, Accountant = `manager`, Contact = `user`** | Preserves existing DB check constraint and auth model. `super_admin` reserved for platform operations. |
+| A3 | Fiscal Year Start Month | Configurable month | **April (Month 4)** | Standard Indian FY (April 1 to March 31). Stored as `fiscal_year_start_month = 4` in `organizations`. |
+| A8 | Tax / GST Compliance Scope | Full Indian GST rules vs. basic rates | **Basic tax rate percentages** | Basic tax percentages (e.g. 5%, 12%, 18%, 28%) applied per line item; no statutory state-wise POS split engines. |
 
 ---
 
