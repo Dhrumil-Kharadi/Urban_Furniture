@@ -37,32 +37,62 @@ const CURRENCIES = Object.freeze(['INR']);
 
 // ─── Chart of Accounts ───────────────────────────────────────────────────────
 
-/** Top-level account categories (technicalrequirement.md §3.3). */
+/** Top-level account categories (project.md §4.3 & technicalrequirement.md §4.1). */
 const ACCOUNT_TYPES = Object.freeze({
   ASSET: 'asset',
   LIABILITY: 'liability',
-  EQUITY: 'equity',
+  CAPITAL: 'capital',
+  EQUITY: 'capital', // Backward-compatibility alias for capital
   INCOME: 'income',
   EXPENSE: 'expense',
 });
 
 const ACCOUNT_STATUS = Object.freeze({
   ACTIVE: 'active',
-  INACTIVE: 'inactive',
+  ARCHIVED: 'archived',
+  INACTIVE: 'archived', // alias
+});
+
+// ─── Journals ────────────────────────────────────────────────────────────────
+
+const JOURNAL_TYPES = Object.freeze({
+  SALES: 'sales',
+  PURCHASE: 'purchase',
+  BANK: 'bank',
+  CASH: 'cash',
+  GENERAL: 'general',
 });
 
 // ─── Tax ─────────────────────────────────────────────────────────────────────
 
-/** Which transactions a tax rate applies to (both = sales AND purchases). */
+/** Which transactions a tax rate applies to (both = sales AND purchase). */
 const TAX_SCOPE = Object.freeze({
   SALES: 'sales',
-  PURCHASES: 'purchases',
+  PURCHASE: 'purchase',
   BOTH: 'both',
+});
+
+const TAX_COMPUTATION = Object.freeze({
+  PERCENTAGE: 'percentage',
+  FIXED: 'fixed',
 });
 
 const TAX_STATUS = Object.freeze({
   ACTIVE: 'active',
-  INACTIVE: 'inactive',
+  ARCHIVED: 'archived',
+  INACTIVE: 'archived', // alias
+});
+
+// ─── Analytic Accounts ───────────────────────────────────────────────────────
+
+const ANALYTIC_TYPES = Object.freeze({
+  INCOME: 'income',
+  EXPENSE: 'expense',
+});
+
+const ANALYTIC_STATUS = Object.freeze({
+  ACTIVE: 'active',
+  ARCHIVED: 'archived',
 });
 
 // ─── Contacts ────────────────────────────────────────────────────────────────
@@ -137,8 +167,12 @@ module.exports = {
   CURRENCIES,
   ACCOUNT_TYPES,
   ACCOUNT_STATUS,
+  JOURNAL_TYPES,
   TAX_SCOPE,
+  TAX_COMPUTATION,
   TAX_STATUS,
+  ANALYTIC_TYPES,
+  ANALYTIC_STATUS,
   CONTACT_TYPE,
   CONTACT_STATUS,
   DOC_TYPES,

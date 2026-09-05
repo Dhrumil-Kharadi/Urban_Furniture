@@ -85,7 +85,7 @@ function buildMeta(page, limit, total) {
  * @param {string}            defaultSort - Fallback column (must be in allowList).
  * @returns {string}  e.g.  `"created_at" DESC`
  */
-function buildOrderBy(sortParam, allowList, defaultSort) {
+function buildOrderBy(sortParam, allowList, defaultSort, explicitOrder) {
   const allowed = new Set(allowList);
 
   let col = defaultSort;
@@ -98,6 +98,13 @@ function buildOrderBy(sortParam, allowList, defaultSort) {
       dir = sortParam.startsWith('-') ? 'DESC' : 'ASC';
     }
     // silently ignore invalid column — fall back to defaultSort
+  }
+
+  if (explicitOrder) {
+    const norm = String(explicitOrder).toUpperCase();
+    if (norm === 'DESC' || norm === 'ASC') {
+      dir = norm;
+    }
   }
 
   // Double-quote the identifier to prevent any SQL injection even within the

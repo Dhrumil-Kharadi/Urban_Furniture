@@ -12,6 +12,10 @@ const notFoundMiddleware = require('./middleware/notFound.middleware');
 const authRoutes = require('./auth/auth.routes');
 const organizationsRoutes = require('./organizations/organizations.routes');
 const usersRoutes = require('./users/users.routes');
+const accountsRoutes = require('./accounts/accounts.routes');
+const journalsRoutes = require('./journals/journals.routes');
+const taxesRoutes = require('./taxes/taxes.routes');
+const analyticsRoutes = require('./analytics/analytics.routes');
 
 /**
  * Create and configure Express application.
@@ -59,6 +63,11 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/organizations', organizationsRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/accounts', accountsRoutes);
+app.use('/api/journals', journalsRoutes);
+app.use('/api/taxes', taxesRoutes);
+app.use('/api/analytic-accounts', analyticsRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Future feature routes will be mounted here:
 // app.use('/api/users', userRoutes);
