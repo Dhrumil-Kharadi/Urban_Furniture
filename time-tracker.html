@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Time Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TIME TRACKER CARD
+   Deep-emerald gradient + flowing topographic wave lines
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: grid;
+  place-items: center;
+  padding: 40px 20px;
+  background: #e9e9ec;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- the card ------------------------------------- */
+
+/* The container lives on the WRAPPER, not on the card. Container query
+   units never resolve against the element that declares the container —
+   they look to the nearest *ancestor* container. Putting it here is what
+   lets the card's own border-radius and shadow scale with the card. */
+.card-wrap {
+  width: min(560px, 92vw);
+  container-type: inline-size;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 890 / 755;          /* exact ratio of the reference */
+  border-radius: 5.2cqw;
+  overflow: hidden;
+  isolation: isolate;
+
+  /* ---- THE BACKGROUND ----------------------------------
+     Layer order (top -> bottom):
+       1. top-left corner shadow      (deepest black-green)
+       2. bottom-left corner shadow
+       3. top-right corner shadow
+       4. bottom-right corner shadow
+       5. warm emerald "pool" of light, offset up-left of centre
+       6. base diagonal ramp
+     ------------------------------------------------------ */
+  background:
+    radial-gradient(82% 66% at -2% -2%,
+        rgba(0, 14, 10, 0.92) 0%,
+        rgba(0, 14, 10, 0.55) 34%,
+        rgba(0, 14, 10, 0) 68%),
+    radial-gradient(88% 72% at 2% 104%,
+        rgba(0, 13, 9, 0.90) 0%,
+        rgba(0, 13, 9, 0.48) 38%,
+        rgba(0, 13, 9, 0) 72%),
+    radial-gradient(76% 62% at 102% -2%,
+        rgba(0, 14, 10, 0.86) 0%,
+        rgba(0, 14, 10, 0.40) 36%,
+        rgba(0, 14, 10, 0) 70%),
+    radial-gradient(84% 74% at 102% 104%,
+        rgba(0, 12, 9, 0.88) 0%,
+        rgba(0, 12, 9, 0.42) 38%,
+        rgba(0, 12, 9, 0) 72%),
+    radial-gradient(62% 58% at 44% 42%,
+        #0b5740 0%,
+        #08472f 42%,
+        #05301f 72%,
+        #03211900 100%),
+    linear-gradient(148deg,
+        #04281c 0%, #063a26 44%, #010f0b 100%);
+
+  box-shadow:
+    0 2cqw 5cqw rgba(10, 40, 30, 0.28),
+    0 0.5cqw 1.5cqw rgba(10, 40, 30, 0.16);
+}
+
+/* generative linework, rasterised once at 2x on a canvas */
+.tex {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* resolution-independent finishing passes ride above the canvas */
+.waves {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ---------- content -------------------------------------- */
+
+.content {
+  position: relative;
+  z-index: 3;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 8.6cqw 9.2cqw 7.2cqw;
+  color: #fff;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 5.6cqw;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 0.25cqw 0.9cqw rgba(0, 20, 14, 0.35);
+}
+
+.readout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3.95cqw;
+  padding-top: 8.2cqw;   /* seats the timer at 43% of card height */
+}
+
+.timer {
+  font-size: 13.6cqw;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.018em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  color: #ffffff;
+  text-shadow: 0 0.4cqw 1.6cqw rgba(0, 22, 16, 0.38);
+}
+
+.task {
+  font-size: 4.5cqw;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.004em;
+  color: rgba(255, 255, 255, 0.97);
+  text-shadow: 0 0.25cqw 1cqw rgba(0, 22, 16, 0.35);
+}
+
+/* ---------- control buttons ------------------------------ */
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8.2cqw;
+}
+
+.btn {
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.3, 1),
+              box-shadow 0.18s ease,
+              filter 0.18s ease;
+}
+
+.btn:active { transform: scale(0.94); }
+
+.btn:focus-visible {
+  outline: 0.45cqw solid rgba(255, 255, 255, 0.85);
+  outline-offset: 0.8cqw;
+}
+
+/* pause — white disc, black bars */
+.btn-pause {
+  width: 18cqw;
+  height: 18cqw;
+  background:
+    radial-gradient(85% 85% at 32% 24%, #ffffff 0%, #ffffff 58%, #f1f2f1 100%);
+  box-shadow:
+    0 1.1cqw 2.4cqw rgba(0, 24, 16, 0.34),
+    0 0.25cqw 0.7cqw rgba(0, 24, 16, 0.20);
+}
+.btn-pause:hover { filter: brightness(1.02); }
+
+.btn-pause .glyph {
+  display: flex;
+  gap: 1.55cqw;
+}
+.btn-pause .glyph i {
+  display: block;
+  width: 2.05cqw;
+  height: 6.1cqw;
+  border-radius: 0.45cqw;
+  background: #16181a;
+}
+
+/* stop — red disc, white rounded square */
+.btn-stop {
+  width: 17.5cqw;
+  height: 17.5cqw;
+  background:
+    radial-gradient(88% 88% at 33% 24%, #f4363a 0%, #e9242b 52%, #d81a22 100%);
+  box-shadow:
+    0 1.1cqw 2.4cqw rgba(80, 6, 10, 0.38),
+    0 0.25cqw 0.7cqw rgba(60, 4, 8, 0.24);
+}
+.btn-stop:hover { filter: brightness(1.05); }
+
+.btn-stop .glyph {
+  width: 6.05cqw;
+  height: 6.05cqw;
+  border-radius: 1.15cqw;
+  background: #ffffff;
+}
+
+/* the pause button swaps to a play triangle once paused */
+.btn-pause[data-state="paused"] .glyph {
+  gap: 0;
+}
+.btn-pause[data-state="paused"] .glyph i:first-child {
+  width: 0;
+  height: 0;
+  border-radius: 0.3cqw;
+  background: transparent;
+  border-top: 3.1cqw solid transparent;
+  border-bottom: 3.1cqw solid transparent;
+  border-left: 5.2cqw solid #16181a;
+  margin-left: 0.9cqw;
+}
+.btn-pause[data-state="paused"] .glyph i:last-child { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="card-wrap">
+<div class="card">
+  <canvas class="tex" id="tex" aria-hidden="true"></canvas>
+  <svg class="waves" id="waves" viewBox="0 0 890 755"
+       preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <!-- specular sweep across the diagonal -->
+      <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
+        <stop offset=".10" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset=".40" stop-color="#d8ffe8" stop-opacity=".085"/>
+        <stop offset=".68" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+
+      <!-- rim light along the top edge, shadow along the bottom -->
+      <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0"   stop-color="#ffffff" stop-opacity=".16"/>
+        <stop offset=".06" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset=".92" stop-color="#000000" stop-opacity="0"/>
+        <stop offset="1"   stop-color="#000000" stop-opacity=".22"/>
+      </linearGradient>
+
+      <radialGradient id="vig" cx="46%" cy="44%" r="76%">
+        <stop offset=".52" stop-color="#000000" stop-opacity="0"/>
+        <stop offset="1"   stop-color="#00100b" stop-opacity=".58"/>
+      </radialGradient>
+
+      <!-- fine film grain; kills gradient banding and adds texture -->
+      <filter id="grain" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="4" stitchTiles="stitch"/>
+        <feColorMatrix type="saturate" values="0"/>
+      </filter>
+    </defs>
+
+    <!-- finishing passes only; all linework lives on the canvas below -->
+    <rect width="890" height="755" fill="url(#sheen)" style="mix-blend-mode:soft-light"/>
+    <rect width="890" height="755" filter="url(#grain)" opacity=".06"
+          style="mix-blend-mode:overlay"/>
+    <rect width="890" height="755" fill="url(#vig)"/>
+    <rect width="890" height="755" fill="url(#rim)"/>
+  </svg>
+
+  <div class="content">
+    <h1 class="card-title">Time Tracker</h1>
+
+    <div class="readout">
+      <div class="timer" id="timer">01:24:08</div>
+      <div class="task">Working on Dashboard</div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-pause" id="pause" data-state="running"
+              aria-label="Pause timer">
+        <span class="glyph"><i></i><i></i></span>
+      </button>
+      <button class="btn btn-stop" id="stop" aria-label="Stop timer">
+        <span class="glyph"></span>
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+/* ============================================================
+   1. THE BACKGROUND - a generative curve field
+   ------------------------------------------------------------
+   The star of the composition is thousands of RANDOM CURVES.
+   None of them are circles or arcs of a circle: every curve is a
+   Catmull-Rom spline threaded through the points of a randomised
+   turning walk, so each one wanders somewhere genuinely new.
+
+     A  mesh blooms      painted light pools
+     B  crystal substrate  a faint Delaunay/Voronoi shatter, kept
+                           low so it reads as structure under the
+                           curves rather than competing with them
+     C  curve tangle     ~520 independent spline walks
+     D  curve bundles    ~46 groups of 5-10 curves offset along the
+                         normal, so they travel together as ribbons
+     E  long sweeps      full-width splines with heavy low-frequency
+                         wander, tying the composition together
+     F  circuit traces   a little hard 45-degree geometry for
+                         contrast against all the curvature
+     G  shear lines      long diagonals crossing the whole card
+
+   Catmull-Rom is converted to cubic beziers rather than sampled as
+   line segments, so the curves stay smooth at any zoom.
+   ============================================================ */
+(function buildTexture() {
+  const W = 890, H = 755, SS = 2, TAU = Math.PI * 2;
+  const cv = document.getElementById("tex");
+  cv.width = W * SS; cv.height = H * SS;
+  const g = cv.getContext("2d");
+  g.scale(SS, SS);
+
+  /* -------- deterministic RNG (mulberry32) -------------------- */
+  let s = 0x5bf03d17;
+  const rnd = () => {
+    s |= 0; s = s + 0x6D2B79F5 | 0;
+    let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+
+  /* -------- 2D value noise + fBm ------------------------------ */
+  const perm = new Uint8Array(512);
+  (() => {
+    const p = new Uint8Array(256);
+    for (let i = 0; i < 256; i++) p[i] = i;
+    for (let i = 255; i > 0; i--) {
+      const j = (rnd() * (i + 1)) | 0;
+      const tmp = p[i]; p[i] = p[j]; p[j] = tmp;
+    }
+    for (let i = 0; i < 512; i++) perm[i] = p[i & 255];
+  })();
+  const fade = t => t * t * t * (t * (t * 6 - 15) + 10);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const grd  = (h, x, y) => ((h & 1) ? x : -x) + ((h & 2) ? y : -y);
+  function noise(x, y) {
+    const X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
+    x -= Math.floor(x); y -= Math.floor(y);
+    const u = fade(x), v = fade(y);
+    const aa = perm[X + perm[Y]],     ba = perm[X + 1 + perm[Y]];
+    const ab = perm[X + perm[Y + 1]], bb = perm[X + 1 + perm[Y + 1]];
+    return lerp(lerp(grd(aa, x, y),     grd(ba, x - 1, y), u),
+                lerp(grd(ab, x, y - 1), grd(bb, x - 1, y - 1), u), v);
+  }
+  function fbm(x, y, oct) {
+    let a = 1, f = 1, sum = 0, n = 0;
+    for (let i = 0; i < oct; i++) { sum += a * noise(x * f, y * f); n += a; a *= 0.5; f *= 2; }
+    return sum / n;
+  }
+  const mask = (x, y) => {
+    const dx = (x - W * 0.44) / (W * 0.68), dy = (y - H * 0.42) / (H * 0.66);
+    return Math.max(0, 1 - Math.sqrt(dx * dx + dy * dy));
+  };
+
+  /* ============ A - mesh blooms ============================== */
+  const pool = (x, y, r, stops) => {
+    const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    stops.forEach(st => gr.addColorStop(st[0], st[1]));
+    g.fillStyle = gr; g.fillRect(0, 0, W, H);
+  };
+  g.fillStyle = "#04231a"; g.fillRect(0, 0, W, H);
+  pool(W * 0.41, H * 0.37, W * 0.66, [
+    [0, "rgba(38,196,146,0.60)"], [0.40, "rgba(15,112,82,0.30)"],
+    [0.74, "rgba(7,64,45,0.10)"], [1, "rgba(4,36,26,0)"]]);
+  pool(W * 0.78, H * 0.66, W * 0.54, [
+    [0, "rgba(16,170,148,0.34)"], [0.55, "rgba(7,99,82,0.13)"],
+    [1, "rgba(4,48,42,0)"]]);
+  pool(W * 0.12, H * 0.18, W * 0.42, [
+    [0, "rgba(10,96,74,0.26)"], [1, "rgba(4,40,30,0)"]]);
+  pool(W * 0.16, H * 0.88, W * 0.58, [
+    [0, "rgba(0,15,10,0.70)"], [1, "rgba(0,15,10,0)"]]);
+  pool(W * 0.95, H * 0.04, W * 0.44, [
+    [0, "rgba(0,18,12,0.54)"], [1, "rgba(0,18,12,0)"]]);
+
+  g.lineCap = "round";
+  g.lineJoin = "round";
+
+  /* ============ Catmull-Rom -> cubic bezier =================== */
+  /* Sampling the spline as short line segments would visibly
+     facet at 2x; emitting real beziers keeps it smooth. */
+  function spline(pts) {
+    if (pts.length < 2) return;
+    g.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i - 1] || pts[i], p1 = pts[i];
+      const p2 = pts[i + 1], p3 = pts[i + 2] || pts[i + 1];
+      g.bezierCurveTo(
+        p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6,
+        p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6,
+        p2[0], p2[1]);
+    }
+  }
+
+  /* a randomised turning walk - the skeleton every curve rides */
+  function walk(x, y, ang, segs, len0, len1, turn) {
+    const pts = [[x, y]];
+    for (let i = 0; i < segs; i++) {
+      ang += (rnd() - 0.5) * turn;
+      const L = len0 + rnd() * (len1 - len0);
+      x += Math.cos(ang) * L; y += Math.sin(ang) * L;
+      pts.push([x, y]);
+    }
+    return pts;
+  }
+
+  /* ============ B - crystal substrate ======================== */
+  /* kept deliberately faint: structure beneath the curves */
+  const orient = (a, b, c) =>
+    (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+  function inCircum(p, a, b, c) {
+    if (orient(a, b, c) < 0) { const t = b; b = c; c = t; }
+    const ax = a[0] - p[0], ay = a[1] - p[1];
+    const bx = b[0] - p[0], by = b[1] - p[1];
+    const cx = c[0] - p[0], cy = c[1] - p[1];
+    return (ax * ax + ay * ay) * (bx * cy - by * cx)
+         - (bx * bx + by * by) * (ax * cy - ay * cx)
+         + (cx * cx + cy * cy) * (ax * by - ay * bx) > 0;
+  }
+  function circumcentre(a, b, c) {
+    const d = 2 * (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1]));
+    if (Math.abs(d) < 1e-9) return null;
+    const sa = a[0] * a[0] + a[1] * a[1],
+          sb = b[0] * b[0] + b[1] * b[1],
+          sc = c[0] * c[0] + c[1] * c[1];
+    return [(sa * (b[1] - c[1]) + sb * (c[1] - a[1]) + sc * (a[1] - b[1])) / d,
+            (sa * (c[0] - b[0]) + sb * (a[0] - c[0]) + sc * (b[0] - a[0])) / d];
+  }
+  (function substrate() {
+    const PTS = [];
+    const gx = 11, gy = 9;
+    for (let j = 0; j < gy; j++)
+      for (let i = 0; i < gx; i++)
+        PTS.push([-150 + (W + 300) * (i + 0.1 + rnd() * 0.8) / gx,
+                  -150 + (H + 300) * (j + 0.1 + rnd() * 0.8) / gy]);
+    const N = PTS.length;
+    const P = PTS.concat([[-9000, -9000], [9000, -9000], [0, 12000]]);
+    let tris = [[N, N + 1, N + 2]];
+    for (let i = 0; i < N; i++) {
+      const edges = [];
+      for (let t = tris.length - 1; t >= 0; t--) {
+        const tr = tris[t];
+        if (inCircum(P[i], P[tr[0]], P[tr[1]], P[tr[2]])) {
+          edges.push([tr[0], tr[1]], [tr[1], tr[2]], [tr[2], tr[0]]);
+          tris.splice(t, 1);
+        }
+      }
+      for (let a = 0; a < edges.length; a++) {
+        if (!edges[a]) continue;
+        for (let b = a + 1; b < edges.length; b++) {
+          if (!edges[b]) continue;
+          if ((edges[a][0] === edges[b][0] && edges[a][1] === edges[b][1]) ||
+              (edges[a][0] === edges[b][1] && edges[a][1] === edges[b][0])) {
+            edges[a] = null; edges[b] = null; break;
+          }
+        }
+      }
+      edges.forEach(e => { if (e) tris.push([e[0], e[1], i]); });
+    }
+    tris = tris.filter(t => t[0] < N && t[1] < N && t[2] < N);
+
+    tris.forEach(t => {
+      const a = P[t[0]], b = P[t[1]], c = P[t[2]];
+      const cx = (a[0] + b[0] + c[0]) / 3, cy = (a[1] + b[1] + c[1]) / 3;
+      const lift = fbm(cx * 0.0030, cy * 0.0030, 4) * 0.5 + 0.5;
+      g.beginPath();
+      g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.lineTo(c[0], c[1]); g.closePath();
+      g.fillStyle = lift > 0.5
+        ? "rgba(160,255,220," + (0.030 * (lift - 0.5) * 2).toFixed(4) + ")"
+        : "rgba(0,20,14,"     + (0.070 * (0.5 - lift) * 2).toFixed(4) + ")";
+      g.fill();
+    });
+
+    const emap = new Map();
+    tris.forEach((t, i) => {
+      [[t[0], t[1]], [t[1], t[2]], [t[2], t[0]]].forEach(e => {
+        const k = Math.min(e[0], e[1]) + ":" + Math.max(e[0], e[1]);
+        if (emap.has(k)) emap.get(k).push(i); else emap.set(k, [i]);
+      });
+    });
+    const cc = tris.map(t => circumcentre(P[t[0]], P[t[1]], P[t[2]]));
+    g.beginPath();
+    emap.forEach(v => {
+      if (v.length !== 2) return;
+      const p = cc[v[0]], q = cc[v[1]];
+      if (p && q) { g.moveTo(p[0], p[1]); g.lineTo(q[0], q[1]); }
+    });
+    g.strokeStyle = "rgba(196,255,230,0.10)";
+    g.lineWidth = 0.6;
+    g.stroke();
+  })();
+
+  /* ============ C - the curve tangle ========================= */
+  for (let n = 0; n < 520; n++) {
+    const x = rnd() * (W + 260) - 130, y = rnd() * (H + 260) - 130;
+    const m = mask(x, y);
+    if (rnd() > 0.20 + m * 0.92) continue;          // density follows the light
+    /* many short steps with a gentle turn rate gives a genuinely
+       curving path; few long steps with a wild turn rate just
+       looks like a zigzag once splined */
+    const pts = walk(x, y, rnd() * TAU,
+                     7 + (rnd() * 14 | 0), 16, 62, 1.15);
+    g.beginPath(); spline(pts);
+    g.strokeStyle = "rgba(182,255,224," +
+                    ((0.045 + rnd() * 0.105) * (0.35 + 0.65 * m)).toFixed(4) + ")";
+    g.lineWidth = 0.45 + rnd() * 1.15;
+    g.stroke();
+  }
+
+  /* ============ D - curve bundles ============================ */
+  /* offset copies along the path normal, so a group of curves
+     travels together like a ribbon or a cable run */
+  for (let n = 0; n < 46; n++) {
+    const bx = rnd() * (W + 200) - 100, by = rnd() * (H + 200) - 100;
+    const m = mask(bx, by);
+    if (rnd() > 0.25 + m * 0.85) continue;
+    const base = walk(bx, by, rnd() * TAU, 7 + (rnd() * 9 | 0), 34, 96, 0.95);
+    const count = 5 + (rnd() * 6 | 0);
+    const gap   = 2.6 + rnd() * 5.4;
+    for (let k = 0; k < count; k++) {
+      const off = (k - count / 2) * gap;
+      const shifted = base.map((p, i) => {
+        const q = base[Math.min(i + 1, base.length - 1)];
+        const r = base[Math.max(i - 1, 0)];
+        let dx = q[0] - r[0], dy = q[1] - r[1];
+        const L = Math.hypot(dx, dy) || 1;
+        return [p[0] - dy / L * off, p[1] + dx / L * off];
+      });
+      g.beginPath(); spline(shifted);
+      g.strokeStyle = "rgba(192,255,232," +
+                      ((0.042 + rnd() * 0.070) * (0.35 + 0.65 * m)).toFixed(4) + ")";
+      g.lineWidth = 0.42 + rnd() * 0.8;
+      g.stroke();
+    }
+  }
+
+  /* ============ E - long sweeps across the card ============== */
+  for (let n = 0; n < 40; n++) {
+    const y0 = -90 + (H + 180) * rnd();
+    const amp = 40 + rnd() * 120;
+    const lane = rnd() * 70;
+    const pts = [];
+    for (let x = -110; x <= W + 110; x += 62 + rnd() * 46)
+      pts.push([x, y0 + fbm(x * 0.0019, lane, 3) * amp]);
+    g.beginPath(); spline(pts);
+    g.strokeStyle = "rgba(206,255,236," + (0.045 + rnd() * 0.085).toFixed(3) + ")";
+    g.lineWidth = 0.5 + rnd() * 1.1;
+    g.stroke();
+  }
+
+  /* ============ E2 - bright accent curves ==================== */
+  /* a handful of foreground strands so the tangle has a top layer
+     instead of reading as one flat mat of scratches */
+  g.globalCompositeOperation = "lighter";
+  for (let n = 0; n < 34; n++) {
+    const x = rnd() * (W + 160) - 80, y = rnd() * (H + 160) - 80;
+    const m = mask(x, y);
+    if (rnd() > 0.16 + m * 0.88) continue;
+    const pts = walk(x, y, rnd() * TAU, 9 + (rnd() * 13 | 0), 22, 78, 1.0);
+    g.beginPath(); spline(pts);
+    g.strokeStyle = "rgba(220,255,242," +
+                    ((0.075 + rnd() * 0.10) * (0.4 + 0.6 * m)).toFixed(4) + ")";
+    g.lineWidth = 0.7 + rnd() * 1.2;
+    g.stroke();
+  }
+  g.globalCompositeOperation = "source-over";
+
+  /* ============ F - circuit traces (angular counterpoint) ==== */
+  const DIRS = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
+  for (let n = 0; n < 34; n++) {
+    let x = rnd() * (W + 240) - 120, y = rnd() * (H + 240) - 120;
+    let d = (rnd() * 8) | 0;
+    const pts = [[x, y]];
+    for (let l = 0, legs = 3 + (rnd() * 6 | 0); l < legs; l++) {
+      const len = 24 + rnd() * 96;
+      x += DIRS[d][0] * len; y += DIRS[d][1] * len;
+      pts.push([x, y]);
+      d = (d + (rnd() < 0.5 ? 1 : 7)) & 7;
+    }
+    const m = mask(pts[0][0], pts[0][1]);
+    g.beginPath();
+    pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
+    g.strokeStyle = "rgba(168,255,216," + (0.05 + 0.15 * m).toFixed(3) + ")";
+    g.lineWidth = 0.55 + rnd() * 0.8;
+    g.stroke();
+    pts.forEach(p => {
+      if (rnd() > 0.5) return;
+      g.fillStyle = "rgba(206,255,236," + (0.11 + 0.20 * m).toFixed(3) + ")";
+      g.fillRect(p[0] - 1.5, p[1] - 1.5, 3, 3);
+    });
+  }
+
+  /* ============ G - shear lines ============================== */
+  g.globalCompositeOperation = "lighter";
+  for (let n = 0; n < 11; n++) {
+    const x0 = rnd() * W * 1.4 - W * 0.2;
+    const sl = (rnd() - 0.5) * 1.9;
+    g.beginPath();
+    g.moveTo(x0, -80);
+    g.lineTo(x0 + sl * (H + 160), H + 80);
+    g.strokeStyle = "rgba(216,255,240," + (0.035 + rnd() * 0.055).toFixed(3) + ")";
+    g.lineWidth = 0.5 + rnd() * 0.7;
+    g.stroke();
+  }
+  g.globalCompositeOperation = "source-over";
+})();
+
+/* ============================================================
+   2. THE TIMER
+   ============================================================ */
+(function timer() {
+  const out     = document.getElementById("timer");
+  const pauseEl = document.getElementById("pause");
+  const stopEl  = document.getElementById("stop");
+
+  const START = 1 * 3600 + 24 * 60 + 8;   // 01:24:08
+  let seconds = START;
+  let running = true;
+  let tick    = null;
+
+  const pad    = n => String(n).padStart(2, "0");
+  const render = () => {
+    out.textContent =
+      pad(Math.floor(seconds / 3600)) + ":" +
+      pad(Math.floor(seconds / 60) % 60) + ":" +
+      pad(seconds % 60);
+  };
+
+  const start = () => { tick = setInterval(() => { seconds++; render(); }, 1000); };
+  const halt  = () => { clearInterval(tick); tick = null; };
+
+  pauseEl.addEventListener("click", () => {
+    running = !running;
+    pauseEl.dataset.state = running ? "running" : "paused";
+    pauseEl.setAttribute("aria-label", running ? "Pause timer" : "Resume timer");
+    running ? start() : halt();
+  });
+
+  stopEl.addEventListener("click", () => {
+    halt();
+    running = false;
+    seconds = 0;
+    pauseEl.dataset.state = "paused";
+    pauseEl.setAttribute("aria-label", "Start timer");
+    render();
+  });
+
+  render();
+  start();
+})();
+</script>
+
+</body>
+</html>
