@@ -22,7 +22,6 @@ class AppError extends Error {
     super(message);
     this.name = 'AppError';
     this.status = status;
-    this.statusCode = status;
     this.code = code;
     this.details = details;
     // Maintains proper stack trace in V8
@@ -101,11 +100,12 @@ class ValidationError extends AppError {
   }
 }
 
-module.exports = AppError;
-module.exports.AppError = AppError;
-module.exports.BadRequestError = BadRequestError;
-module.exports.UnauthorizedError = UnauthorizedError;
-module.exports.ForbiddenError = ForbiddenError;
-module.exports.NotFoundError = NotFoundError;
-module.exports.ConflictError = ConflictError;
-module.exports.ValidationError = ValidationError;
+module.exports = {
+  AppError,
+  BadRequestError,
+  UnauthorizedError,
+  ForbiddenError,
+  NotFoundError,
+  ConflictError,
+  ValidationError,
+};

@@ -715,14 +715,34 @@ const authService = {
   // ─── User & Role Management Methods ───────────────────
 
   /**
-   * List all users (Admin/SuperAdmin only).
+   * List users visible to the caller.
+   *
+   * The scope is decided HERE from the authenticated actor, never from the
+   * request: an admin sees their own organization, and only the platform
+   * operator (super_admin, who has no organization) sees across tenants.
+   *
    * @param {Object} [pagination]
+   * @param {Object} actor - { role, organization_id } from req.user.
    * @returns {Promise<Array>}
    */
-  async listUsers(pagination = {}) {
+  async listUsers(pagination = {}, actor = {}) {
     const limit = Math.min(parseInt(pagination.limit, 10) || 50, 100);
     const offset = Math.max(parseInt(pagination.offset, 10) || 0, 0);
-    return authRepository.listUsers({ limit, offset });
+
+    if (actor.role === 'super_admin') {
+      return authRepository.listUsers({ limit, offset, organizationId: null });
+    }
+
+    // Any other role without an organization has nothing to list. Falling
+    // through to an unscoped query here is exactly the cross-tenant leak this
+    // guard exists to prevent.
+    if (!actor.organization_id) return [];
+
+    return authRepository.listUsers({
+      limit,
+      offset,
+      organizationId: actor.organization_id,
+    });
   },
 
   /**

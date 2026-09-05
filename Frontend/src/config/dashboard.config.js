@@ -29,19 +29,25 @@ export const ICON_SM = 15;
  *   `href` is a locale-agnostic path — <Link> adds the prefix.
  */
 export const DASHBOARD_NAV = {
-  // Contact (customer / vendor). Portal routes.
+  // Contact (customer / vendor). Deliberately the narrowest surface in the
+  // app: their own documents only, never anything organization-wide.
+  // A customer sees invoices raised to them and can pay an unpaid one by
+  // card; a vendor sees the bills the organization has raised against them.
   user: [
     {
       key: 'menu',
       items: [
         { key: 'overview', icon: SOLID_ICONS.overview, href: '/portal' },
-        { key: 'invoices', icon: SOLID_ICONS.fields, href: '/portal/invoices' },
-        { key: 'bills', icon: SOLID_ICONS.deployments, href: '/portal/bills' },
-        { key: 'payments', icon: SOLID_ICONS.irrigation, href: '/portal/payments' },
+        { key: 'invoices', icon: SOLID_ICONS.fields },
+        { key: 'bills', icon: SOLID_ICONS.deployments },
+        { key: 'payments', icon: SOLID_ICONS.irrigation },
+        { key: 'statements', icon: SOLID_ICONS.analytics },
       ],
     },
   ],
-  // Invoicing User (Accountant / Manager). Master read/create + transactions + reporting.
+  // Invoicing User (Accountant). Adds contacts and records transactions,
+  // and may update product prices — but adding or deleting products and
+  // other master data stays with the business owner.
   manager: [
     {
       key: 'menu',
@@ -49,42 +55,40 @@ export const DASHBOARD_NAV = {
         { key: 'overview', icon: SOLID_ICONS.overview, href: '/dashboard/manager' },
         { key: 'contacts', icon: SOLID_ICONS.team, href: '/dashboard/contacts' },
         { key: 'products', icon: SOLID_ICONS.fields, href: '/dashboard/products' },
-        { key: 'accounts', icon: SOLID_ICONS.system, href: '/dashboard/accounts' },
-        { key: 'journals', icon: SOLID_ICONS.directory, href: '/dashboard/journals' },
-        { key: 'journalEntries', icon: SOLID_ICONS.analytics, href: '/dashboard/journal-entries' },
+        { key: 'productCategories', icon: SOLID_ICONS.calendar, href: '/dashboard/product-categories' },
+        { key: 'accounts', icon: SOLID_ICONS.analytics, href: '/dashboard/accounts' },
+        { key: 'journals', icon: SOLID_ICONS.system, href: '/dashboard/journals' },
         { key: 'taxes', icon: SOLID_ICONS.roles, href: '/dashboard/taxes' },
         { key: 'analyticAccounts', icon: SOLID_ICONS.nodes, href: '/dashboard/analytic-accounts' },
-        { key: 'sales', icon: SOLID_ICONS.deployments, href: '/dashboard/sales-orders' },
-        { key: 'invoices', icon: SOLID_ICONS.fields, href: '/dashboard/customer-invoices' },
-        { key: 'purchases', icon: SOLID_ICONS.nodes, href: '/dashboard/purchase-orders' },
-        { key: 'bills', icon: SOLID_ICONS.deployments, href: '/dashboard/vendor-bills' },
-        { key: 'payments', icon: SOLID_ICONS.irrigation, href: '/dashboard/payments' },
-        { key: 'budgets', icon: SOLID_ICONS.calendar, href: '/dashboard/budgets' },
-        { key: 'reports', icon: SOLID_ICONS.analytics, href: '/dashboard/reports' },
+        { key: 'sales', icon: SOLID_ICONS.deployments },
+        { key: 'purchases', icon: SOLID_ICONS.nodes },
+        { key: 'payments', icon: SOLID_ICONS.irrigation },
+        { key: 'reports', icon: SOLID_ICONS.analytics },
       ],
     },
   ],
-  // Business Owner (Admin). Full permissions including Users and Organization Settings.
+  // Business Owner. The only role that self-registers, the only one that
+  // creates user accounts, and the only one that may add, modify or
+  // archive master data.
   admin: [
     {
       key: 'menu',
       items: [
         { key: 'overview', icon: SOLID_ICONS.overview, href: '/dashboard/admin' },
+        { key: 'masters', icon: SOLID_ICONS.fields },
         { key: 'contacts', icon: SOLID_ICONS.team, href: '/dashboard/contacts' },
         { key: 'products', icon: SOLID_ICONS.fields, href: '/dashboard/products' },
-        { key: 'accounts', icon: SOLID_ICONS.system, href: '/dashboard/accounts' },
-        { key: 'journals', icon: SOLID_ICONS.directory, href: '/dashboard/journals' },
-        { key: 'journalEntries', icon: SOLID_ICONS.analytics, href: '/dashboard/journal-entries' },
+        { key: 'productCategories', icon: SOLID_ICONS.calendar, href: '/dashboard/product-categories' },
+        { key: 'accounts', icon: SOLID_ICONS.analytics, href: '/dashboard/accounts' },
+        { key: 'journals', icon: SOLID_ICONS.system, href: '/dashboard/journals' },
         { key: 'taxes', icon: SOLID_ICONS.roles, href: '/dashboard/taxes' },
         { key: 'analyticAccounts', icon: SOLID_ICONS.nodes, href: '/dashboard/analytic-accounts' },
-        { key: 'sales', icon: SOLID_ICONS.deployments, href: '/dashboard/sales-orders' },
-        { key: 'invoices', icon: SOLID_ICONS.fields, href: '/dashboard/customer-invoices' },
-        { key: 'purchases', icon: SOLID_ICONS.nodes, href: '/dashboard/purchase-orders' },
-        { key: 'bills', icon: SOLID_ICONS.deployments, href: '/dashboard/vendor-bills' },
-        { key: 'payments', icon: SOLID_ICONS.irrigation, href: '/dashboard/payments' },
-        { key: 'budgets', icon: SOLID_ICONS.calendar, href: '/dashboard/budgets' },
-        { key: 'reports', icon: SOLID_ICONS.analytics, href: '/dashboard/reports' },
-        { key: 'users', icon: SOLID_ICONS.directory, href: '/dashboard/users' },
+        { key: 'transactions', icon: SOLID_ICONS.deployments },
+        { key: 'payments', icon: SOLID_ICONS.irrigation },
+        { key: 'budgets', icon: SOLID_ICONS.calendar },
+        { key: 'reports', icon: SOLID_ICONS.analytics },
+        { key: 'users', icon: SOLID_ICONS.directory },
+        { key: 'system', icon: SOLID_ICONS.system },
       ],
     },
   ],
@@ -93,25 +97,21 @@ export const DASHBOARD_NAV = {
       key: 'menu',
       items: [
         { key: 'overview', icon: SOLID_ICONS.overview, href: '/dashboard/super-admin' },
-        { key: 'directory', icon: SOLID_ICONS.directory, href: '/dashboard/super-admin/directory' },
-        { key: 'roles', icon: SOLID_ICONS.roles, href: '/dashboard/super-admin/roles' },
-        { key: 'system', icon: SOLID_ICONS.system, href: '/dashboard/super-admin/system' },
+        { key: 'directory', icon: SOLID_ICONS.directory },
+        { key: 'roles', icon: SOLID_ICONS.roles },
+        { key: 'analytics', icon: SOLID_ICONS.analytics },
+        { key: 'system', icon: SOLID_ICONS.system },
       ],
     },
   ],
 };
 
 /**
- * Dedicated Portal Navigation for external contacts (customers/vendors).
+ * Second nav group — identical for every role.
+ *
+ * Entries without an `href` are hidden by DashboardFrame until their route
+ * exists. Give one an href and it appears; nothing else needs to change.
  */
-export const PORTAL_NAV = [
-  { key: 'overview', icon: SOLID_ICONS.overview, href: '/portal' },
-  { key: 'invoices', icon: SOLID_ICONS.fields, href: '/portal/invoices' },
-  { key: 'bills', icon: SOLID_ICONS.deployments, href: '/portal/bills' },
-  { key: 'payments', icon: SOLID_ICONS.irrigation, href: '/portal/payments' },
-];
-
-/** Second nav group — identical for every role. */
 export const GENERAL_NAV = {
   key: 'general',
   items: [

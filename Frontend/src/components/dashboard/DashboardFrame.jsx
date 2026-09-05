@@ -52,29 +52,37 @@ export default function DashboardFrame({
   const groups = useMemo(() => {
     const roleGroups = DASHBOARD_NAV[role] || DASHBOARD_NAV.user;
 
+    // Only entries that actually go somewhere are shown. The config lists the
+    // whole intended menu, including sections later phases will build, but a
+    // nav item that silently does nothing when clicked is worse than one that
+    // is not there yet — it reads as a broken app rather than an unfinished
+    // one. Adding an `href` in dashboard.config.js is all it takes to surface
+    // a section once its route exists.
     const mapItems = (items) =>
-      items.map((item) => {
-        const Icon = item.icon;
-        return {
-          key: item.key,
-          label: t(`nav.${item.key}`),
-          href: item.href,
-          // solid glyphs are fill-based — no stroke weight to set
-          icon: <Icon size={ICON} />,
-          active: item.key === activeKey,
-          badge: item.badge,
-          // Entries without a route are not linkable yet; keep them
-          // inert rather than sending the user to a 404.
-          onClick: item.href ? undefined : () => {},
-        };
-      });
+      items
+        .filter((item) => Boolean(item.href) || typeof item.onClick === 'function')
+        .map((item) => {
+          const Icon = item.icon;
+          return {
+            key: item.key,
+            label: t(`nav.${item.key}`),
+            href: item.href,
+            // solid glyphs are fill-based — no stroke weight to set
+            icon: <Icon size={ICON} />,
+            active: item.key === activeKey,
+            badge: item.badge,
+            onClick: item.onClick,
+          };
+        });
 
     return [
-      ...roleGroups.map((g) => ({
-        key: g.key,
-        label: t(`nav.${g.key}`),
-        items: mapItems(g.items),
-      })),
+      ...roleGroups
+        .map((g) => ({
+          key: g.key,
+          label: t(`nav.${g.key}`),
+          items: mapItems(g.items),
+        }))
+        .filter((g) => g.items.length > 0),
       {
         key: GENERAL_NAV.key,
         label: t(`nav.${GENERAL_NAV.key}`),

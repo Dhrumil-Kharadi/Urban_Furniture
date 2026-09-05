@@ -22,7 +22,6 @@ import api, { setToken, clearToken, getToken } from '@/lib/api';
 
 const defaultAuthValue = {
   user: null,
-  organization: null,
   loading: true,
   isAuthenticated: false,
   role: null,
@@ -40,7 +39,6 @@ let _initAuthPromise = null;
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [organization, setOrganization] = useState(null);
   const [loading, setLoading] = useState(true);
   const tokenRef = useRef(getToken());
 
@@ -53,15 +51,12 @@ export function AuthProvider({ children }) {
       const res = await api.get('/auth/me');
       if (res.success && res.data?.user) {
         setUser(res.data.user);
-        setOrganization(res.data.organization || null);
       } else {
         setUser(null);
-        setOrganization(null);
         clearToken();
       }
     } catch {
       setUser(null);
-      setOrganization(null);
       clearToken();
     }
   }, []);
@@ -99,10 +94,7 @@ export function AuthProvider({ children }) {
             try {
               const meRes = await api.get('/auth/me');
               if (meRes.success && meRes.data?.user) {
-                return {
-                  user: meRes.data.user,
-                  organization: meRes.data.organization || null,
-                };
+                return { user: meRes.data.user };
               }
             } catch {
               // Not authenticated
@@ -121,10 +113,8 @@ export function AuthProvider({ children }) {
           }
           if (result?.user) {
             setUser(result.user);
-            setOrganization(result.organization || null);
           } else {
             setUser(null);
-            setOrganization(null);
             clearToken();
           }
         }
@@ -191,7 +181,6 @@ export function AuthProvider({ children }) {
       // Even if logout request fails, clear local state
     }
     setUser(null);
-    setOrganization(null);
     clearToken();
     tokenRef.current = null;
     setLoading(false);
@@ -211,7 +200,6 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
-    organization,
     loading,
     isAuthenticated: !!user,
     role: user?.role || null,
@@ -250,8 +238,10 @@ export function getDashboardPath(role) {
     case 'super_admin':
       return '/dashboard/super-admin';
     case 'user':
-      return '/portal';
     default:
+      // A Contact is not a member of staff. Their landing place is the
+      // portal — their own invoices, bills and payments — never the
+      // organization-wide dashboard (project.md §3).
       return '/portal';
   }
 }

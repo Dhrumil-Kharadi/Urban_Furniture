@@ -1,114 +1,117 @@
-'use strict';
-
-const journalsService = require('./journals.service');
-const { validateCreateJournal, validateUpdateJournal } = require('./journals.validation');
 const { success, created, error } = require('../utils/response');
+const journalsValidation = require('./journals.validation');
+const journalsService = require('./journals.service');
 
 /**
- * List journals.
+ * Journals Controller
+ *
+ * Reads the request, validates, delegates, responds. No SQL, no rules.
  */
-async function listJournals(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const result = await journalsService.listJournals(orgId, req.query);
-    return success(res, 'Journals retrieved successfully', result);
-  } catch (err) {
-    next(err);
-  }
-}
 
-/**
- * Get single journal by ID.
- */
-async function getJournalById(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const { id } = req.params;
-    const journal = await journalsService.getJournalById(orgId, id);
-    return success(res, 'Journal retrieved successfully', journal);
-  } catch (err) {
-    next(err);
-  }
-}
+const journalsController = {
+  /** GET /api/journals */
+  async listJournals(req, res, next) {
+    try {
+      const validation = journalsValidation.validateListQuery(req.query);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
 
-/**
- * Create new journal.
- */
-async function createJournal(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const userId = req.user?.id;
+      const result = await journalsService.listJournals(req.organizationId, {
+        ...req.query,
+        ...validation.data,
+      });
 
-    const validation = validateCreateJournal(req.body);
-    if (!validation.isValid) {
-      return error(res, validation.errors[0] || 'Validation failed', 400, validation.errors);
+      return success(res, 'Journals retrieved successfully', result);
+    } catch (err) {
+      next(err);
     }
+  },
 
-    const journal = await journalsService.createJournal(orgId, userId, validation.data);
-    return created(res, 'Journal created successfully', journal);
-  } catch (err) {
-    next(err);
-  }
-}
-
-/**
- * Update journal.
- */
-async function updateJournal(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const userId = req.user?.id;
-    const { id } = req.params;
-
-    const validation = validateUpdateJournal(req.body);
-    if (!validation.isValid) {
-      return error(res, validation.errors[0] || 'Validation failed', 400, validation.errors);
+  /** GET /api/journals/:id */
+  async getJournal(req, res, next) {
+    try {
+      const journal = await journalsService.getJournal(req.organizationId, req.params.id);
+      return success(res, 'Journal retrieved successfully', { journal });
+    } catch (err) {
+      next(err);
     }
+  },
 
-    const updated = await journalsService.updateJournal(orgId, id, userId, validation.data);
-    return success(res, 'Journal updated successfully', updated);
-  } catch (err) {
-    next(err);
-  }
-}
+  /** POST /api/journals */
+  async createJournal(req, res, next) {
+    try {
+      const validation = journalsValidation.validateCreate(req.body);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
 
-/**
- * Archive journal.
- */
-async function archiveJournal(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const userId = req.user?.id;
-    const { id } = req.params;
+      const journal = await journalsService.createJournal({
+        organizationId: req.organizationId,
+        actorUserId: req.user.id,
+        data: validation.data,
+        ipAddress: req.ip,
+      });
 
-    const archived = await journalsService.archiveJournal(orgId, id, userId);
-    return success(res, 'Journal archived successfully', archived);
-  } catch (err) {
-    next(err);
-  }
-}
+      return created(res, 'Journal created successfully', { journal });
+    } catch (err) {
+      next(err);
+    }
+  },
 
-/**
- * Unarchive journal.
- */
-async function unarchiveJournal(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const userId = req.user?.id;
-    const { id } = req.params;
+  /** PATCH /api/journals/:id */
+  async updateJournal(req, res, next) {
+    try {
+      const validation = journalsValidation.validateUpdate(req.body);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
 
-    const unarchived = await journalsService.unarchiveJournal(orgId, id, userId);
-    return success(res, 'Journal unarchived successfully', unarchived);
-  } catch (err) {
-    next(err);
-  }
-}
+      const journal = await journalsService.updateJournal({
+        organizationId: req.organizationId,
+        actorUserId: req.user.id,
+        journalId: req.params.id,
+        data: validation.data,
+        ipAddress: req.ip,
+      });
 
-module.exports = {
-  listJournals,
-  getJournalById,
-  createJournal,
-  updateJournal,
-  archiveJournal,
-  unarchiveJournal,
+      return success(res, 'Journal updated successfully', { journal });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /** PATCH /api/journals/:id/archive */
+  async archiveJournal(req, res, next) {
+    try {
+      const journal = await journalsService.archiveJournal({
+        organizationId: req.organizationId,
+        actorUserId: req.user.id,
+        journalId: req.params.id,
+        ipAddress: req.ip,
+      });
+
+      return success(res, 'Journal archived successfully', { journal });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /** PATCH /api/journals/:id/unarchive */
+  async unarchiveJournal(req, res, next) {
+    try {
+      const journal = await journalsService.unarchiveJournal({
+        organizationId: req.organizationId,
+        actorUserId: req.user.id,
+        journalId: req.params.id,
+        ipAddress: req.ip,
+      });
+
+      return success(res, 'Journal restored successfully', { journal });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
+
+module.exports = journalsController;

@@ -17,7 +17,7 @@
 
 import { NextIntlClientProvider } from 'next-intl';
 import { AuthProvider } from '@/context/AuthContext';
-import { ToastProvider } from '@/components/shared';
+import { ToastProvider } from '@/context/ToastContext';
 
 /**
  * @param {object} props

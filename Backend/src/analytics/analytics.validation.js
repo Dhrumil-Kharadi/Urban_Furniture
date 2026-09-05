@@ -1,119 +1,145 @@
-'use strict';
-
-const { ANALYTIC_TYPES } = require('../shared/constants');
-
-const VALID_ANALYTIC_TYPES = Object.values(ANALYTIC_TYPES);
-
 /**
- * Validate create analytic account payload.
+ * Analytic Accounts Validation
+ *
+ * Pure functions returning { isValid, errors, data? }.
  */
-function validateCreateAnalyticAccount(payload = {}) {
-  const errors = [];
-  const { name, code, analytic_type, type, department_or_project, department } = payload;
 
-  if (!name || typeof name !== 'string' || name.trim().length < 2) {
-    errors.push('Analytic account name must be at least 2 characters');
-  } else if (name.trim().length > 150) {
-    errors.push('Analytic account name cannot exceed 150 characters');
-  }
+const { ANALYTIC_TYPES, ANALYTIC_STATUS } = require('../shared/constants');
 
-  const rawType = analytic_type || type;
-  const normalizedType = rawType ? String(rawType).toLowerCase().trim() : '';
-  if (!normalizedType || !VALID_ANALYTIC_TYPES.includes(normalizedType)) {
-    errors.push(`Analytic type must be one of: ${VALID_ANALYTIC_TYPES.join(', ')}`);
-  }
+const TYPES = Object.values(ANALYTIC_TYPES);
+const STATUSES = Object.values(ANALYTIC_STATUS);
 
-  let validCode = null;
-  if (code !== undefined && code !== null && code !== '') {
-    if (typeof code !== 'string' || code.trim().length > 50) {
-      errors.push('Code cannot exceed 50 characters');
-    } else {
-      validCode = code.trim();
-    }
-  }
+/** Codes are short handles: letters, digits and dot/dash separators. */
+const CODE_REGEX = /^[A-Za-z0-9][A-Za-z0-9.-]{0,49}$/;
 
-  const rawDept = department_or_project || department;
-  let validDept = null;
-  if (rawDept !== undefined && rawDept !== null && rawDept !== '') {
-    if (typeof rawDept !== 'string' || rawDept.trim().length > 100) {
-      errors.push('Department or project cannot exceed 100 characters');
-    } else {
-      validDept = rawDept.trim();
-    }
-  }
-
-  if (errors.length > 0) {
-    return { isValid: false, errors };
-  }
-
-  return {
-    isValid: true,
-    errors: [],
-    data: {
-      name: name.trim(),
-      code: validCode,
-      analytic_type: normalizedType,
-      department_or_project: validDept,
-    },
-  };
+/** @private */
+function optionalText(value) {
+  if (value === undefined || value === null) return null;
+  const trimmed = String(value).trim();
+  return trimmed.length ? trimmed : null;
 }
 
-/**
- * Validate update analytic account payload.
- */
-function validateUpdateAnalyticAccount(payload = {}) {
-  const errors = [];
+/** @private */
+function checkFields(body, errors, partial) {
   const data = {};
 
-  if (payload.name !== undefined) {
-    if (!payload.name || typeof payload.name !== 'string' || payload.name.trim().length < 2) {
-      errors.push('Analytic account name must be at least 2 characters');
-    } else if (payload.name.trim().length > 150) {
-      errors.push('Analytic account name cannot exceed 150 characters');
+  // ── name ──
+  if (body.name !== undefined || !partial) {
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
+    if (!name) {
+      errors.push('Name is required');
+    } else if (name.length < 2 || name.length > 150) {
+      errors.push('Name must be between 2 and 150 characters');
     } else {
-      data.name = payload.name.trim();
+      data.name = name;
     }
   }
 
-  const rawType = payload.analytic_type || payload.type;
-  if (rawType !== undefined) {
-    const normalizedType = String(rawType).toLowerCase().trim();
-    if (!VALID_ANALYTIC_TYPES.includes(normalizedType)) {
-      errors.push(`Analytic type must be one of: ${VALID_ANALYTIC_TYPES.join(', ')}`);
+  // ── analytic_type ──
+  if (body.analytic_type !== undefined || !partial) {
+    if (!TYPES.includes(body.analytic_type)) {
+      errors.push(`Type is required and must be one of: ${TYPES.join(', ')}`);
     } else {
-      data.analytic_type = normalizedType;
+      data.analytic_type = body.analytic_type;
     }
   }
 
-  if (payload.code !== undefined) {
-    if (payload.code === null || payload.code === '') {
+  // ── code ──
+  if (body.code !== undefined) {
+    const code = optionalText(body.code);
+    if (code === null) {
       data.code = null;
-    } else if (typeof payload.code !== 'string' || payload.code.trim().length > 50) {
-      errors.push('Code cannot exceed 50 characters');
+    } else if (!CODE_REGEX.test(code)) {
+      errors.push('Code may contain only letters, digits, dot and dash');
     } else {
-      data.code = payload.code.trim();
+      data.code = code.toUpperCase();
     }
   }
 
-  const rawDept = payload.department_or_project || payload.department;
-  if (rawDept !== undefined) {
-    if (rawDept === null || rawDept === '') {
-      data.department_or_project = null;
-    } else if (typeof rawDept !== 'string' || rawDept.trim().length > 100) {
-      errors.push('Department or project cannot exceed 100 characters');
+  // ── department ── the optional descriptive field of project.md §4.6
+  if (body.department !== undefined) {
+    const department = optionalText(body.department);
+    if (department !== null && department.length > 150) {
+      errors.push('Department must not exceed 150 characters');
     } else {
-      data.department_or_project = rawDept.trim();
+      data.department = department;
     }
   }
 
-  if (errors.length > 0) {
-    return { isValid: false, errors };
-  }
-
-  return { isValid: true, errors: [], data };
+  return data;
 }
 
-module.exports = {
-  validateCreateAnalyticAccount,
-  validateUpdateAnalyticAccount,
+const analyticsValidation = {
+  /**
+   * @param {object} body
+   * @returns {{ isValid: boolean, errors: string[], data?: object }}
+   */
+  validateCreate(body) {
+    if (!body || typeof body !== 'object') {
+      return { isValid: false, errors: ['Request body must be a JSON object'] };
+    }
+
+    const errors = [];
+    const data = checkFields(body, errors, false);
+
+    if (errors.length > 0) return { isValid: false, errors };
+
+    return {
+      isValid: true,
+      errors: [],
+      data: {
+        name: data.name,
+        analytic_type: data.analytic_type,
+        code: data.code ?? null,
+        department: data.department ?? null,
+      },
+    };
+  },
+
+  /**
+   * @param {object} body
+   * @returns {{ isValid: boolean, errors: string[], data?: object }}
+   */
+  validateUpdate(body) {
+    if (!body || typeof body !== 'object') {
+      return { isValid: false, errors: ['Request body must be a JSON object'] };
+    }
+
+    const errors = [];
+    const data = checkFields(body, errors, true);
+
+    if (errors.length === 0 && Object.keys(data).length === 0) {
+      errors.push('No updatable fields were provided');
+    }
+
+    if (errors.length > 0) return { isValid: false, errors };
+
+    return { isValid: true, errors: [], data };
+  },
+
+  /**
+   * @param {object} query
+   * @returns {{ isValid: boolean, errors: string[], data?: object }}
+   */
+  validateListQuery(query = {}) {
+    const errors = [];
+
+    if (query.status !== undefined && query.status !== '' && !STATUSES.includes(query.status)) {
+      errors.push(`Status filter must be one of: ${STATUSES.join(', ')}`);
+    }
+
+    if (query.type !== undefined && query.type !== '' && !TYPES.includes(query.type)) {
+      errors.push(`Type filter must be one of: ${TYPES.join(', ')}`);
+    }
+
+    if (errors.length > 0) return { isValid: false, errors };
+
+    return {
+      isValid: true,
+      errors: [],
+      data: { status: query.status || null, type: query.type || null },
+    };
+  },
 };
+
+module.exports = analyticsValidation;

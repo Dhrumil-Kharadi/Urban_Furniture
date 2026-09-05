@@ -1,144 +1,167 @@
-'use strict';
-
-const { JOURNAL_TYPES } = require('../shared/constants');
-
-const VALID_TYPES = Object.values(JOURNAL_TYPES);
-
 /**
- * Validate create journal payload.
+ * Journals Validation
+ *
+ * Pure functions returning { isValid, errors, data? }.
  */
-function validateCreateJournal(payload = {}) {
-  const errors = [];
-  const {
-    name,
-    journal_type,
-    default_debit_account_id,
-    default_credit_account_id,
-    sequence_prefix,
-  } = payload;
 
-  if (!name || typeof name !== 'string' || name.trim().length < 2) {
-    errors.push('Journal name must be at least 2 characters');
-  } else if (name.trim().length > 100) {
-    errors.push('Journal name cannot exceed 100 characters');
-  }
+const { JOURNAL_TYPES, JOURNAL_STATUS } = require('../shared/constants');
 
-  const normalizedType = journal_type ? String(journal_type).toLowerCase().trim() : '';
-  if (!normalizedType || !VALID_TYPES.includes(normalizedType)) {
-    errors.push(`Journal type must be one of: ${VALID_TYPES.join(', ')}`);
-  }
+const TYPES = Object.values(JOURNAL_TYPES);
+const STATUSES = Object.values(JOURNAL_STATUS);
 
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-  let validDebitAcc = null;
-  if (default_debit_account_id !== undefined && default_debit_account_id !== null && default_debit_account_id !== '') {
-    if (!uuidRegex.test(default_debit_account_id)) {
-      errors.push('Default debit account ID must be a valid UUID');
-    } else {
-      validDebitAcc = default_debit_account_id;
-    }
-  }
+/** Sequence prefixes appear in document numbers, so they stay short and plain. */
+const PREFIX_REGEX = /^[A-Za-z0-9-]{1,10}$/;
 
-  let validCreditAcc = null;
-  if (default_credit_account_id !== undefined && default_credit_account_id !== null && default_credit_account_id !== '') {
-    if (!uuidRegex.test(default_credit_account_id)) {
-      errors.push('Default credit account ID must be a valid UUID');
-    } else {
-      validCreditAcc = default_credit_account_id;
-    }
-  }
-
-  let validPrefix = null;
-  if (sequence_prefix !== undefined && sequence_prefix !== null && sequence_prefix !== '') {
-    if (typeof sequence_prefix !== 'string' || sequence_prefix.trim().length > 10) {
-      errors.push('Sequence prefix cannot exceed 10 characters');
-    } else {
-      validPrefix = sequence_prefix.trim().toUpperCase();
-    }
-  }
-
-  if (errors.length > 0) {
-    return { isValid: false, errors };
-  }
-
-  return {
-    isValid: true,
-    errors: [],
-    data: {
-      name: name.trim(),
-      journal_type: normalizedType,
-      default_debit_account_id: validDebitAcc,
-      default_credit_account_id: validCreditAcc,
-      sequence_prefix: validPrefix,
-    },
-  };
+/** @private */
+function optionalText(value) {
+  if (value === undefined || value === null) return null;
+  const trimmed = String(value).trim();
+  return trimmed.length ? trimmed : null;
 }
 
 /**
- * Validate update journal payload.
+ * Validate an optional default-account reference. Existence, tenancy and
+ * active status are the service's job; only the shape is decided here.
+ * @private
  */
-function validateUpdateJournal(payload = {}) {
-  const errors = [];
+function checkAccountRef(field, label, value, errors, data) {
+  if (value === undefined) return;
+
+  const id = optionalText(value);
+  if (id === null) {
+    data[field] = null;
+    return;
+  }
+
+  if (!UUID_REGEX.test(id)) {
+    errors.push(`${label} must be a valid id`);
+    return;
+  }
+
+  data[field] = id;
+}
+
+/** @private */
+function checkFields(body, errors, partial) {
   const data = {};
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-  if (payload.name !== undefined) {
-    if (!payload.name || typeof payload.name !== 'string' || payload.name.trim().length < 2) {
-      errors.push('Journal name must be at least 2 characters');
-    } else if (payload.name.trim().length > 100) {
-      errors.push('Journal name cannot exceed 100 characters');
+  // ── name ──
+  if (body.name !== undefined || !partial) {
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
+    if (!name) {
+      errors.push('Name is required');
+    } else if (name.length < 2 || name.length > 100) {
+      errors.push('Name must be between 2 and 100 characters');
     } else {
-      data.name = payload.name.trim();
+      data.name = name;
     }
   }
 
-  if (payload.journal_type !== undefined) {
-    const normalizedType = String(payload.journal_type).toLowerCase().trim();
-    if (!VALID_TYPES.includes(normalizedType)) {
-      errors.push(`Journal type must be one of: ${VALID_TYPES.join(', ')}`);
+  // ── journal_type ──
+  if (body.journal_type !== undefined || !partial) {
+    if (!TYPES.includes(body.journal_type)) {
+      errors.push(`Type is required and must be one of: ${TYPES.join(', ')}`);
     } else {
-      data.journal_type = normalizedType;
+      data.journal_type = body.journal_type;
     }
   }
 
-  if (payload.default_debit_account_id !== undefined) {
-    if (payload.default_debit_account_id === null || payload.default_debit_account_id === '') {
-      data.default_debit_account_id = null;
-    } else if (!uuidRegex.test(payload.default_debit_account_id)) {
-      errors.push('Default debit account ID must be a valid UUID');
-    } else {
-      data.default_debit_account_id = payload.default_debit_account_id;
-    }
-  }
-
-  if (payload.default_credit_account_id !== undefined) {
-    if (payload.default_credit_account_id === null || payload.default_credit_account_id === '') {
-      data.default_credit_account_id = null;
-    } else if (!uuidRegex.test(payload.default_credit_account_id)) {
-      errors.push('Default credit account ID must be a valid UUID');
-    } else {
-      data.default_credit_account_id = payload.default_credit_account_id;
-    }
-  }
-
-  if (payload.sequence_prefix !== undefined) {
-    if (payload.sequence_prefix === null || payload.sequence_prefix === '') {
+  // ── sequence_prefix ──
+  if (body.sequence_prefix !== undefined) {
+    const prefix = optionalText(body.sequence_prefix);
+    if (prefix === null) {
       data.sequence_prefix = null;
-    } else if (typeof payload.sequence_prefix !== 'string' || payload.sequence_prefix.trim().length > 10) {
-      errors.push('Sequence prefix cannot exceed 10 characters');
+    } else if (!PREFIX_REGEX.test(prefix)) {
+      errors.push('Sequence prefix may contain up to 10 letters, digits or dashes');
     } else {
-      data.sequence_prefix = payload.sequence_prefix.trim().toUpperCase();
+      data.sequence_prefix = prefix.toUpperCase();
     }
   }
 
-  if (errors.length > 0) {
-    return { isValid: false, errors };
-  }
+  checkAccountRef(
+    'default_debit_account_id', 'Default debit account', body.default_debit_account_id, errors, data
+  );
+  checkAccountRef(
+    'default_credit_account_id', 'Default credit account', body.default_credit_account_id, errors, data
+  );
 
-  return { isValid: true, errors: [], data };
+  return data;
 }
 
-module.exports = {
-  validateCreateJournal,
-  validateUpdateJournal,
+const journalsValidation = {
+  /**
+   * @param {object} body
+   * @returns {{ isValid: boolean, errors: string[], data?: object }}
+   */
+  validateCreate(body) {
+    if (!body || typeof body !== 'object') {
+      return { isValid: false, errors: ['Request body must be a JSON object'] };
+    }
+
+    const errors = [];
+    const data = checkFields(body, errors, false);
+
+    if (errors.length > 0) return { isValid: false, errors };
+
+    return {
+      isValid: true,
+      errors: [],
+      data: {
+        name: data.name,
+        journal_type: data.journal_type,
+        sequence_prefix: data.sequence_prefix ?? null,
+        default_debit_account_id: data.default_debit_account_id ?? null,
+        default_credit_account_id: data.default_credit_account_id ?? null,
+      },
+    };
+  },
+
+  /**
+   * @param {object} body
+   * @returns {{ isValid: boolean, errors: string[], data?: object }}
+   */
+  validateUpdate(body) {
+    if (!body || typeof body !== 'object') {
+      return { isValid: false, errors: ['Request body must be a JSON object'] };
+    }
+
+    const errors = [];
+    const data = checkFields(body, errors, true);
+
+    if (errors.length === 0 && Object.keys(data).length === 0) {
+      errors.push('No updatable fields were provided');
+    }
+
+    if (errors.length > 0) return { isValid: false, errors };
+
+    return { isValid: true, errors: [], data };
+  },
+
+  /**
+   * @param {object} query
+   * @returns {{ isValid: boolean, errors: string[], data?: object }}
+   */
+  validateListQuery(query = {}) {
+    const errors = [];
+
+    if (query.status !== undefined && query.status !== '' && !STATUSES.includes(query.status)) {
+      errors.push(`Status filter must be one of: ${STATUSES.join(', ')}`);
+    }
+
+    if (query.type !== undefined && query.type !== '' && !TYPES.includes(query.type)) {
+      errors.push(`Type filter must be one of: ${TYPES.join(', ')}`);
+    }
+
+    if (errors.length > 0) return { isValid: false, errors };
+
+    return {
+      isValid: true,
+      errors: [],
+      data: { status: query.status || null, type: query.type || null },
+    };
+  },
 };
+
+module.exports = journalsValidation;

@@ -1,0 +1,734 @@
+/* ============================================================
+   FILE: src/styles/masterdata.css
+
+   Contacts, Products and Product Categories — the list, form and detail
+   surfaces they share.
+
+   Every colour here is a var(--*) defined in globals.css :root. No hex, no
+   rgb(), no new hues: this file introduces no colour of its own, it only
+   arranges the ones the Frozen Lake palette already carries.
+
+   Fonts are Orbitron (headings, numbers, badges) and Sora (body, labels,
+   controls) with their fallbacks, per strict.md §4.
+   ============================================================ */
+
+/* ── Page scaffolding ──────────────────────────────────── */
+
+.md-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.md-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  box-shadow: 8px 8px 16px var(--nm-shadow-dark),
+              -4px -4px 10px var(--nm-shadow-light);
+  overflow: hidden;
+}
+
+.md-panel-body {
+  padding: 18px 20px;
+}
+
+/* ── Toolbar: search, filters, actions ─────────────────── */
+
+.md-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--dash-divider);
+}
+
+.md-toolbar-search {
+  flex: 1 1 240px;
+  min-width: 180px;
+}
+
+.md-toolbar-filter {
+  flex: 0 1 170px;
+  min-width: 140px;
+}
+
+.md-toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.md-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Table region ──────────────────────────────────────── */
+
+/* A refetch dims the table it is replacing instead of swapping it for
+   skeletons, so the row the user was reading does not jump. */
+.md-table-region {
+  transition: opacity 160ms ease;
+}
+
+.md-table-region.is-refreshing {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.md-cell-strong {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.md-cell-muted {
+  color: var(--text-secondary);
+}
+
+/* Money is right-aligned and tabular so decimal points line up down the
+   column — the only way a price column can be scanned. */
+.md-cell-money {
+  font-family: 'Orbitron', monospace;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.md-cell-code {
+  font-family: 'Orbitron', monospace;
+  font-weight: 400;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.md-row-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+/* ── Skeleton rows ─────────────────────────────────────── */
+
+.md-skeleton-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px;
+}
+
+.md-skeleton-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+/* ── Empty / error states ──────────────────────────────── */
+
+.md-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 54px 24px;
+  text-align: center;
+}
+
+.md-state-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.md-state-body {
+  font-family: 'Sora', sans-serif;
+  font-weight: 300;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 34ch;
+}
+
+.md-state-action {
+  margin-top: 6px;
+}
+
+/* ── Pagination ────────────────────────────────────────── */
+
+.md-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--dash-divider);
+}
+
+.md-pagination-summary {
+  font-family: 'Sora', sans-serif;
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.md-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.md-pagination-page {
+  font-family: 'Orbitron', monospace;
+  font-weight: 600;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Forms ─────────────────────────────────────────────── */
+
+.md-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.md-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.md-form-grid .is-full {
+  grid-column: 1 / -1;
+}
+
+.md-form-section-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 600;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0 0 2px;
+}
+
+.md-form-hint {
+  font-family: 'Sora', sans-serif;
+  font-weight: 300;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin: 4px 0 0;
+}
+
+.md-form-error {
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  font-size: 0.78rem;
+  color: var(--dash-danger-text);
+  margin: 0;
+}
+
+.md-form-errors {
+  list-style: none;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border-medium);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  box-shadow: inset 4px 4px 8px var(--nm-inset-dark),
+              inset -3px -3px 6px var(--nm-inset-light);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.md-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+/* Checkbox row — the toggle for portal access. */
+.md-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--bg-surface);
+}
+
+.md-check input {
+  margin-top: 3px;
+  accent-color: var(--accent-primary);
+}
+
+.md-check-label {
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.md-check-hint {
+  font-family: 'Sora', sans-serif;
+  font-weight: 300;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin: 3px 0 0;
+}
+
+/* ── Detail page ───────────────────────────────────────── */
+
+.md-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.md-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 12px 20px 0;
+  border-bottom: 1px solid var(--dash-divider);
+  overflow-x: auto;
+}
+
+.md-tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  padding: 9px 14px;
+  border-radius: 6px 6px 0 0;
+  white-space: nowrap;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.md-tab:hover {
+  background: var(--dash-nav-hover-bg);
+  color: var(--text-primary);
+}
+
+.md-tab.is-active {
+  color: var(--dash-nav-active-text);
+  background: var(--dash-nav-active-bg);
+  box-shadow: inset 0 -2px 0 var(--dash-nav-rail);
+}
+
+.md-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 20px;
+}
+
+.md-fact-label {
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 3px;
+}
+
+.md-fact-value {
+  font-family: 'Sora', sans-serif;
+  font-weight: 400;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  margin: 0;
+  word-break: break-word;
+}
+
+.md-fact-value.is-money {
+  font-family: 'Orbitron', monospace;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Profile image ─────────────────────────────────────── */
+
+.md-avatar-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.md-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-subtle);
+  box-shadow: 6px 6px 12px var(--nm-shadow-dark),
+              -3px -3px 8px var(--nm-shadow-light);
+}
+
+.md-avatar-fallback {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--dash-brand-mark-bg);
+  border: 1px solid var(--dash-brand-mark-border);
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--accent-primary);
+}
+
+/* The native file input is replaced by a labelled button; the input itself
+   stays in the DOM for keyboard and screen-reader users. */
+.md-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Portal access panel ───────────────────────────────── */
+
+.md-portal-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.md-portal-note {
+  font-family: 'Sora', sans-serif;
+  font-weight: 300;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+/* ── Toasts ────────────────────────────────────────────── */
+
+.ui-toast-stack {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: min(360px, calc(100vw - 40px));
+}
+
+.ui-toast {
+  appearance: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  font-size: 0.82rem;
+  padding: 11px 15px;
+  border-radius: 12px;
+  border: 1px solid var(--dash-on-deep-border);
+  background: var(--dash-tip-bg);
+  color: var(--dash-tip-text);
+  box-shadow: 8px 8px 18px var(--dash-deep-shadow);
+}
+
+.ui-toast-soft {
+  border-color: var(--border-medium);
+  background: var(--bg-card);
+  color: var(--dash-danger-text);
+  box-shadow: 8px 8px 16px var(--nm-shadow-dark),
+              -4px -4px 10px var(--nm-shadow-light);
+}
+
+/* ── Portal landing ────────────────────────────────────── */
+
+.md-portal-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  background: var(--bg-base);
+}
+
+.md-portal-card {
+  width: min(560px, 100%);
+  padding: 32px;
+  border-radius: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 8px 8px 16px var(--nm-shadow-dark),
+              -4px -4px 10px var(--nm-shadow-light);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.md-portal-title {
+  font-family: 'Orbitron', monospace;
+  font-weight: 900;
+  font-size: 1.8rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.md-portal-sub {
+  font-family: 'Sora', sans-serif;
+  font-weight: 300;
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ── Responsive (phase.md §Responsive contract) ────────── */
+
+@media (max-width: 1023px) {
+  .md-detail-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .md-form-grid,
+  .md-facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .md-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .md-toolbar-actions {
+    justify-content: flex-end;
+  }
+
+  .md-pagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .md-pagination-controls {
+    justify-content: space-between;
+  }
+}
+
+/* ============================================================
+   LEDGER — journal entry line grid and balance indicator (Phase 7)
+
+   A NOTE ON "RED": the phase brief asks for a footer that "stays red until
+   the two sides match". The Frozen Lake palette has no red, and strict.md §1.4
+   forbids introducing a hue outside it. The unbalanced state is therefore
+   carried by weight, an inset pressed treatment, a dot, the explicit
+   difference amount and the wording — using the existing --dash-danger-text
+   slate. It is unmistakable without inventing a colour the design system does
+   not own. Flagged for the design owner.
+   ============================================================ */
+
+.md-line-grid {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.md-line-grid th {
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: left;
+  padding: 0 8px 8px;
+  white-space: nowrap;
+}
+
+.md-line-grid th.is-amount {
+  text-align: right;
+}
+
+.md-line-grid td {
+  padding: 5px 8px;
+  vertical-align: top;
+  border-top: 1px solid var(--dash-divider);
+}
+
+.md-line-no {
+  font-family: 'Orbitron', monospace;
+  font-weight: 600;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  padding-top: 14px;
+}
+
+.md-line-amount input {
+  text-align: right;
+  font-family: 'Orbitron', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.md-line-actions {
+  width: 44px;
+  text-align: right;
+}
+
+/* Below the table breakpoint the grid becomes stacked cards, per the
+   responsive contract — a six-column entry grid is unusable at 375px. */
+.md-line-cards {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.md-line-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.md-line-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── Totals footer ─────────────────────────────────────── */
+
+.md-entry-totals {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 24px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  box-shadow: 8px 8px 16px var(--nm-shadow-dark),
+              -4px -4px 10px var(--nm-shadow-light);
+  transition: box-shadow 180ms ease, border-color 180ms ease;
+}
+
+/* Unbalanced: pressed inward and outlined, so it reads as a problem the
+   reader has to resolve rather than a number they can skim past. */
+.md-entry-totals.is-unbalanced {
+  border-color: var(--dash-ghost-border);
+  box-shadow: inset 4px 4px 8px var(--nm-inset-dark),
+              inset -3px -3px 6px var(--nm-inset-light);
+}
+
+.md-total-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.md-total-label {
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.md-total-value {
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.md-total-value.is-off {
+  color: var(--dash-danger-text);
+}
+
+.md-total-state {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+
+.md-total-state.is-balanced {
+  color: var(--dash-state-strong);
+}
+
+.md-total-state.is-unbalanced {
+  color: var(--dash-danger-text);
+}
+
+.md-total-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.md-entry-warning {
+  font-family: 'Sora', sans-serif;
+  font-weight: 500;
+  font-size: 0.78rem;
+  color: var(--dash-danger-text);
+  margin: 8px 0 0;
+}
+
+/* ── Entry detail lines ────────────────────────────────── */
+
+.md-entry-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 767px) {
+  .md-line-grid {
+    display: none;
+  }
+
+  .md-line-cards {
+    display: flex;
+  }
+
+  .md-entry-totals {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .md-total-state {
+    margin-left: 0;
+  }
+}

@@ -26,17 +26,14 @@ function errorMiddleware(err, req, res, next) {
   });
 
   // 1️⃣ AppError (or subclass)
-  if (err instanceof AppError || err.name === 'AppError') {
-    const status = err.status || err.statusCode || 500;
-    return res.status(status).json({
+  if (err instanceof AppError) {
+    return res.status(err.status).json({
       success: false,
-      message: err.message,
       error: {
         code: err.code,
         message: err.message,
         ...(Object.keys(err.details || {}).length > 0 ? { details: err.details } : {}),
       },
-      errors: [err.message],
     });
   }
 
@@ -44,12 +41,10 @@ function errorMiddleware(err, req, res, next) {
   if (typeof err.statusCode === 'number') {
     return res.status(err.statusCode).json({
       success: false,
-      message: err.message || 'An error occurred',
       error: {
         code: err.code || 'ERROR',
         message: err.message || 'An error occurred',
       },
-      errors: [err.message || 'An error occurred'],
     });
   }
 

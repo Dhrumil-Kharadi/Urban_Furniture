@@ -275,19 +275,6 @@
       "submittingButton": "Resetting…",
       "backToLogin": "Back to sign in"
     },
-    "setPassword": {
-      "title": "Set Your Password",
-      "subtitle": "Welcome to the team! Create a strong password for your invited account.",
-      "passwordLabel": "New Password",
-      "passwordPlaceholder": "••••••••",
-      "confirmPasswordLabel": "Confirm Password",
-      "confirmPasswordPlaceholder": "••••••••",
-      "submitButton": "Set Password & Sign In",
-      "submittingButton": "Setting password…",
-      "successTitle": "Password Set Successfully",
-      "successMessage": "Your account has been activated. Redirecting to sign in...",
-      "goToLogin": "Back to sign in"
-    },
     "verifyResetOtp": {
       "title": "Verify Reset Code",
       "subtitle": "Enter the 6-digit code sent to your email to continue.",
@@ -444,9 +431,10 @@
       "statements": "Statement",
       "settings": "Settings",
       "help": "Help",
-      "journalEntries": "Journal Entries",
-      "taxes": "Tax Rates",
-      "analyticAccounts": "Analytic Accounts"
+      "productCategories": "Product categories",
+      "taxes": "Taxes",
+      "analyticAccounts": "Analytic accounts",
+      "journalEntries": "Journal entries"
     },
     "promo": {
       "title": "Your books on",
@@ -593,455 +581,499 @@
       "protectedRoot": "Protected root"
     }
   },
-  "common": {
+  "masterData": {
     "actions": {
-      "save": "Save",
-      "cancel": "Cancel",
-      "delete": "Delete",
-      "archive": "Archive",
-      "restore": "Restore",
       "create": "Create",
-      "new": "New",
       "edit": "Edit",
-      "view": "View",
-      "print": "Print",
-      "download": "Download",
-      "export": "Export",
-      "import": "Import",
-      "confirm": "Confirm",
-      "close": "Close",
-      "post": "Post Entry",
-      "reset": "Reset",
-      "filter": "Filter",
-      "clearFilters": "Clear Filters",
-      "search": "Search",
-      "searchPlaceholder": "Search records…",
-      "refresh": "Refresh",
-      "back": "Back",
-      "retry": "Retry",
-      "submit": "Submit",
-      "submitting": "Submitting…",
+      "save": "Save",
       "saving": "Saving…",
-      "loading": "Loading…",
-      "payNow": "Pay Now",
-      "allocate": "Allocate"
+      "cancel": "Cancel",
+      "archive": "Archive",
+      "unarchive": "Restore",
+      "back": "Back",
+      "retry": "Try again",
+      "clearFilters": "Clear filters",
+      "upload": "Upload image",
+      "uploading": "Uploading…",
+      "view": "View"
+    },
+    "filters": {
+      "search": "Search",
+      "status": "Status",
+      "type": "Type",
+      "category": "Category",
+      "all": "All",
+      "none": "None"
     },
     "status": {
-      "draft": "Draft",
-      "posted": "Posted",
-      "cancelled": "Cancelled",
-      "unpaid": "Unpaid",
-      "partiallyPaid": "Partially Paid",
-      "paid": "Paid",
-      "overdue": "Overdue",
       "active": "Active",
-      "inactive": "Inactive",
-      "archived": "Archived",
-      "open": "Open",
-      "closed": "Closed",
-      "pending": "Pending",
-      "confirmed": "Confirmed"
+      "archived": "Archived"
     },
-    "table": {
-      "loading": "Loading records…",
-      "empty": "No records found.",
-      "emptyFiltered": "No records match your filters.",
-      "showing": "Showing {start} to {end} of {total} records",
-      "rowsPerPage": "Rows per page",
-      "actions": "Actions",
-      "selectAll": "Select All"
+    "pagination": {
+      "summary": "Showing {from}–{to} of {total}",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page} of {totalPages}"
     },
-    "validation": {
-      "required": "This field is required",
-      "invalidEmail": "Invalid email address",
-      "invalidNumber": "Must be a valid number",
-      "invalidDate": "Must be a valid date",
-      "positiveNumber": "Must be greater than zero",
-      "nonNegative": "Cannot be negative"
+    "states": {
+      "loading": "Loading…",
+      "emptyTitle": "Nothing here yet",
+      "emptyBody": "Create the first record to get started.",
+      "noMatchTitle": "No matches",
+      "noMatchBody": "No records match the current filters.",
+      "errorTitle": "That didn't load",
+      "errorBody": "Something went wrong while fetching this list.",
+      "notFound": "Record not found"
     },
     "toast": {
-      "success": "Operation completed successfully",
-      "error": "An error occurred",
-      "saved": "Changes saved successfully",
-      "deleted": "Record deleted",
-      "created": "Record created successfully"
+      "created": "Created successfully",
+      "updated": "Saved successfully",
+      "archived": "Archived successfully",
+      "unarchived": "Restored successfully",
+      "error": "Something went wrong"
+    },
+    "form": {
+      "required": "Required",
+      "optional": "Optional",
+      "adminOnly": "Only the business owner can change this."
     }
   },
   "contacts": {
+    "badge": "Master data",
     "title": "Contacts",
-    "subtitle": "Manage customers, vendors, and business partners",
-    "createContact": "New Contact",
-    "editContact": "Edit Contact",
+    "subtitle": "Customers and vendors your transactions are raised against.",
+    "new": {
+      "title": "New contact",
+      "subtitle": "Add a customer or vendor."
+    },
+    "edit": {
+      "title": "Edit contact"
+    },
+    "detail": {
+      "title": "Contact"
+    },
+    "fields": {
+      "name": "Name",
+      "type": "Type",
+      "email": "Email",
+      "mobile": "Mobile",
+      "city": "City",
+      "state": "State",
+      "pincode": "Pincode",
+      "profileImage": "Profile image",
+      "portalAccess": "Portal access",
+      "status": "Status"
+    },
+    "placeholders": {
+      "name": "Azure Furniture",
+      "email": "name@example.com",
+      "mobile": "9876543210",
+      "city": "Ahmedabad",
+      "state": "Gujarat",
+      "pincode": "380015"
+    },
     "types": {
       "customer": "Customer",
       "vendor": "Vendor",
-      "both": "Customer & Vendor"
+      "both": "Both"
     },
-    "fields": {
-      "name": "Contact Name",
-      "type": "Contact Type",
-      "email": "Email Address",
-      "mobile": "Mobile Number",
-      "address": "Street Address",
+    "table": {
+      "name": "Name",
+      "type": "Type",
+      "email": "Email",
+      "mobile": "Mobile",
       "city": "City",
-      "state": "State",
-      "pincode": "PIN / Postal Code",
-      "taxId": "Tax / GSTIN ID",
-      "portalAccess": "Allow Portal Access",
+      "portal": "Portal",
       "status": "Status"
     },
     "tabs": {
       "details": "Details",
-      "invoices": "Customer Invoices",
-      "bills": "Vendor Bills",
-      "payments": "Payments & Ledger"
-    }
+      "invoices": "Invoices",
+      "bills": "Bills",
+      "payments": "Payments"
+    },
+    "portal": {
+      "title": "Portal access",
+      "description": "A contact with portal access can sign in to see their own documents and pay online.",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "enable": "Enable access",
+      "disable": "Revoke access",
+      "needsEmail": "Add an email address before enabling portal access.",
+      "invitePending": "Invitation sent — awaiting password",
+      "loginActive": "Login active",
+      "loginRevoked": "Login revoked",
+      "adminOnly": "Only the business owner can grant or revoke a portal login."
+    },
+    "empty": {
+      "title": "No contacts yet",
+      "body": "Add your first customer or vendor."
+    },
+    "comingSoon": "Transactions appear here once sales and purchases are live.",
+    "pincodeHint": "6 digits"
   },
   "products": {
+    "badge": "Master data",
     "title": "Products",
-    "subtitle": "Items and services for sales and purchases",
-    "createProduct": "New Product",
-    "editProduct": "Edit Product",
-    "types": {
-      "goods": "Physical Goods",
-      "service": "Service"
+    "subtitle": "Goods and services your documents are built from.",
+    "new": {
+      "title": "New product",
+      "subtitle": "Add a product or service."
+    },
+    "edit": {
+      "title": "Edit product"
+    },
+    "detail": {
+      "title": "Product"
     },
     "fields": {
-      "name": "Product Name",
-      "sku": "SKU / Code",
-      "type": "Product Type",
+      "name": "Name",
+      "sku": "SKU",
+      "type": "Type",
       "category": "Category",
-      "salesPrice": "Sales Price",
-      "costPrice": "Cost Price",
-      "salesTax": "Sales Tax",
-      "purchaseTax": "Purchase Tax",
-      "incomeAccount": "Income Account",
-      "expenseAccount": "Expense Account",
+      "salesPrice": "Sales price",
+      "costPrice": "Cost price",
+      "salesTax": "Sales tax",
+      "purchaseTax": "Purchase tax",
+      "incomeAccount": "Income account",
+      "expenseAccount": "Expense account",
+      "status": "Status"
+    },
+    "placeholders": {
+      "name": "Wooden Chair",
+      "sku": "WC-001",
+      "price": "0.00"
+    },
+    "types": {
+      "goods": "Goods",
+      "service": "Service",
+      "combo": "Combo"
+    },
+    "table": {
+      "name": "Name",
+      "sku": "SKU",
+      "type": "Type",
+      "category": "Category",
+      "salesPrice": "Sales price",
+      "costPrice": "Cost price",
+      "status": "Status"
+    },
+    "empty": {
+      "title": "No products yet",
+      "body": "Add the first product to your catalogue."
+    },
+    "comboNote": "Combo is a label in this version — it does not yet expand into components.",
+    "priceNote": "Changing a price never alters a document that was already issued.",
+    "pricesAdminOnly": "Only the business owner can change prices."
+  },
+  "productCategories": {
+    "badge": "Master data",
+    "title": "Product categories",
+    "subtitle": "Groupings that keep the catalogue and its reporting consistent.",
+    "new": {
+      "title": "New category",
+      "subtitle": "Group products for reporting."
+    },
+    "edit": {
+      "title": "Edit category"
+    },
+    "fields": {
+      "name": "Name",
       "description": "Description",
       "status": "Status"
     },
-    "categories": {
-      "title": "Product Categories",
-      "createCategory": "New Category",
-      "name": "Category Name",
-      "parent": "Parent Category"
+    "placeholders": {
+      "name": "Seating",
+      "description": "Chairs, stools and benches"
+    },
+    "table": {
+      "name": "Name",
+      "description": "Description",
+      "status": "Status"
+    },
+    "empty": {
+      "title": "No categories yet",
+      "body": "Add the first product category."
     }
   },
+  "portal": {
+    "badge": "Portal",
+    "title": "Your documents",
+    "subtitle": "Invoices and bills raised for your account.",
+    "welcome": "Welcome, {name}",
+    "comingSoon": "Your invoices, bills and online payments will appear here.",
+    "signOut": "Sign out"
+  },
   "accounts": {
+    "badge": "Accounting core",
     "title": "Chart of Accounts",
-    "subtitle": "General Ledger account master for double-entry bookkeeping",
-    "createAccount": "New Account",
-    "editAccount": "Edit Account",
+    "subtitle": "The accounts every journal entry posts into.",
+    "new": {
+      "title": "New account",
+      "subtitle": "Add an account to the chart."
+    },
+    "edit": {
+      "title": "Edit account"
+    },
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "parent": "Parent account",
+      "openingBalance": "Opening balance",
+      "system": "System account",
+      "status": "Status"
+    },
+    "placeholders": {
+      "code": "1010",
+      "name": "Cash",
+      "balance": "0.00"
+    },
     "types": {
       "asset": "Asset",
       "liability": "Liability",
-      "equity": "Equity",
-      "income": "Income",
       "expense": "Expense",
+      "income": "Income",
       "capital": "Capital"
     },
-    "fields": {
-      "code": "Account Code",
-      "name": "Account Name",
-      "type": "Account Classification",
-      "parent": "Parent Account",
-      "openingBalance": "Opening Balance",
-      "currentBalance": "Current Balance",
-      "isSystem": "System Account",
+    "table": {
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "parent": "Parent",
+      "openingBalance": "Opening balance",
       "status": "Status"
-    }
+    },
+    "empty": {
+      "title": "No accounts yet",
+      "body": "Add the first account to your chart."
+    },
+    "systemNote": "System accounts cannot be archived or retyped — the ledger posts to them by role.",
+    "parentNote": "A parent must be of the same type as its child.",
+    "noParent": "No parent (top level)",
+    "yes": "Yes",
+    "no": "No"
   },
   "journals": {
+    "badge": "Accounting core",
     "title": "Journals",
-    "subtitle": "Accounting journals to segregate transactional entries",
-    "createJournal": "New Journal",
-    "editJournal": "Edit Journal",
-    "types": {
-      "sales": "Sales Journal",
-      "purchase": "Purchase Journal",
-      "bank": "Bank Journal",
-      "cash": "Cash Journal",
-      "general": "Miscellaneous Journal"
+    "subtitle": "The books documents post into, with their default accounts.",
+    "new": {
+      "title": "New journal",
+      "subtitle": "Add a book for a kind of document."
+    },
+    "edit": {
+      "title": "Edit journal"
     },
     "fields": {
-      "code": "Journal Code",
-      "name": "Journal Name",
+      "name": "Name",
       "type": "Type",
-      "defaultDebitAccount": "Default Debit Account",
-      "defaultCreditAccount": "Default Credit Account",
-      "sequencePrefix": "Sequence Prefix"
-    }
+      "prefix": "Sequence prefix",
+      "defaultDebit": "Default debit account",
+      "defaultCredit": "Default credit account",
+      "status": "Status"
+    },
+    "placeholders": {
+      "name": "Sales",
+      "prefix": "INV"
+    },
+    "types": {
+      "sales": "Sales",
+      "purchase": "Purchase",
+      "bank": "Bank",
+      "cash": "Cash",
+      "general": "General"
+    },
+    "table": {
+      "name": "Name",
+      "type": "Type",
+      "prefix": "Prefix",
+      "defaultDebit": "Default debit",
+      "defaultCredit": "Default credit",
+      "status": "Status"
+    },
+    "empty": {
+      "title": "No journals yet",
+      "body": "Add the first journal."
+    },
+    "lastOfTypeNote": "The only active journal of its type cannot be archived — documents of that kind could not be posted."
+  },
+  "taxes": {
+    "badge": "Accounting core",
+    "title": "Taxes",
+    "subtitle": "Rates applied per line, posting to their own account.",
+    "new": {
+      "title": "New tax",
+      "subtitle": "Add a tax rate."
+    },
+    "edit": {
+      "title": "Edit tax"
+    },
+    "fields": {
+      "name": "Name",
+      "rate": "Rate (%)",
+      "scope": "Applies to",
+      "account": "Tax account",
+      "status": "Status"
+    },
+    "placeholders": {
+      "name": "GST 18%",
+      "rate": "18"
+    },
+    "scopes": {
+      "sales": "Sales",
+      "purchase": "Purchase",
+      "both": "Sales and purchase"
+    },
+    "table": {
+      "name": "Name",
+      "rate": "Rate",
+      "scope": "Applies to",
+      "account": "Tax account",
+      "status": "Status"
+    },
+    "empty": {
+      "title": "No taxes yet",
+      "body": "Add the first tax rate."
+    },
+    "accountNote": "Tax posts to its own account, never into Sale Income. Choose a liability for tax collected, an asset for tax paid.",
+    "noAccount": "No account selected"
+  },
+  "analyticAccounts": {
+    "badge": "Accounting core",
+    "title": "Analytic accounts",
+    "subtitle": "Cost centres transactions are tagged with, for budget reporting.",
+    "new": {
+      "title": "New analytic account",
+      "subtitle": "Add a cost centre or project."
+    },
+    "edit": {
+      "title": "Edit analytic account"
+    },
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "department": "Department or project",
+      "status": "Status"
+    },
+    "placeholders": {
+      "code": "AHM-RETAIL",
+      "name": "Retail Store - Ahmedabad",
+      "department": "Retail"
+    },
+    "types": {
+      "income": "Income",
+      "expense": "Expense"
+    },
+    "table": {
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "department": "Department",
+      "status": "Status"
+    },
+    "empty": {
+      "title": "No analytic accounts yet",
+      "body": "Add the first cost centre."
+    },
+    "purposeNote": "Budget reports compare planned amounts against journal lines carrying these tags."
   },
   "journalEntries": {
-    "title": "Journal Entries",
-    "subtitle": "Double-entry general ledger transactions",
-    "createEntry": "New Journal Entry",
-    "editEntry": "Edit Entry",
+    "badge": "Ledger",
+    "title": "Journal entries",
+    "subtitle": "Every posting in the ledger, balanced and immutable.",
+    "new": {
+      "title": "New journal entry",
+      "subtitle": "Post a manual entry. Debits must equal credits."
+    },
+    "detail": {
+      "title": "Journal entry"
+    },
     "fields": {
+      "journal": "Journal",
+      "entryDate": "Entry date",
+      "reference": "Reference",
+      "narration": "Narration",
+      "status": "Status",
+      "source": "Source",
+      "entryNumber": "Entry #",
+      "postedAt": "Posted at"
+    },
+    "placeholders": {
+      "reference": "INV/2026/00001",
+      "narration": "What this entry records",
+      "search": "Entry number or reference"
+    },
+    "table": {
       "entryNumber": "Entry #",
       "date": "Date",
       "journal": "Journal",
       "reference": "Reference",
-      "narration": "Narration / Note",
-      "status": "Status",
-      "account": "Account",
-      "partner": "Partner / Contact",
-      "debit": "Debit (₹)",
-      "credit": "Credit (₹)",
-      "totalDebit": "Total Debit",
-      "totalCredit": "Total Credit",
-      "unbalanced": "Unbalanced Entry (Difference: {diff})",
-      "balanced": "Balanced Entry"
-    },
-    "actions": {
-      "postToLedger": "Post to Ledger",
-      "reverse": "Reverse Entry"
-    }
-  },
-  "analyticAccounts": {
-    "title": "Analytic Accounts",
-    "subtitle": "Cost centers and projects for managerial accounting",
-    "createAccount": "New Analytic Account",
-    "editAccount": "Edit Analytic Account",
-    "fields": {
-      "name": "Analytic Account Name",
-      "code": "Code",
-      "department": "Department / Project",
-      "budget": "Allocated Budget",
+      "debit": "Debit",
+      "credit": "Credit",
+      "source": "Source",
       "status": "Status"
-    }
-  },
-  "budgets": {
-    "title": "Budgets",
-    "subtitle": "Financial plan and variance tracking by analytic account",
-    "createBudget": "New Budget",
-    "editBudget": "Edit Budget",
-    "fields": {
-      "name": "Budget Name",
-      "periodStart": "Start Date",
-      "periodEnd": "End Date",
-      "analyticAccount": "Analytic Account",
-      "responsible": "Responsible Manager",
-      "plannedAmount": "Planned Amount",
-      "actualAmount": "Actual Amount",
-      "variance": "Variance",
-      "consumption": "Consumption (%)"
-    }
-  },
-  "taxes": {
-    "title": "Tax Rates",
-    "subtitle": "Sales and purchase tax definitions",
-    "createTax": "New Tax",
-    "editTax": "Edit Tax",
-    "scopes": {
-      "sales": "Sales Only",
-      "purchase": "Purchase Only",
-      "both": "Sales & Purchase"
-    },
-    "types": {
-      "percentage": "Percentage (%)",
-      "fixed": "Fixed Amount"
-    },
-    "fields": {
-      "name": "Tax Name",
-      "rate": "Rate (%)",
-      "scope": "Scope",
-      "computation": "Computation",
-      "collectedAccount": "Tax Output Account (Payable)",
-      "paidAccount": "Tax Input Account (Credit)",
-      "status": "Status"
-    }
-  },
-  "purchases": {
-    "title": "Purchase Orders",
-    "subtitle": "Procurement orders and vendor confirmations",
-    "createOrder": "New Purchase Order",
-    "vendorBillsTitle": "Vendor Bills",
-    "createBill": "New Vendor Bill",
-    "fields": {
-      "orderNumber": "PO Number",
-      "billNumber": "Bill Number",
-      "vendor": "Vendor",
-      "orderDate": "Order Date",
-      "billDate": "Bill Date",
-      "dueDate": "Due Date",
-      "reference": "Vendor Reference",
-      "untaxedTotal": "Untaxed Amount",
-      "taxTotal": "Taxes",
-      "totalAmount": "Total Amount",
-      "paidAmount": "Paid Amount",
-      "amountDue": "Amount Due",
-      "notes": "Terms & Conditions"
-    },
-    "lines": {
-      "product": "Product / Item",
-      "description": "Description",
-      "account": "Expense Account",
-      "quantity": "Quantity",
-      "unitPrice": "Unit Cost",
-      "tax": "Tax",
-      "amount": "Line Total",
-      "addLine": "Add an Item",
-      "removeLine": "Remove"
-    }
-  },
-  "sales": {
-    "title": "Sales Orders",
-    "subtitle": "Customer orders and commercial quotations",
-    "createOrder": "New Sales Order",
-    "invoicesTitle": "Customer Invoices",
-    "createInvoice": "New Customer Invoice",
-    "fields": {
-      "orderNumber": "SO Number",
-      "invoiceNumber": "Invoice Number",
-      "customer": "Customer",
-      "orderDate": "Order Date",
-      "invoiceDate": "Invoice Date",
-      "dueDate": "Due Date",
-      "reference": "Payment Reference",
-      "untaxedTotal": "Untaxed Amount",
-      "taxTotal": "Taxes",
-      "totalAmount": "Total Amount",
-      "paidAmount": "Paid Amount",
-      "amountDue": "Amount Due",
-      "notes": "Payment Terms"
-    },
-    "lines": {
-      "product": "Product / Item",
-      "description": "Description",
-      "account": "Income Account",
-      "quantity": "Quantity",
-      "unitPrice": "Unit Price",
-      "tax": "Tax",
-      "amount": "Line Total",
-      "addLine": "Add an Item",
-      "removeLine": "Remove"
-    }
-  },
-  "payments": {
-    "title": "Payments",
-    "subtitle": "Customer receipts and vendor disbursements",
-    "createPayment": "Record Payment",
-    "directions": {
-      "inbound": "Customer Receipt (Inbound)",
-      "outbound": "Vendor Disbursement (Outbound)"
-    },
-    "methods": {
-      "cash": "Cash",
-      "bank": "Bank Transfer / NEFT",
-      "card": "Card Payment",
-      "cheque": "Cheque"
-    },
-    "fields": {
-      "paymentNumber": "Payment #",
-      "contact": "Partner / Contact",
-      "date": "Payment Date",
-      "amount": "Amount Received / Paid",
-      "direction": "Payment Type",
-      "method": "Payment Method",
-      "journal": "Payment Journal",
-      "reference": "Transaction / Cheque #",
-      "allocated": "Allocated Amount",
-      "unallocated": "Unallocated Balance",
-      "status": "Status"
-    },
-    "allocation": {
-      "title": "Invoice / Bill Allocation",
-      "document": "Document #",
-      "originalAmount": "Total Amount",
-      "openBalance": "Outstanding",
-      "allocatedNow": "Allocate This Payment"
-    }
-  },
-  "reports": {
-    "title": "Financial Reports",
-    "subtitle": "Statutory statements and managerial financial summaries",
-    "balanceSheet": {
-      "title": "Balance Sheet",
-      "subtitle": "Statement of Financial Position as of date",
-      "assets": "Assets",
-      "liabilities": "Liabilities",
-      "equity": "Equity & Retained Earnings",
-      "totalAssets": "Total Assets",
-      "totalLiabilitiesEquity": "Total Liabilities & Equity",
-      "currentYearEarnings": "Unallocated Current Year Earnings"
-    },
-    "profitLoss": {
-      "title": "Profit and Loss",
-      "subtitle": "Income statement for selected reporting period",
-      "operatingIncome": "Operating Revenue",
-      "costOfSales": "Cost of Goods Sold",
-      "grossProfit": "Gross Profit",
-      "operatingExpenses": "Operating Expenses",
-      "netProfit": "Net Profit / (Loss)"
-    },
-    "budgetReport": {
-      "title": "Budget vs. Actuals",
-      "subtitle": "Analytical variance tracking across cost centers",
-      "account": "Analytic Cost Center",
-      "planned": "Planned Spend",
-      "actual": "Actual Spend",
-      "variance": "Variance (Savings / Overrun)"
-    },
-    "toolbar": {
-      "asOfDate": "As of Date",
-      "dateRange": "Reporting Period",
-      "thisMonth": "This Month",
-      "thisQuarter": "This Quarter",
-      "thisFY": "This Financial Year",
-      "custom": "Custom Range"
-    }
-  },
-  "portal": {
-    "title": "Partner Portal",
-    "welcome": "Welcome, {name}",
-    "subtitle": "View and pay invoices, review account statements",
-    "kpis": {
-      "outstanding": "Total Outstanding",
-      "overdue": "Overdue Amount",
-      "paidThisYear": "Paid This Financial Year"
-    },
-    "invoices": {
-      "title": "Your Invoices",
-      "empty": "You have no invoices raised."
-    },
-    "bills": {
-      "title": "Your Bills",
-      "empty": "You have no vendor bills."
-    },
-    "pay": {
-      "payInvoice": "Pay Invoice {number}",
-      "amountPrompt": "Amount to pay",
-      "cardPlaceholder": "Debit / Credit Card (Gateway Mock)",
-      "proceed": "Proceed to Payment"
-    }
-  },
-  "users": {
-    "title": "Team Members",
-    "subtitle": "Manage access, invite colleagues, and configure roles",
-    "inviteUser": "Invite Team Member",
-    "fields": {
-      "name": "Full Name",
-      "email": "Email Address",
-      "role": "Assigned Role",
-      "status": "Account Status",
-      "invitedAt": "Invited Date"
-    },
-    "roles": {
-      "admin": "Business Owner (Admin)",
-      "manager": "Accountant (Manager)",
-      "user": "Contact / Customer (User)"
-    },
-    "dialog": {
-      "inviteTitle": "Invite New Team Member",
-      "inviteDesc": "An email invitation with a secure single-use link will be sent to the recipient to set their password.",
-      "sendInvite": "Send Invitation",
-      "sending": "Sending…"
     },
     "status": {
-      "active": "Active",
-      "invited": "Invited (Pending Set Password)",
-      "deactivated": "Deactivated"
+      "draft": "Draft",
+      "posted": "Posted",
+      "reversed": "Reversed"
+    },
+    "source": {
+      "manual": "Manual",
+      "auto": "Automatic",
+      "all": "All sources"
+    },
+    "lines": {
+      "title": "Lines",
+      "lineNo": "#",
+      "account": "Account",
+      "partner": "Contact",
+      "analytic": "Analytic account",
+      "description": "Description",
+      "debit": "Debit",
+      "credit": "Credit",
+      "addLine": "Add line",
+      "removeLine": "Remove line",
+      "noAccount": "Select an account",
+      "noPartner": "No contact",
+      "noAnalytic": "No analytic account"
+    },
+    "totals": {
+      "title": "Totals",
+      "debit": "Total debit",
+      "credit": "Total credit",
+      "difference": "Difference",
+      "balanced": "Balanced",
+      "unbalanced": "Debits and credits must match before this can be posted"
+    },
+    "actions": {
+      "post": "Post entry",
+      "posting": "Posting…",
+      "reverse": "Reverse entry",
+      "reversing": "Reversing…"
+    },
+    "reverse": {
+      "title": "Reverse this entry",
+      "reason": "Reason",
+      "reasonPlaceholder": "Why this entry is being reversed",
+      "date": "Reversal date",
+      "note": "A reversal is a new mirror entry. The original is kept exactly as posted — this is the only way to correct a posted entry.",
+      "confirm": "Reverse"
+    },
+    "immutableNote": "A posted entry can never be edited or deleted. Correct it with a reversing entry.",
+    "reversedBy": "Reversed by",
+    "reversalOf": "Reversal of",
+    "empty": {
+      "title": "No journal entries yet",
+      "body": "Post the first entry, or let a document post one for you."
+    },
+    "filters": {
+      "journal": "Journal",
+      "from": "From",
+      "to": "To",
+      "allJournals": "All journals"
     }
   }
 }

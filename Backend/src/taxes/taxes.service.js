@@ -1,194 +1,235 @@
-'use strict';
-
-const taxesRepository = require('./taxes.repository');
+const { withTransaction } = require('../shared/withTransaction');
+const auditService = require('../shared/audit.service');
+const { TAX_STATUS, ACCOUNT_TYPES, ACCOUNT_STATUS } = require('../shared/constants');
+const { findBlockingReferences, TAX_REFERENCE_SOURCES } = require('../shared/references');
 const accountsRepository = require('../accounts/accounts.repository');
-const AppError = require('../shared/AppError');
-const { parse } = require('../shared/pagination');
-const { recordAudit } = require('../shared/audit.service');
-const { AUDIT_ACTIONS } = require('../shared/constants');
+const taxesRepository = require('./taxes.repository');
 
 /**
- * Validate that an account exists, belongs to same org, is active, and matches expected classification.
+ * Taxes Service
+ *
+ * project.md §7: tax posts to its OWN Chart of Accounts account and is never
+ * folded into Sale Income. That is why `tax_account_id` matters, and why the
+ * account it points at has to be the right kind:
+ *
+ *   - tax COLLECTED on a sale is money owed to the government → a LIABILITY
+ *   - tax PAID on a purchase is a claim against the government → an ASSET
+ *
+ * Pointing a tax at an income or expense account instead does not fail loudly.
+ * It silently misstates the Balance Sheet for as long as nobody notices, which
+ * is exactly why it is refused here.
  */
-async function validateTaxAccount(orgId, accountId, expectedType, fieldLabel) {
-  if (!accountId) return;
-  const acc = await accountsRepository.findAccountById(null, orgId, accountId);
-  if (!acc) {
-    throw new AppError(`${fieldLabel} does not exist in this organization`, 404, 'ACCOUNT_NOT_FOUND');
+
+/** Account types a tax may legitimately post to. */
+const VALID_TAX_ACCOUNT_TYPES = Object.freeze([
+  ACCOUNT_TYPES.LIABILITY,
+  ACCOUNT_TYPES.ASSET,
+]);
+
+/** @private */
+function fail(message, statusCode) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  throw error;
+}
+
+/**
+ * A tax in another organization is reported as missing, never as forbidden.
+ * @private
+ */
+async function loadOrFail(client, organizationId, taxId) {
+  const tax = await taxesRepository.findByIdAndOrg(client, organizationId, taxId);
+  if (!tax) fail('Tax not found', 404);
+  return tax;
+}
+
+/**
+ * Confirm the tax account exists in this tenant, is active, and is of a type
+ * that can legitimately hold tax.
+ * @private
+ */
+async function assertTaxAccountIsUsable(client, organizationId, accountId) {
+  const account = await accountsRepository.findByIdAndOrg(client, organizationId, accountId);
+  if (!account) fail('Tax account was not found', 400);
+
+  if (account.status !== ACCOUNT_STATUS.ACTIVE) {
+    fail('Tax account is archived', 400);
   }
-  if (acc.status === 'archived') {
-    throw new AppError(`Cannot assign archived account as ${fieldLabel}`, 400, 'ACCOUNT_ARCHIVED');
-  }
-  if (acc.account_type !== expectedType) {
-    throw new AppError(
-      `${fieldLabel} must have account classification "${expectedType}" (got "${acc.account_type}")`,
-      400,
-      'INVALID_TAX_ACCOUNT_TYPE'
+
+  if (!VALID_TAX_ACCOUNT_TYPES.includes(account.account_type)) {
+    fail(
+      'Tax account must be a liability (tax collected) or an asset (tax paid)',
+      400
     );
   }
 }
 
-/**
- * Create a new tax rate.
- */
-async function createTax(orgId, userId, data) {
-  // Check duplicate name
-  const existingName = await taxesRepository.findTaxByName(null, orgId, data.name);
-  if (existingName) {
-    throw new AppError(`Tax rate "${data.name}" already exists in this organization`, 409, 'DUPLICATE_TAX_NAME');
-  }
+const taxesService = {
+  /**
+   * @param {string} organizationId
+   * @param {object} query
+   * @returns {Promise<{ items: Array, pagination: object }>}
+   */
+  async listTaxes(organizationId, query) {
+    return taxesRepository.list(null, organizationId, query);
+  },
 
-  // Validate tax accounts: Output tax = Liability, Input tax = Asset
-  if (data.collected_account_id) {
-    await validateTaxAccount(orgId, data.collected_account_id, 'liability', 'Collected tax account (Output Tax)');
-  }
-  if (data.paid_account_id) {
-    await validateTaxAccount(orgId, data.paid_account_id, 'asset', 'Paid tax account (Input Tax)');
-  }
+  /**
+   * @param {string} organizationId
+   * @param {string} taxId
+   * @returns {Promise<object>}
+   */
+  async getTax(organizationId, taxId) {
+    return loadOrFail(null, organizationId, taxId);
+  },
 
-  const tax = await taxesRepository.createTax(null, orgId, userId, data);
+  /**
+   * @param {object} params
+   * @returns {Promise<object>}
+   */
+  async createTax({ organizationId, actorUserId, data, ipAddress = null }) {
+    const duplicate = await taxesRepository.findByName(null, organizationId, data.name);
+    if (duplicate) fail('A tax with that name already exists', 409);
 
-  await recordAudit(null, {
-    actorUserId: userId,
-    action: AUDIT_ACTIONS.CREATE,
-    entityType: 'taxes',
-    entityId: tax.id,
-    before: null,
-    after: tax,
-  }).catch(() => {});
-
-  return tax;
-}
-
-/**
- * Get tax rate by ID.
- */
-async function getTaxById(orgId, id) {
-  const tax = await taxesRepository.findTaxById(null, orgId, id);
-  if (!tax) {
-    throw new AppError('Tax rate not found', 404, 'TAX_NOT_FOUND');
-  }
-  return tax;
-}
-
-/**
- * List taxes with pagination and filters.
- */
-async function listTaxes(orgId, query = {}) {
-  const { page, limit, offset } = parse(query);
-  return taxesRepository.listTaxes(null, orgId, {
-    page,
-    limit,
-    offset,
-    search: query.search,
-    status: query.status,
-    taxScope: query.tax_scope || query.taxScope,
-    sortBy: query.sortBy,
-    sortOrder: query.sortOrder,
-  });
-}
-
-/**
- * Update an existing tax.
- */
-async function updateTax(orgId, id, userId, data) {
-  const existing = await taxesRepository.findTaxById(null, orgId, id);
-  if (!existing) {
-    throw new AppError('Tax rate not found', 404, 'TAX_NOT_FOUND');
-  }
-
-  if (data.name && data.name.toLowerCase() !== existing.name.toLowerCase()) {
-    const conflict = await taxesRepository.findTaxByName(null, orgId, data.name);
-    if (conflict && conflict.id !== id) {
-      throw new AppError(`Tax rate "${data.name}" already exists in this organization`, 409, 'DUPLICATE_TAX_NAME');
+    if (data.tax_account_id) {
+      await assertTaxAccountIsUsable(null, organizationId, data.tax_account_id);
     }
-  }
 
-  if (data.collected_account_id) {
-    await validateTaxAccount(orgId, data.collected_account_id, 'liability', 'Collected tax account (Output Tax)');
-  }
-  if (data.paid_account_id) {
-    await validateTaxAccount(orgId, data.paid_account_id, 'asset', 'Paid tax account (Input Tax)');
-  }
+    return withTransaction(async (client) => {
+      const tax = await taxesRepository.insert(client, {
+        organization_id: organizationId,
+        actor_user_id: actorUserId,
+        ...data,
+      });
 
-  const updated = await taxesRepository.updateTax(null, orgId, id, userId, data);
+      await auditService.recordAudit(client, {
+        organizationId,
+        actorUserId,
+        action: 'create',
+        entityType: 'tax',
+        entityId: tax.id,
+        after: tax,
+        ipAddress,
+      });
 
-  await recordAudit(null, {
-    actorUserId: userId,
-    action: AUDIT_ACTIONS.UPDATE,
-    entityType: 'taxes',
-    entityId: id,
-    before: existing,
-    after: updated,
-  }).catch(() => {});
+      return tax;
+    });
+  },
 
-  return updated;
-}
+  /**
+   * Update a tax.
+   *
+   * Changing a rate affects documents raised from now on and nothing already
+   * posted — a posted line stores the rate it was taxed at, the same way it
+   * stores the price it was sold at.
+   *
+   * @param {object} params
+   * @returns {Promise<object>}
+   */
+  async updateTax({ organizationId, actorUserId, taxId, data, ipAddress = null }) {
+    const existing = await loadOrFail(null, organizationId, taxId);
 
-/**
- * Archive a tax rate.
- */
-async function archiveTax(orgId, id, userId) {
-  const existing = await taxesRepository.findTaxById(null, orgId, id);
-  if (!existing) {
-    throw new AppError('Tax rate not found', 404, 'TAX_NOT_FOUND');
-  }
+    if (data.name) {
+      const duplicate = await taxesRepository.findByName(null, organizationId, data.name, taxId);
+      if (duplicate) fail('A tax with that name already exists', 409);
+    }
 
-  if (existing.status === 'archived') {
-    return existing;
-  }
+    if (data.tax_account_id) {
+      await assertTaxAccountIsUsable(null, organizationId, data.tax_account_id);
+    }
 
-  const blocker = await taxesRepository.checkTaxBlockers(null, orgId, id);
-  if (blocker) {
-    throw new AppError(`Cannot archive tax: ${blocker}`, 409, 'TAX_ARCHIVE_BLOCKED');
-  }
+    return withTransaction(async (client) => {
+      const updated = await taxesRepository.update(
+        client, organizationId, taxId, data, actorUserId
+      );
+      if (!updated) fail('Tax not found', 404);
 
-  const archived = await taxesRepository.archiveTax(null, orgId, id, userId);
+      await auditService.recordAudit(client, {
+        organizationId,
+        actorUserId,
+        action: 'update',
+        entityType: 'tax',
+        entityId: taxId,
+        before: existing,
+        after: updated,
+        ipAddress,
+      });
 
-  await recordAudit(null, {
-    actorUserId: userId,
-    action: AUDIT_ACTIONS.UPDATE,
-    entityType: 'taxes',
-    entityId: id,
-    before: existing,
-    after: archived,
-  }).catch(() => {});
+      return updated;
+    });
+  },
 
-  return archived;
-}
+  /**
+   * @param {object} params
+   * @returns {Promise<object>}
+   */
+  async archiveTax({ organizationId, actorUserId, taxId, ipAddress = null }) {
+    const existing = await loadOrFail(null, organizationId, taxId);
 
-/**
- * Unarchive a tax rate.
- */
-async function unarchiveTax(orgId, id, userId) {
-  const existing = await taxesRepository.findTaxById(null, orgId, id);
-  if (!existing) {
-    throw new AppError('Tax rate not found', 404, 'TAX_NOT_FOUND');
-  }
+    if (existing.status === TAX_STATUS.ARCHIVED) {
+      fail('Tax is already archived', 409);
+    }
 
-  if (existing.status === 'active') {
-    return existing;
-  }
+    const blockers = await findBlockingReferences(
+      null, TAX_REFERENCE_SOURCES, taxId, organizationId
+    );
+    if (blockers.length > 0) {
+      const detail = blockers.map((b) => `${b.table} (${b.count})`).join(', ');
+      fail(`Tax cannot be archived while it is referenced by: ${detail}`, 409);
+    }
 
-  const unarchived = await taxesRepository.unarchiveTax(null, orgId, id, userId);
+    return withTransaction(async (client) => {
+      const archived = await taxesRepository.setStatus(
+        client, organizationId, taxId, TAX_STATUS.ARCHIVED, actorUserId
+      );
+      if (!archived) fail('Tax not found', 404);
 
-  await recordAudit(null, {
-    actorUserId: userId,
-    action: AUDIT_ACTIONS.UPDATE,
-    entityType: 'taxes',
-    entityId: id,
-    before: existing,
-    after: unarchived,
-  }).catch(() => {});
+      await auditService.recordAudit(client, {
+        organizationId,
+        actorUserId,
+        action: 'archive',
+        entityType: 'tax',
+        entityId: taxId,
+        before: existing,
+        after: archived,
+        ipAddress,
+      });
 
-  return unarchived;
-}
+      return archived;
+    });
+  },
 
-module.exports = {
-  createTax,
-  getTaxById,
-  listTaxes,
-  updateTax,
-  archiveTax,
-  unarchiveTax,
+  /**
+   * @param {object} params
+   * @returns {Promise<object>}
+   */
+  async unarchiveTax({ organizationId, actorUserId, taxId, ipAddress = null }) {
+    const existing = await loadOrFail(null, organizationId, taxId);
+
+    if (existing.status === TAX_STATUS.ACTIVE) {
+      fail('Tax is already active', 409);
+    }
+
+    return withTransaction(async (client) => {
+      const restored = await taxesRepository.setStatus(
+        client, organizationId, taxId, TAX_STATUS.ACTIVE, actorUserId
+      );
+      if (!restored) fail('Tax not found', 404);
+
+      await auditService.recordAudit(client, {
+        organizationId,
+        actorUserId,
+        action: 'unarchive',
+        entityType: 'tax',
+        entityId: taxId,
+        before: existing,
+        after: restored,
+        ipAddress,
+      });
+
+      return restored;
+    });
+  },
 };
+
+module.exports = taxesService;

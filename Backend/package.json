@@ -11,7 +11,13 @@
     "test:phase1": "jest tests/phase1-tenancy.test.js",
     "test:phase2": "jest tests/phase2-shared.test.js --runInBand",
     "test:phase3": "jest tests/phase3-auth-org.test.js --runInBand",
-    "test:phase5": "jest tests/phase5-accounting-core.test.js --runInBand"
+    "test:phase6": "jest tests/phase6-validation.test.js tests/phase6-contacts-products.test.js --runInBand",
+    "test:phase6:unit": "jest tests/phase6-validation.test.js",
+    "test:phase5": "jest tests/phase5-validation.test.js tests/phase5-accounting-core.test.js --runInBand",
+    "test:phase5:unit": "jest tests/phase5-validation.test.js",
+    "test:phase7": "jest tests/phase7-ledger-unit.test.js tests/phase7-ledger.test.js --runInBand",
+    "test:phase7:unit": "jest tests/phase7-ledger-unit.test.js",
+    "test:units": "jest tests/phase5-validation.test.js tests/phase6-validation.test.js tests/phase7-ledger-unit.test.js"
   },
   "keywords": [],
   "author": "",

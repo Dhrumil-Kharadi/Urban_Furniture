@@ -23,3 +23,6 @@ coverage/
 # Build
 dist/
 build/
+
+# Uploaded files (contact profile images) are data, not source.
+uploads/

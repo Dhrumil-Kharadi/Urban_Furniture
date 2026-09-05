@@ -1,164 +1,216 @@
-'use strict';
-
+const { withTransaction } = require('../shared/withTransaction');
+const auditService = require('../shared/audit.service');
+const { ANALYTIC_STATUS } = require('../shared/constants');
+const { findBlockingReferences, ANALYTIC_REFERENCE_SOURCES } = require('../shared/references');
 const analyticsRepository = require('./analytics.repository');
-const AppError = require('../shared/AppError');
-const { parse } = require('../shared/pagination');
-const { recordAudit } = require('../shared/audit.service');
-const { AUDIT_ACTIONS } = require('../shared/constants');
 
 /**
- * Create a new analytic account.
+ * Analytic Accounts Service
+ *
+ * project.md §8 — the cost-centre dimension. A transaction line optionally
+ * carries an analytic account, and the Budget Report compares a budget's
+ * planned amount against the sum of journal lines carrying that tag.
+ *
+ * Archiving one that already has posted lines is refused: those lines are the
+ * "actual" side of a budget comparison, and hiding the dimension they hang off
+ * would make an existing Budget Report change its answer.
  */
-async function createAnalyticAccount(orgId, userId, data) {
-  const existing = await analyticsRepository.findAnalyticAccountByName(null, orgId, data.name);
-  if (existing) {
-    throw new AppError(
-      `Analytic account "${data.name}" already exists in this organization`,
-      409,
-      'DUPLICATE_ANALYTIC_ACCOUNT_NAME'
-    );
-  }
 
-  const account = await analyticsRepository.createAnalyticAccount(null, orgId, userId, data);
-
-  await recordAudit(null, {
-    actorUserId: userId,
-    action: AUDIT_ACTIONS.CREATE,
-    entityType: 'analytic_accounts',
-    entityId: account.id,
-    before: null,
-    after: account,
-  }).catch(() => {});
-
-  return account;
+/** @private */
+function fail(message, statusCode) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  throw error;
 }
 
 /**
- * Get analytic account by ID.
+ * An analytic account in another organization is reported as missing, never as
+ * forbidden — a 403 would confirm it exists.
+ * @private
  */
-async function getAnalyticAccountById(orgId, id) {
-  const account = await analyticsRepository.findAnalyticAccountById(null, orgId, id);
-  if (!account) {
-    throw new AppError('Analytic account not found', 404, 'ANALYTIC_ACCOUNT_NOT_FOUND');
-  }
-  return account;
+async function loadOrFail(client, organizationId, analyticId) {
+  const analytic = await analyticsRepository.findByIdAndOrg(client, organizationId, analyticId);
+  if (!analytic) fail('Analytic account not found', 404);
+  return analytic;
 }
 
-/**
- * List analytic accounts with pagination and filters.
- */
-async function listAnalyticAccounts(orgId, query = {}) {
-  const { page, limit, offset } = parse(query);
-  return analyticsRepository.listAnalyticAccounts(null, orgId, {
-    page,
-    limit,
-    offset,
-    search: query.search,
-    status: query.status,
-    analyticType: query.analytic_type || query.analyticType || query.type,
-    sortBy: query.sortBy,
-    sortOrder: query.sortOrder,
-  });
-}
+const analyticsService = {
+  /**
+   * @param {string} organizationId
+   * @param {object} query
+   * @returns {Promise<{ items: Array, pagination: object }>}
+   */
+  async listAnalyticAccounts(organizationId, query) {
+    return analyticsRepository.list(null, organizationId, query);
+  },
 
-/**
- * Update an existing analytic account.
- */
-async function updateAnalyticAccount(orgId, id, userId, data) {
-  const existing = await analyticsRepository.findAnalyticAccountById(null, orgId, id);
-  if (!existing) {
-    throw new AppError('Analytic account not found', 404, 'ANALYTIC_ACCOUNT_NOT_FOUND');
-  }
+  /**
+   * @param {string} organizationId
+   * @param {string} analyticId
+   * @returns {Promise<object>}
+   */
+  async getAnalyticAccount(organizationId, analyticId) {
+    return loadOrFail(null, organizationId, analyticId);
+  },
 
-  if (data.name && data.name.toLowerCase() !== existing.name.toLowerCase()) {
-    const conflict = await analyticsRepository.findAnalyticAccountByName(null, orgId, data.name);
-    if (conflict && conflict.id !== id) {
-      throw new AppError(
-        `Analytic account "${data.name}" already exists in this organization`,
-        409,
-        'DUPLICATE_ANALYTIC_ACCOUNT_NAME'
-      );
+  /**
+   * @param {object} params
+   * @returns {Promise<object>}
+   */
+  async createAnalyticAccount({ organizationId, actorUserId, data, ipAddress = null }) {
+    const duplicateName = await analyticsRepository.findByName(null, organizationId, data.name);
+    if (duplicateName) fail('An analytic account with that name already exists', 409);
+
+    if (data.code) {
+      const duplicateCode = await analyticsRepository.findByCode(null, organizationId, data.code);
+      if (duplicateCode) fail('An analytic account with that code already exists', 409);
     }
-  }
 
-  const updated = await analyticsRepository.updateAnalyticAccount(null, orgId, id, userId, data);
+    return withTransaction(async (client) => {
+      const analytic = await analyticsRepository.insert(client, {
+        organization_id: organizationId,
+        actor_user_id: actorUserId,
+        ...data,
+      });
 
-  await recordAudit(null, {
-    actorUserId: userId,
-    action: AUDIT_ACTIONS.UPDATE,
-    entityType: 'analytic_accounts',
-    entityId: id,
-    before: existing,
-    after: updated,
-  }).catch(() => {});
+      await auditService.recordAudit(client, {
+        organizationId,
+        actorUserId,
+        action: 'create',
+        entityType: 'analytic_account',
+        entityId: analytic.id,
+        after: analytic,
+        ipAddress,
+      });
 
-  return updated;
-}
+      return analytic;
+    });
+  },
 
-/**
- * Archive an analytic account.
- */
-async function archiveAnalyticAccount(orgId, id, userId) {
-  const existing = await analyticsRepository.findAnalyticAccountById(null, orgId, id);
-  if (!existing) {
-    throw new AppError('Analytic account not found', 404, 'ANALYTIC_ACCOUNT_NOT_FOUND');
-  }
+  /**
+   * @param {object} params
+   * @returns {Promise<object>}
+   */
+  async updateAnalyticAccount({ organizationId, actorUserId, analyticId, data, ipAddress = null }) {
+    const existing = await loadOrFail(null, organizationId, analyticId);
 
-  if (existing.status === 'archived') {
-    return existing;
-  }
+    if (data.name) {
+      const duplicate = await analyticsRepository.findByName(
+        null, organizationId, data.name, analyticId
+      );
+      if (duplicate) fail('An analytic account with that name already exists', 409);
+    }
 
-  const blocker = await analyticsRepository.checkAnalyticAccountBlockers(null, orgId, id);
-  if (blocker) {
-    throw new AppError(`Cannot archive analytic account: ${blocker}`, 409, 'ANALYTIC_ACCOUNT_ARCHIVE_BLOCKED');
-  }
+    if (data.code) {
+      const duplicate = await analyticsRepository.findByCode(
+        null, organizationId, data.code, analyticId
+      );
+      if (duplicate) fail('An analytic account with that code already exists', 409);
+    }
 
-  const archived = await analyticsRepository.archiveAnalyticAccount(null, orgId, id, userId);
+    // Flipping income to expense on a dimension that already carries posted
+    // lines would reclassify every one of them at once.
+    if (data.analytic_type && data.analytic_type !== existing.analytic_type) {
+      const blockers = await findBlockingReferences(
+        null, ANALYTIC_REFERENCE_SOURCES, analyticId, organizationId
+      );
+      if (blockers.length > 0) {
+        fail('An analytic account already used by postings cannot change type', 409);
+      }
+    }
 
-  await recordAudit(null, {
-    actorUserId: userId,
-    action: AUDIT_ACTIONS.UPDATE,
-    entityType: 'analytic_accounts',
-    entityId: id,
-    before: existing,
-    after: archived,
-  }).catch(() => {});
+    return withTransaction(async (client) => {
+      const updated = await analyticsRepository.update(
+        client, organizationId, analyticId, data, actorUserId
+      );
+      if (!updated) fail('Analytic account not found', 404);
 
-  return archived;
-}
+      await auditService.recordAudit(client, {
+        organizationId,
+        actorUserId,
+        action: 'update',
+        entityType: 'analytic_account',
+        entityId: analyticId,
+        before: existing,
+        after: updated,
+        ipAddress,
+      });
 
-/**
- * Unarchive an analytic account.
- */
-async function unarchiveAnalyticAccount(orgId, id, userId) {
-  const existing = await analyticsRepository.findAnalyticAccountById(null, orgId, id);
-  if (!existing) {
-    throw new AppError('Analytic account not found', 404, 'ANALYTIC_ACCOUNT_NOT_FOUND');
-  }
+      return updated;
+    });
+  },
 
-  if (existing.status === 'active') {
-    return existing;
-  }
+  /**
+   * @param {object} params
+   * @returns {Promise<object>}
+   */
+  async archiveAnalyticAccount({ organizationId, actorUserId, analyticId, ipAddress = null }) {
+    const existing = await loadOrFail(null, organizationId, analyticId);
 
-  const unarchived = await analyticsRepository.unarchiveAnalyticAccount(null, orgId, id, userId);
+    if (existing.status === ANALYTIC_STATUS.ARCHIVED) {
+      fail('Analytic account is already archived', 409);
+    }
 
-  await recordAudit(null, {
-    actorUserId: userId,
-    action: AUDIT_ACTIONS.UPDATE,
-    entityType: 'analytic_accounts',
-    entityId: id,
-    before: existing,
-    after: unarchived,
-  }).catch(() => {});
+    const blockers = await findBlockingReferences(
+      null, ANALYTIC_REFERENCE_SOURCES, analyticId, organizationId
+    );
+    if (blockers.length > 0) {
+      const detail = blockers.map((b) => `${b.table} (${b.count})`).join(', ');
+      fail(`Analytic account cannot be archived while it is referenced by: ${detail}`, 409);
+    }
 
-  return unarchived;
-}
+    return withTransaction(async (client) => {
+      const archived = await analyticsRepository.setStatus(
+        client, organizationId, analyticId, ANALYTIC_STATUS.ARCHIVED, actorUserId
+      );
+      if (!archived) fail('Analytic account not found', 404);
 
-module.exports = {
-  createAnalyticAccount,
-  getAnalyticAccountById,
-  listAnalyticAccounts,
-  updateAnalyticAccount,
-  archiveAnalyticAccount,
-  unarchiveAnalyticAccount,
+      await auditService.recordAudit(client, {
+        organizationId,
+        actorUserId,
+        action: 'archive',
+        entityType: 'analytic_account',
+        entityId: analyticId,
+        before: existing,
+        after: archived,
+        ipAddress,
+      });
+
+      return archived;
+    });
+  },
+
+  /**
+   * @param {object} params
+   * @returns {Promise<object>}
+   */
+  async unarchiveAnalyticAccount({ organizationId, actorUserId, analyticId, ipAddress = null }) {
+    const existing = await loadOrFail(null, organizationId, analyticId);
+
+    if (existing.status === ANALYTIC_STATUS.ACTIVE) {
+      fail('Analytic account is already active', 409);
+    }
+
+    return withTransaction(async (client) => {
+      const restored = await analyticsRepository.setStatus(
+        client, organizationId, analyticId, ANALYTIC_STATUS.ACTIVE, actorUserId
+      );
+      if (!restored) fail('Analytic account not found', 404);
+
+      await auditService.recordAudit(client, {
+        organizationId,
+        actorUserId,
+        action: 'unarchive',
+        entityType: 'analytic_account',
+        entityId: analyticId,
+        before: existing,
+        after: restored,
+        ipAddress,
+      });
+
+      return restored;
+    });
+  },
 };
+
+module.exports = analyticsService;

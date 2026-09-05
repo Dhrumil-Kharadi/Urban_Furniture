@@ -1,128 +1,132 @@
-'use strict';
-
-const accountsService = require('./accounts.service');
-const { validateCreateAccount, validateUpdateAccount } = require('./accounts.validation');
 const { success, created, error } = require('../utils/response');
+const accountsValidation = require('./accounts.validation');
+const accountsService = require('./accounts.service');
 
 /**
- * List accounts.
+ * Accounts Controller (Chart of Accounts)
+ *
+ * Reads the request, validates, delegates, responds. No SQL, no rules.
  */
-async function listAccounts(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const result = await accountsService.listAccounts(orgId, req.query);
-    return success(res, 'Accounts retrieved successfully', result);
-  } catch (err) {
-    next(err);
-  }
-}
 
-/**
- * Get account tree.
- */
-async function getAccountTree(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const tree = await accountsService.getAccountTree(orgId);
-    return success(res, 'Account tree retrieved successfully', tree);
-  } catch (err) {
-    next(err);
-  }
-}
+const accountsController = {
+  /** GET /api/accounts */
+  async listAccounts(req, res, next) {
+    try {
+      const validation = accountsValidation.validateListQuery(req.query);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
 
-/**
- * Get single account by ID.
- */
-async function getAccountById(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const { id } = req.params;
-    const account = await accountsService.getAccountById(orgId, id);
-    return success(res, 'Account retrieved successfully', account);
-  } catch (err) {
-    next(err);
-  }
-}
+      const result = await accountsService.listAccounts(req.organizationId, {
+        ...req.query,
+        ...validation.data,
+      });
 
-/**
- * Create new account.
- */
-async function createAccount(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const userId = req.user?.id;
-
-    const validation = validateCreateAccount(req.body);
-    if (!validation.isValid) {
-      return error(res, validation.errors[0] || 'Validation failed', 400, validation.errors);
+      return success(res, 'Accounts retrieved successfully', result);
+    } catch (err) {
+      next(err);
     }
+  },
 
-    const account = await accountsService.createAccount(orgId, userId, validation.data);
-    return created(res, 'Account created successfully', account);
-  } catch (err) {
-    next(err);
-  }
-}
+  /** GET /api/accounts/tree */
+  async getAccountTree(req, res, next) {
+    try {
+      const validation = accountsValidation.validateListQuery(req.query);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
 
-/**
- * Update account.
- */
-async function updateAccount(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const userId = req.user?.id;
-    const { id } = req.params;
-
-    const validation = validateUpdateAccount(req.body);
-    if (!validation.isValid) {
-      return error(res, validation.errors[0] || 'Validation failed', 400, validation.errors);
+      const result = await accountsService.getAccountTree(req.organizationId, validation.data);
+      return success(res, 'Account tree retrieved successfully', result);
+    } catch (err) {
+      next(err);
     }
+  },
 
-    const updated = await accountsService.updateAccount(orgId, id, userId, validation.data);
-    return success(res, 'Account updated successfully', updated);
-  } catch (err) {
-    next(err);
-  }
-}
+  /** GET /api/accounts/:id */
+  async getAccount(req, res, next) {
+    try {
+      const account = await accountsService.getAccount(req.organizationId, req.params.id);
+      return success(res, 'Account retrieved successfully', { account });
+    } catch (err) {
+      next(err);
+    }
+  },
 
-/**
- * Archive account.
- */
-async function archiveAccount(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const userId = req.user?.id;
-    const { id } = req.params;
+  /** POST /api/accounts */
+  async createAccount(req, res, next) {
+    try {
+      const validation = accountsValidation.validateCreate(req.body);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
 
-    const archived = await accountsService.archiveAccount(orgId, id, userId);
-    return success(res, 'Account archived successfully', archived);
-  } catch (err) {
-    next(err);
-  }
-}
+      const account = await accountsService.createAccount({
+        organizationId: req.organizationId,
+        actorUserId: req.user.id,
+        data: validation.data,
+        ipAddress: req.ip,
+      });
 
-/**
- * Unarchive account.
- */
-async function unarchiveAccount(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const userId = req.user?.id;
-    const { id } = req.params;
+      return created(res, 'Account created successfully', { account });
+    } catch (err) {
+      next(err);
+    }
+  },
 
-    const unarchived = await accountsService.unarchiveAccount(orgId, id, userId);
-    return success(res, 'Account unarchived successfully', unarchived);
-  } catch (err) {
-    next(err);
-  }
-}
+  /** PATCH /api/accounts/:id */
+  async updateAccount(req, res, next) {
+    try {
+      const validation = accountsValidation.validateUpdate(req.body);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
 
-module.exports = {
-  listAccounts,
-  getAccountTree,
-  getAccountById,
-  createAccount,
-  updateAccount,
-  archiveAccount,
-  unarchiveAccount,
+      const account = await accountsService.updateAccount({
+        organizationId: req.organizationId,
+        actorUserId: req.user.id,
+        accountId: req.params.id,
+        data: validation.data,
+        ipAddress: req.ip,
+      });
+
+      return success(res, 'Account updated successfully', { account });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /** PATCH /api/accounts/:id/archive */
+  async archiveAccount(req, res, next) {
+    try {
+      const account = await accountsService.archiveAccount({
+        organizationId: req.organizationId,
+        actorUserId: req.user.id,
+        accountId: req.params.id,
+        ipAddress: req.ip,
+      });
+
+      return success(res, 'Account archived successfully', { account });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /** PATCH /api/accounts/:id/unarchive */
+  async unarchiveAccount(req, res, next) {
+    try {
+      const account = await accountsService.unarchiveAccount({
+        organizationId: req.organizationId,
+        actorUserId: req.user.id,
+        accountId: req.params.id,
+        ipAddress: req.ip,
+      });
+
+      return success(res, 'Account restored successfully', { account });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
+
+module.exports = accountsController;

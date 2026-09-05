@@ -1,246 +1,335 @@
-'use strict';
-
+const { withTransaction } = require('../shared/withTransaction');
+const auditService = require('../shared/audit.service');
+const { ACCOUNT_STATUS } = require('../shared/constants');
+const {
+  findBlockingReferences,
+  ACCOUNT_REFERENCE_SOURCES,
+} = require('../shared/references');
 const accountsRepository = require('./accounts.repository');
-const AppError = require('../shared/AppError');
-const { parse } = require('../shared/pagination');
-const { recordAudit } = require('../shared/audit.service');
-const { AUDIT_ACTIONS } = require('../shared/constants');
 
 /**
- * Walk ancestor chain to ensure no circular reference when parenting accounts.
+ * Accounts Service (Chart of Accounts)
+ *
+ * The CoA is the spine of every financial report, so three rules here are not
+ * conveniences:
+ *
+ *   1. A parent must share its child's account_type. A Balance Sheet that
+ *      rolls an expense up under an asset is not a rounding problem, it is a
+ *      wrong report.
+ *
+ *   2. The ancestor chain is walked before saving a parent. A cycle would hang
+ *      the tree renderer and make any recursive balance query non-terminating.
+ *
+ *   3. System accounts (is_system) cannot be archived or retyped. The ledger
+ *      engine posts to them by name — Debtors, Creditors, Output Tax Payable —
+ *      and losing one breaks posting for the whole organization.
  */
-async function assertNoAncestorCycle(client, orgId, accountId, targetParentId) {
-  if (!targetParentId) return;
-  if (accountId && targetParentId === accountId) {
-    throw new AppError('An account cannot be its own parent', 400, 'CIRCULAR_PARENT_REFERENCE');
-  }
 
-  let currentParentId = targetParentId;
-  const visited = new Set();
-  if (accountId) visited.add(accountId);
-
-  while (currentParentId) {
-    if (visited.has(currentParentId)) {
-      throw new AppError('Parent account creates a circular reference in the account hierarchy', 400, 'CIRCULAR_PARENT_REFERENCE');
-    }
-    visited.add(currentParentId);
-
-    const ancestor = await accountsRepository.findAccountById(client, orgId, currentParentId);
-    if (!ancestor) break;
-    currentParentId = ancestor.parent_account_id;
-  }
+/** @private */
+function fail(message, statusCode) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  throw error;
 }
 
 /**
- * Create a new account.
+ * An account in another organization is reported as missing, never as
+ * forbidden — a 403 would confirm it exists.
+ * @private
  */
-async function createAccount(orgId, userId, data) {
-  // 1. Check duplicate code
-  const existing = await accountsRepository.findAccountByCode(null, orgId, data.code);
-  if (existing) {
-    throw new AppError(`Account code "${data.code}" already exists in this organization`, 409, 'DUPLICATE_ACCOUNT_CODE');
-  }
-
-  // 2. Validate parent if provided
-  if (data.parent_account_id) {
-    const parent = await accountsRepository.findAccountById(null, orgId, data.parent_account_id);
-    if (!parent) {
-      throw new AppError('Parent account not found', 404, 'PARENT_ACCOUNT_NOT_FOUND');
-    }
-    if (parent.account_type !== data.account_type) {
-      throw new AppError(`Parent account must share the same account type (expected "${data.account_type}", got "${parent.account_type}")`, 400, 'PARENT_TYPE_MISMATCH');
-    }
-    await assertNoAncestorCycle(null, orgId, null, data.parent_account_id);
-  }
-
-  // 3. Insert account
-  const account = await accountsRepository.createAccount(null, orgId, userId, data);
-
-  // 4. Audit log
-  await recordAudit(null, {
-    actorUserId: userId,
-    action: AUDIT_ACTIONS.CREATE,
-    entityType: 'accounts',
-    entityId: account.id,
-    before: null,
-    after: account,
-  }).catch(() => {});
-
+async function loadOrFail(client, organizationId, accountId) {
+  const account = await accountsRepository.findByIdAndOrg(client, organizationId, accountId);
+  if (!account) fail('Account not found', 404);
   return account;
 }
 
 /**
- * Get account by ID.
+ * Validate a proposed parent: it must exist in this tenant, be active, share
+ * the child's type, and not already sit below the child.
+ *
+ * @param {object|null} client
+ * @param {string} organizationId
+ * @param {string} parentId
+ * @param {string} accountType - The child's type, after any change.
+ * @param {string|null} childId - null when creating.
+ * @private
  */
-async function getAccountById(orgId, id) {
-  const account = await accountsRepository.findAccountById(null, orgId, id);
-  if (!account) {
-    throw new AppError('Account not found', 404, 'ACCOUNT_NOT_FOUND');
-  }
-  return account;
-}
-
-/**
- * List accounts with pagination & filters.
- */
-async function listAccounts(orgId, query = {}) {
-  const { page, limit, offset } = parse(query);
-  return accountsRepository.listAccounts(null, orgId, {
-    page,
-    limit,
-    offset,
-    search: query.search,
-    status: query.status,
-    accountType: query.account_type || query.accountType || query.type,
-    sortBy: query.sortBy,
-    sortOrder: query.sortOrder,
-  });
-}
-
-/**
- * Update an existing account.
- */
-async function updateAccount(orgId, id, userId, data) {
-  const existing = await accountsRepository.findAccountById(null, orgId, id);
-  if (!existing) {
-    throw new AppError('Account not found', 404, 'ACCOUNT_NOT_FOUND');
+async function assertParentIsUsable(client, organizationId, parentId, accountType, childId) {
+  if (childId && parentId === childId) {
+    fail('An account cannot be its own parent', 400);
   }
 
-  // System account protections
-  if (existing.is_system) {
-    if (data.account_type && data.account_type !== existing.account_type) {
-      throw new AppError('System account type cannot be changed', 400, 'SYSTEM_ACCOUNT_IMMUTABLE');
+  const parent = await accountsRepository.findByIdAndOrg(client, organizationId, parentId);
+  if (!parent) fail('Parent account was not found', 400);
+
+  if (parent.status !== ACCOUNT_STATUS.ACTIVE) {
+    fail('Parent account is archived', 400);
+  }
+
+  if (parent.account_type !== accountType) {
+    fail(`Parent account must be of type '${accountType}'`, 400);
+  }
+
+  // Walking up from the proposed parent: if the child appears anywhere in that
+  // chain, attaching here would close a loop.
+  if (childId) {
+    const ancestors = await accountsRepository.findAncestorIds(client, organizationId, parentId);
+    if (ancestors.includes(childId)) {
+      fail('That parent would create a cycle in the account hierarchy', 400);
     }
   }
-
-  // Code uniqueness check if changed
-  if (data.code && data.code !== existing.code) {
-    const codeConflict = await accountsRepository.findAccountByCode(null, orgId, data.code);
-    if (codeConflict && codeConflict.id !== id) {
-      throw new AppError(`Account code "${data.code}" already exists in this organization`, 409, 'DUPLICATE_ACCOUNT_CODE');
-    }
-  }
-
-  const effectiveType = data.account_type || existing.account_type;
-
-  // Validate parent if updating parent
-  if (data.parent_account_id !== undefined && data.parent_account_id !== null) {
-    const parent = await accountsRepository.findAccountById(null, orgId, data.parent_account_id);
-    if (!parent) {
-      throw new AppError('Parent account not found', 404, 'PARENT_ACCOUNT_NOT_FOUND');
-    }
-    if (parent.account_type !== effectiveType) {
-      throw new AppError(`Parent account must share the same account type (expected "${effectiveType}", got "${parent.account_type}")`, 400, 'PARENT_TYPE_MISMATCH');
-    }
-    await assertNoAncestorCycle(null, orgId, id, data.parent_account_id);
-  }
-
-  const updated = await accountsRepository.updateAccount(null, orgId, id, userId, data);
-
-  await recordAudit(null, {
-    actorUserId: userId,
-    action: AUDIT_ACTIONS.UPDATE,
-    entityType: 'accounts',
-    entityId: id,
-    before: existing,
-    after: updated,
-  }).catch(() => {});
-
-  return updated;
 }
 
 /**
- * Archive an account.
+ * Assemble a flat account list into a tree.
+ *
+ * Two passes over the rows, no recursion into the database. An account whose
+ * parent is missing from the set (archived and filtered out, say) is surfaced
+ * at the root rather than silently dropped.
+ *
+ * @param {Array} rows
+ * @returns {Array} Root nodes, each with a `children` array.
+ * @private
  */
-async function archiveAccount(orgId, id, userId) {
-  const existing = await accountsRepository.findAccountById(null, orgId, id);
-  if (!existing) {
-    throw new AppError('Account not found', 404, 'ACCOUNT_NOT_FOUND');
+function buildTree(rows) {
+  const byId = new Map();
+  for (const row of rows) {
+    byId.set(row.id, { ...row, children: [] });
   }
-
-  if (existing.is_system) {
-    throw new AppError('System accounts cannot be archived', 400, 'SYSTEM_ACCOUNT_CANNOT_ARCHIVE');
-  }
-
-  if (existing.status === 'archived') {
-    return existing;
-  }
-
-  const blocker = await accountsRepository.checkAccountBlockers(null, orgId, id);
-  if (blocker) {
-    throw new AppError(`Cannot archive account: ${blocker}`, 409, 'ACCOUNT_ARCHIVE_BLOCKED');
-  }
-
-  const archived = await accountsRepository.archiveAccount(null, orgId, id, userId);
-
-  await recordAudit(null, {
-    actorUserId: userId,
-    action: AUDIT_ACTIONS.UPDATE,
-    entityType: 'accounts',
-    entityId: id,
-    before: existing,
-    after: archived,
-  }).catch(() => {});
-
-  return archived;
-}
-
-/**
- * Unarchive an account.
- */
-async function unarchiveAccount(orgId, id, userId) {
-  const existing = await accountsRepository.findAccountById(null, orgId, id);
-  if (!existing) {
-    throw new AppError('Account not found', 404, 'ACCOUNT_NOT_FOUND');
-  }
-
-  if (existing.status === 'active') {
-    return existing;
-  }
-
-  const unarchived = await accountsRepository.unarchiveAccount(null, orgId, id, userId);
-
-  await recordAudit(null, {
-    actorUserId: userId,
-    action: AUDIT_ACTIONS.UPDATE,
-    entityType: 'accounts',
-    entityId: id,
-    before: existing,
-    after: unarchived,
-  }).catch(() => {});
-
-  return unarchived;
-}
-
-/**
- * Build hierarchical account tree.
- */
-async function getAccountTree(orgId) {
-  const rows = await accountsRepository.listAllAccountsForTree(null, orgId);
-
-  const byId = {};
-  rows.forEach((r) => {
-    byId[r.id] = { ...r, children: [] };
-  });
 
   const roots = [];
-  rows.forEach((r) => {
-    if (r.parent_account_id && byId[r.parent_account_id]) {
-      byId[r.parent_account_id].children.push(byId[r.id]);
-    } else {
-      roots.push(byId[r.id]);
-    }
-  });
+  for (const node of byId.values()) {
+    const parent = node.parent_account_id ? byId.get(node.parent_account_id) : null;
+    if (parent) parent.children.push(node);
+    else roots.push(node);
+  }
 
   return roots;
 }
 
-module.exports = {
-  createAccount,
-  getAccountById,
-  listAccounts,
-  updateAccount,
-  archiveAccount,
-  unarchiveAccount,
-  getAccountTree,
+const accountsService = {
+  /**
+   * @param {string} organizationId
+   * @param {object} query
+   * @returns {Promise<{ items: Array, pagination: object }>}
+   */
+  async listAccounts(organizationId, query) {
+    return accountsRepository.list(null, organizationId, query);
+  },
+
+  /**
+   * The full hierarchy, from a single query.
+   *
+   * @param {string} organizationId
+   * @param {object} [query] - { status }
+   * @returns {Promise<{ tree: Array, count: number }>}
+   */
+  async getAccountTree(organizationId, query = {}) {
+    const rows = await accountsRepository.listAll(null, organizationId, query);
+    return { tree: buildTree(rows), count: rows.length };
+  },
+
+  /**
+   * @param {string} organizationId
+   * @param {string} accountId
+   * @returns {Promise<object>}
+   */
+  async getAccount(organizationId, accountId) {
+    return loadOrFail(null, organizationId, accountId);
+  },
+
+  /**
+   * @param {object} params
+   * @returns {Promise<object>}
+   */
+  async createAccount({ organizationId, actorUserId, data, ipAddress = null }) {
+    const duplicate = await accountsRepository.findByCode(null, organizationId, data.code);
+    if (duplicate) fail('An account with that code already exists', 409);
+
+    if (data.parent_account_id) {
+      await assertParentIsUsable(
+        null, organizationId, data.parent_account_id, data.account_type, null
+      );
+    }
+
+    return withTransaction(async (client) => {
+      const account = await accountsRepository.insert(client, {
+        organization_id: organizationId,
+        actor_user_id: actorUserId,
+        ...data,
+      });
+
+      await auditService.recordAudit(client, {
+        organizationId,
+        actorUserId,
+        action: 'create',
+        entityType: 'account',
+        entityId: account.id,
+        after: account,
+        ipAddress,
+      });
+
+      return account;
+    });
+  },
+
+  /**
+   * @param {object} params
+   * @returns {Promise<object>}
+   */
+  async updateAccount({ organizationId, actorUserId, accountId, data, ipAddress = null }) {
+    const existing = await loadOrFail(null, organizationId, accountId);
+
+    // A system account may be renamed, but never retyped: the posting rules
+    // reach for it by role, and changing its type silently rewires the
+    // Balance Sheet.
+    if (existing.is_system && data.account_type && data.account_type !== existing.account_type) {
+      fail('A system account\'s type cannot be changed', 409);
+    }
+
+    if (existing.is_system && data.code && data.code !== existing.code) {
+      fail('A system account\'s code cannot be changed', 409);
+    }
+
+    if (data.code) {
+      const duplicate = await accountsRepository.findByCode(
+        null, organizationId, data.code, accountId
+      );
+      if (duplicate) fail('An account with that code already exists', 409);
+    }
+
+    const nextType = data.account_type || existing.account_type;
+
+    // Retyping an account with children would leave the children mismatched,
+    // so the whole subtree has to move together or not at all.
+    if (data.account_type && data.account_type !== existing.account_type) {
+      const children = await accountsRepository.countChildren(null, organizationId, accountId);
+      if (children > 0) {
+        fail('Change the type of this account\'s children first', 409);
+      }
+    }
+
+    if (data.parent_account_id) {
+      await assertParentIsUsable(
+        null, organizationId, data.parent_account_id, nextType, accountId
+      );
+    }
+
+    return withTransaction(async (client) => {
+      const updated = await accountsRepository.update(
+        client, organizationId, accountId, data, actorUserId
+      );
+      if (!updated) fail('Account not found', 404);
+
+      await auditService.recordAudit(client, {
+        organizationId,
+        actorUserId,
+        action: 'update',
+        entityType: 'account',
+        entityId: accountId,
+        before: existing,
+        after: updated,
+        ipAddress,
+      });
+
+      return updated;
+    });
+  },
+
+  /**
+   * Archive an account.
+   *
+   * Refused for a system account, and refused with a 409 naming the blocker
+   * when anything still points at it — project.md §9.6 forbids posting to an
+   * archived account, so archiving one that a journal or a posted line depends
+   * on would break that document rather than tidy the list.
+   *
+   * @param {object} params
+   * @returns {Promise<object>}
+   */
+  async archiveAccount({ organizationId, actorUserId, accountId, ipAddress = null }) {
+    const existing = await loadOrFail(null, organizationId, accountId);
+
+    if (existing.is_system) {
+      fail('A system account cannot be archived', 409);
+    }
+
+    if (existing.status === ACCOUNT_STATUS.ARCHIVED) {
+      fail('Account is already archived', 409);
+    }
+
+    const blockers = await findBlockingReferences(
+      null, ACCOUNT_REFERENCE_SOURCES, accountId, organizationId
+    );
+    if (blockers.length > 0) {
+      const detail = blockers.map((b) => `${b.table} (${b.count})`).join(', ');
+      fail(`Account cannot be archived while it is referenced by: ${detail}`, 409);
+    }
+
+    return withTransaction(async (client) => {
+      const archived = await accountsRepository.setStatus(
+        client, organizationId, accountId, ACCOUNT_STATUS.ARCHIVED, actorUserId
+      );
+      if (!archived) fail('Account not found', 404);
+
+      await auditService.recordAudit(client, {
+        organizationId,
+        actorUserId,
+        action: 'archive',
+        entityType: 'account',
+        entityId: accountId,
+        before: existing,
+        after: archived,
+        ipAddress,
+      });
+
+      return archived;
+    });
+  },
+
+  /**
+   * @param {object} params
+   * @returns {Promise<object>}
+   */
+  async unarchiveAccount({ organizationId, actorUserId, accountId, ipAddress = null }) {
+    const existing = await loadOrFail(null, organizationId, accountId);
+
+    if (existing.status === ACCOUNT_STATUS.ACTIVE) {
+      fail('Account is already active', 409);
+    }
+
+    // Restoring a child under a still-archived parent would produce a node the
+    // tree cannot place.
+    if (existing.parent_account_id) {
+      const parent = await accountsRepository.findByIdAndOrg(
+        null, organizationId, existing.parent_account_id
+      );
+      if (parent && parent.status !== ACCOUNT_STATUS.ACTIVE) {
+        fail('Restore the parent account first', 409);
+      }
+    }
+
+    return withTransaction(async (client) => {
+      const restored = await accountsRepository.setStatus(
+        client, organizationId, accountId, ACCOUNT_STATUS.ACTIVE, actorUserId
+      );
+      if (!restored) fail('Account not found', 404);
+
+      await auditService.recordAudit(client, {
+        organizationId,
+        actorUserId,
+        action: 'unarchive',
+        entityType: 'account',
+        entityId: accountId,
+        before: existing,
+        after: restored,
+        ipAddress,
+      });
+
+      return restored;
+    });
+  },
 };
+
+module.exports = accountsService;
+module.exports.buildTree = buildTree;

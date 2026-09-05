@@ -1,19 +1,19 @@
 git config --global user.name "Dhrumil-Kharadi"
 git config --global user.email "dhumil05@gmail.com"
 
-Dhrumil
+Dhrumil frontend side
 
 git config --global user.name "Neel2102"
 git config --global user.email "neelsutariya21@gmail.com"
 
-Neel 
+Neel backend side
 
 git config --global user.name "kavyajoshiii"
 git config --global user.email "kavyajoshi4290@gmail.com"
 
-Kavya 
+Kavya frontend side
 
 git config --global user.name "YagnaSuthar"
 git config --global user.email "yagna.suthar@gmail.com"
 
-Yagna 
+Yagna backend side(AI backend)

@@ -1,114 +1,119 @@
-'use strict';
-
-const analyticsService = require('./analytics.service');
-const { validateCreateAnalyticAccount, validateUpdateAnalyticAccount } = require('./analytics.validation');
 const { success, created, error } = require('../utils/response');
+const analyticsValidation = require('./analytics.validation');
+const analyticsService = require('./analytics.service');
 
 /**
- * List analytic accounts.
+ * Analytic Accounts Controller
+ *
+ * Reads the request, validates, delegates, responds. No SQL, no rules.
  */
-async function listAnalyticAccounts(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const result = await analyticsService.listAnalyticAccounts(orgId, req.query);
-    return success(res, 'Analytic accounts retrieved successfully', result);
-  } catch (err) {
-    next(err);
-  }
-}
 
-/**
- * Get single analytic account by ID.
- */
-async function getAnalyticAccountById(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const { id } = req.params;
-    const account = await analyticsService.getAnalyticAccountById(orgId, id);
-    return success(res, 'Analytic account retrieved successfully', account);
-  } catch (err) {
-    next(err);
-  }
-}
+const analyticsController = {
+  /** GET /api/analytic-accounts */
+  async listAnalyticAccounts(req, res, next) {
+    try {
+      const validation = analyticsValidation.validateListQuery(req.query);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
 
-/**
- * Create new analytic account.
- */
-async function createAnalyticAccount(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const userId = req.user?.id;
+      const result = await analyticsService.listAnalyticAccounts(req.organizationId, {
+        ...req.query,
+        ...validation.data,
+      });
 
-    const validation = validateCreateAnalyticAccount(req.body);
-    if (!validation.isValid) {
-      return error(res, validation.errors[0] || 'Validation failed', 400, validation.errors);
+      return success(res, 'Analytic accounts retrieved successfully', result);
+    } catch (err) {
+      next(err);
     }
+  },
 
-    const account = await analyticsService.createAnalyticAccount(orgId, userId, validation.data);
-    return created(res, 'Analytic account created successfully', account);
-  } catch (err) {
-    next(err);
-  }
-}
-
-/**
- * Update analytic account.
- */
-async function updateAnalyticAccount(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const userId = req.user?.id;
-    const { id } = req.params;
-
-    const validation = validateUpdateAnalyticAccount(req.body);
-    if (!validation.isValid) {
-      return error(res, validation.errors[0] || 'Validation failed', 400, validation.errors);
+  /** GET /api/analytic-accounts/:id */
+  async getAnalyticAccount(req, res, next) {
+    try {
+      const analyticAccount = await analyticsService.getAnalyticAccount(
+        req.organizationId, req.params.id
+      );
+      return success(res, 'Analytic account retrieved successfully', { analyticAccount });
+    } catch (err) {
+      next(err);
     }
+  },
 
-    const updated = await analyticsService.updateAnalyticAccount(orgId, id, userId, validation.data);
-    return success(res, 'Analytic account updated successfully', updated);
-  } catch (err) {
-    next(err);
-  }
-}
+  /** POST /api/analytic-accounts */
+  async createAnalyticAccount(req, res, next) {
+    try {
+      const validation = analyticsValidation.validateCreate(req.body);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
 
-/**
- * Archive analytic account.
- */
-async function archiveAnalyticAccount(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const userId = req.user?.id;
-    const { id } = req.params;
+      const analyticAccount = await analyticsService.createAnalyticAccount({
+        organizationId: req.organizationId,
+        actorUserId: req.user.id,
+        data: validation.data,
+        ipAddress: req.ip,
+      });
 
-    const archived = await analyticsService.archiveAnalyticAccount(orgId, id, userId);
-    return success(res, 'Analytic account archived successfully', archived);
-  } catch (err) {
-    next(err);
-  }
-}
+      return created(res, 'Analytic account created successfully', { analyticAccount });
+    } catch (err) {
+      next(err);
+    }
+  },
 
-/**
- * Unarchive analytic account.
- */
-async function unarchiveAnalyticAccount(req, res, next) {
-  try {
-    const orgId = req.organizationId;
-    const userId = req.user?.id;
-    const { id } = req.params;
+  /** PATCH /api/analytic-accounts/:id */
+  async updateAnalyticAccount(req, res, next) {
+    try {
+      const validation = analyticsValidation.validateUpdate(req.body);
+      if (!validation.isValid) {
+        return error(res, 'Validation failed', 400, validation.errors);
+      }
 
-    const unarchived = await analyticsService.unarchiveAnalyticAccount(orgId, id, userId);
-    return success(res, 'Analytic account unarchived successfully', unarchived);
-  } catch (err) {
-    next(err);
-  }
-}
+      const analyticAccount = await analyticsService.updateAnalyticAccount({
+        organizationId: req.organizationId,
+        actorUserId: req.user.id,
+        analyticId: req.params.id,
+        data: validation.data,
+        ipAddress: req.ip,
+      });
 
-module.exports = {
-  listAnalyticAccounts,
-  getAnalyticAccountById,
-  createAnalyticAccount,
-  updateAnalyticAccount,
-  archiveAnalyticAccount,
-  unarchiveAnalyticAccount,
+      return success(res, 'Analytic account updated successfully', { analyticAccount });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /** PATCH /api/analytic-accounts/:id/archive */
+  async archiveAnalyticAccount(req, res, next) {
+    try {
+      const analyticAccount = await analyticsService.archiveAnalyticAccount({
+        organizationId: req.organizationId,
+        actorUserId: req.user.id,
+        analyticId: req.params.id,
+        ipAddress: req.ip,
+      });
+
+      return success(res, 'Analytic account archived successfully', { analyticAccount });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  /** PATCH /api/analytic-accounts/:id/unarchive */
+  async unarchiveAnalyticAccount(req, res, next) {
+    try {
+      const analyticAccount = await analyticsService.unarchiveAnalyticAccount({
+        organizationId: req.organizationId,
+        actorUserId: req.user.id,
+        analyticId: req.params.id,
+        ipAddress: req.ip,
+      });
+
+      return success(res, 'Analytic account restored successfully', { analyticAccount });
+    } catch (err) {
+      next(err);
+    }
+  },
 };
+
+module.exports = analyticsController;

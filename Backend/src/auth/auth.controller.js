@@ -258,7 +258,12 @@ const authController = {
 
   async listUsers(req, res, next) {
     try {
-      const users = await authService.listUsers(req.query);
+      // The scope comes from the verified session, never from the query
+      // string — a client-supplied organizationId would defeat the point.
+      const users = await authService.listUsers(req.query, {
+        role: req.user.role,
+        organization_id: req.user.organization_id,
+      });
       return success(res, 'Users retrieved successfully', { users });
     } catch (err) {
       next(err);

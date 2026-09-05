@@ -1,164 +1,175 @@
-'use strict';
-
-const { TAX_SCOPE, TAX_COMPUTATION } = require('../shared/constants');
-
-const VALID_SCOPES = Object.values(TAX_SCOPE);
-const VALID_COMPUTATIONS = Object.values(TAX_COMPUTATION);
-
 /**
- * Validate create tax payload.
+ * Taxes Validation
+ *
+ * Pure functions returning { isValid, errors, data? }.
+ *
+ * RATE: NUMERIC(7,4), carried as a STRING. A rate is arithmetic input to every
+ * invoice line, so it never becomes a JS float on the way in.
  */
-function validateCreateTax(payload = {}) {
-  const errors = [];
-  const {
-    name,
-    rate,
-    tax_scope,
-    computation,
-    collected_account_id,
-    paid_account_id,
-  } = payload;
 
-  if (!name || typeof name !== 'string' || name.trim().length < 2) {
-    errors.push('Tax name must be at least 2 characters');
-  } else if (name.trim().length > 100) {
-    errors.push('Tax name cannot exceed 100 characters');
-  }
+const { TAX_SCOPE, TAX_STATUS } = require('../shared/constants');
+const { money } = require('../shared/money');
 
-  if (rate === undefined || rate === null || rate === '') {
-    errors.push('Tax rate is required');
-  } else {
-    const numRate = Number(rate);
-    if (isNaN(numRate)) {
-      errors.push('Tax rate must be a valid number');
-    } else if (numRate < 0 || numRate > 100) {
-      errors.push('Tax rate must be between 0 and 100');
-    }
-  }
+const SCOPES = Object.values(TAX_SCOPE);
+const STATUSES = Object.values(TAX_STATUS);
 
-  const normalizedScope = tax_scope ? String(tax_scope).toLowerCase().trim() : 'both';
-  if (!VALID_SCOPES.includes(normalizedScope)) {
-    errors.push(`Tax scope must be one of: ${VALID_SCOPES.join(', ')}`);
-  }
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-  const normalizedComputation = computation ? String(computation).toLowerCase().trim() : 'percentage';
-  if (!VALID_COMPUTATIONS.includes(normalizedComputation)) {
-    errors.push(`Computation must be one of: ${VALID_COMPUTATIONS.join(', ')}`);
-  }
-
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-  let validCollectedAcc = null;
-  if (collected_account_id !== undefined && collected_account_id !== null && collected_account_id !== '') {
-    if (!uuidRegex.test(collected_account_id)) {
-      errors.push('Collected tax account ID (Output) must be a valid UUID');
-    } else {
-      validCollectedAcc = collected_account_id;
-    }
-  }
-
-  let validPaidAcc = null;
-  if (paid_account_id !== undefined && paid_account_id !== null && paid_account_id !== '') {
-    if (!uuidRegex.test(paid_account_id)) {
-      errors.push('Paid tax account ID (Input) must be a valid UUID');
-    } else {
-      validPaidAcc = paid_account_id;
-    }
-  }
-
-  if (errors.length > 0) {
-    return { isValid: false, errors };
-  }
-
-  return {
-    isValid: true,
-    errors: [],
-    data: {
-      name: name.trim(),
-      rate: Number(rate).toFixed(4),
-      tax_scope: normalizedScope,
-      computation: normalizedComputation,
-      collected_account_id: validCollectedAcc,
-      paid_account_id: validPaidAcc,
-    },
-  };
+/** @private */
+function optionalText(value) {
+  if (value === undefined || value === null) return null;
+  const trimmed = String(value).trim();
+  return trimmed.length ? trimmed : null;
 }
 
 /**
- * Validate update tax payload.
+ * Validate the rate and normalise it to the column's 4dp scale.
+ * @private
  */
-function validateUpdateTax(payload = {}) {
-  const errors = [];
+function checkRate(value, errors, data, required) {
+  if (value === undefined) {
+    if (required) errors.push('Rate is required');
+    return;
+  }
+
+  if (value === null || value === '') {
+    errors.push('Rate is required');
+    return;
+  }
+
+  // Plain decimal only — Decimal would otherwise accept hex and exponent forms.
+  if (!/^\d{1,3}(\.\d{1,4})?$/.test(String(value).trim())) {
+    errors.push('Rate must be a decimal percentage');
+    return;
+  }
+
+  const rate = money(value);
+
+  if (rate.isNegative() || rate.greaterThan(money('100'))) {
+    errors.push('Rate must be between 0 and 100');
+    return;
+  }
+
+  data.rate = rate.toFixed(4);
+}
+
+/** @private */
+function checkFields(body, errors, partial) {
   const data = {};
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-  if (payload.name !== undefined) {
-    if (!payload.name || typeof payload.name !== 'string' || payload.name.trim().length < 2) {
-      errors.push('Tax name must be at least 2 characters');
-    } else if (payload.name.trim().length > 100) {
-      errors.push('Tax name cannot exceed 100 characters');
+  // ── name ──
+  if (body.name !== undefined || !partial) {
+    const name = typeof body.name === 'string' ? body.name.trim() : '';
+    if (!name) {
+      errors.push('Name is required');
+    } else if (name.length < 2 || name.length > 100) {
+      errors.push('Name must be between 2 and 100 characters');
     } else {
-      data.name = payload.name.trim();
+      data.name = name;
     }
   }
 
-  if (payload.rate !== undefined) {
-    const numRate = Number(payload.rate);
-    if (isNaN(numRate)) {
-      errors.push('Tax rate must be a valid number');
-    } else if (numRate < 0 || numRate > 100) {
-      errors.push('Tax rate must be between 0 and 100');
+  checkRate(body.rate, errors, data, !partial);
+
+  // ── tax_scope ──
+  if (body.tax_scope !== undefined) {
+    if (!SCOPES.includes(body.tax_scope)) {
+      errors.push(`Scope must be one of: ${SCOPES.join(', ')}`);
     } else {
-      data.rate = numRate.toFixed(4);
+      data.tax_scope = body.tax_scope;
     }
   }
 
-  if (payload.tax_scope !== undefined) {
-    const normalizedScope = String(payload.tax_scope).toLowerCase().trim();
-    if (!VALID_SCOPES.includes(normalizedScope)) {
-      errors.push(`Tax scope must be one of: ${VALID_SCOPES.join(', ')}`);
+  // ── tax_account_id ──
+  // That the account is a liability or an asset is checked in the service,
+  // where the account can actually be loaded.
+  if (body.tax_account_id !== undefined) {
+    const accountId = optionalText(body.tax_account_id);
+    if (accountId === null) {
+      data.tax_account_id = null;
+    } else if (!UUID_REGEX.test(accountId)) {
+      errors.push('Tax account must be a valid id');
     } else {
-      data.tax_scope = normalizedScope;
+      data.tax_account_id = accountId;
     }
   }
 
-  if (payload.computation !== undefined) {
-    const normalizedComp = String(payload.computation).toLowerCase().trim();
-    if (!VALID_COMPUTATIONS.includes(normalizedComp)) {
-      errors.push(`Computation must be one of: ${VALID_COMPUTATIONS.join(', ')}`);
-    } else {
-      data.computation = normalizedComp;
-    }
-  }
-
-  if (payload.collected_account_id !== undefined) {
-    if (payload.collected_account_id === null || payload.collected_account_id === '') {
-      data.collected_account_id = null;
-    } else if (!uuidRegex.test(payload.collected_account_id)) {
-      errors.push('Collected tax account ID must be a valid UUID');
-    } else {
-      data.collected_account_id = payload.collected_account_id;
-    }
-  }
-
-  if (payload.paid_account_id !== undefined) {
-    if (payload.paid_account_id === null || payload.paid_account_id === '') {
-      data.paid_account_id = null;
-    } else if (!uuidRegex.test(payload.paid_account_id)) {
-      errors.push('Paid tax account ID must be a valid UUID');
-    } else {
-      data.paid_account_id = payload.paid_account_id;
-    }
-  }
-
-  if (errors.length > 0) {
-    return { isValid: false, errors };
-  }
-
-  return { isValid: true, errors: [], data };
+  return data;
 }
 
-module.exports = {
-  validateCreateTax,
-  validateUpdateTax,
+const taxesValidation = {
+  /**
+   * @param {object} body
+   * @returns {{ isValid: boolean, errors: string[], data?: object }}
+   */
+  validateCreate(body) {
+    if (!body || typeof body !== 'object') {
+      return { isValid: false, errors: ['Request body must be a JSON object'] };
+    }
+
+    const errors = [];
+    const data = checkFields(body, errors, false);
+
+    if (errors.length > 0) return { isValid: false, errors };
+
+    return {
+      isValid: true,
+      errors: [],
+      data: {
+        name: data.name,
+        rate: data.rate,
+        // Phase 0 Decision 4 puts tax on both sides, so 'both' is the default
+        // rather than a choice the operator has to remember to make.
+        tax_scope: data.tax_scope ?? TAX_SCOPE.BOTH,
+        tax_account_id: data.tax_account_id ?? null,
+      },
+    };
+  },
+
+  /**
+   * @param {object} body
+   * @returns {{ isValid: boolean, errors: string[], data?: object }}
+   */
+  validateUpdate(body) {
+    if (!body || typeof body !== 'object') {
+      return { isValid: false, errors: ['Request body must be a JSON object'] };
+    }
+
+    const errors = [];
+    const data = checkFields(body, errors, true);
+
+    if (errors.length === 0 && Object.keys(data).length === 0) {
+      errors.push('No updatable fields were provided');
+    }
+
+    if (errors.length > 0) return { isValid: false, errors };
+
+    return { isValid: true, errors: [], data };
+  },
+
+  /**
+   * @param {object} query
+   * @returns {{ isValid: boolean, errors: string[], data?: object }}
+   */
+  validateListQuery(query = {}) {
+    const errors = [];
+
+    if (query.status !== undefined && query.status !== '' && !STATUSES.includes(query.status)) {
+      errors.push(`Status filter must be one of: ${STATUSES.join(', ')}`);
+    }
+
+    if (query.scope !== undefined && query.scope !== '' && !SCOPES.includes(query.scope)) {
+      errors.push(`Scope filter must be one of: ${SCOPES.join(', ')}`);
+    }
+
+    if (errors.length > 0) return { isValid: false, errors };
+
+    return {
+      isValid: true,
+      errors: [],
+      data: { status: query.status || null, scope: query.scope || null },
+    };
+  },
 };
+
+module.exports = taxesValidation;

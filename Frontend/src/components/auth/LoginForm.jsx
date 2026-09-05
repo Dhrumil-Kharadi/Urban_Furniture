@@ -7,6 +7,7 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { useAuth, getDashboardPath } from '@/context/AuthContext';
 import { usePageTransition } from '@/reusablefiles/pagetransition';
 import api from '@/lib/api';
+import { formatChallenge, normalizeDigits } from '@/lib/captcha';
 
 export default function LoginForm({
   onSwitchToRegister,
@@ -22,7 +23,7 @@ export default function LoginForm({
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [captcha, setCaptcha] = useState({ captchaId: '', challenge: '', loading: true });
+  const [captcha, setCaptcha] = useState({ captchaId: '', challenge: '', operands: null, loading: true });
 
   // Retained across a locale switch (which remounts this tree). The
   // password and the captcha answer are excluded: the first should not
@@ -30,7 +31,6 @@ export default function LoginForm({
   const [formData, setFormData, clearDraft] = useFormDraft(
     'auth:login',
     {
-      organizationSlug: '',
       email: initialEmail,
       password: '',
       captchaAnswer: '',
@@ -47,6 +47,7 @@ export default function LoginForm({
       if (res.success && res.data) {
         setCaptcha({
           captchaId: res.data.captchaId,
+          operands: res.data.operands || null,
           challenge: res.data.challenge,
           loading: false,
         });
@@ -64,6 +65,7 @@ export default function LoginForm({
         if (!ignore && res.success && res.data) {
           setCaptcha({
             captchaId: res.data.captchaId,
+          operands: res.data.operands || null,
             challenge: res.data.challenge,
             loading: false,
           });
@@ -98,11 +100,10 @@ export default function LoginForm({
 
     try {
       const res = await login({
-        organizationSlug: formData.organizationSlug?.trim() || undefined,
         email: formData.email.trim(),
         password: formData.password,
         captchaId: captcha.captchaId,
-        captchaAnswer: formData.captchaAnswer.trim(),
+        captchaAnswer: normalizeDigits(formData.captchaAnswer.trim()),
         remember: Boolean(formData.remember),
       });
 
@@ -182,24 +183,6 @@ export default function LoginForm({
       )}
 
       <form className="login-form-auth" onSubmit={handleSubmit} noValidate>
-        {/* Optional Organization Slug (Disambiguation) */}
-        <div className="field-auth">
-          <label className="field-label-auth" htmlFor="login-org">
-            {t('login.organizationLabel')}{' '}
-            <span style={{ opacity: 0.6, fontSize: '0.85em' }}>(Optional)</span>
-          </label>
-          <input
-            id="login-org"
-            name="organizationSlug"
-            type="text"
-            placeholder={t('login.organizationPlaceholder')}
-            className="field-input-auth"
-            value={formData.organizationSlug || ''}
-            onChange={(e) => setFormData({ ...formData, organizationSlug: e.target.value })}
-            disabled={isSubmitting}
-          />
-        </div>
-
         {/* Username / Email field */}
         <div className="field-auth">
           <label className="field-label-auth" htmlFor="login-email">
@@ -278,7 +261,7 @@ export default function LoginForm({
           <div className="captcha-row-auth">
             <div className="captcha-challenge-box-auth">
               <span className="captcha-challenge-text-auth">
-                {captcha.loading ? t('captcha.loading') : captcha.challenge.replace(/^What is\s*/i, '')}
+                {captcha.loading ? t('captcha.loading') : formatChallenge(captcha)}
               </span>
               <button
                 type="button"

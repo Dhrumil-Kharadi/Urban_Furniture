@@ -36,11 +36,17 @@ const migrations = [
   require('./006_create_organizations'),
   require('./007_add_organization_to_users'),
   require('./008_create_accounts'),
+  require('./009_create_contacts'),
+  require('./010_create_product_categories'),
   require('./011_create_taxes'),
+  require('./012_create_products'),
   require('./013_create_journals'),
   require('./014_create_analytic_accounts'),
+  require('./016_create_journal_entries'),
+  require('./017_create_journal_entry_lines'),
   require('./018_create_document_sequences'),
   require('./026_create_audit_logs'),
+  require('./028_ledger_integrity_triggers'),
 ];
 
 /**

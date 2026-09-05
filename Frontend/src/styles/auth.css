@@ -1149,3 +1149,46 @@
 
 
 
+
+/* ── Primary CTA variant ─────────────────────────────────────────────────────
+   "Create organisation" is the whole point of the signup page, but it was
+   rendering at the same 38px / 0.708rem as a secondary control and sitting in
+   the right-hand half of a split row, which read as an afterthought.
+
+   This variant gives the page's primary action its own full-width line and a
+   size that matches its weight. Colours and shadows come from the existing
+   --auth-btn-* tokens; no new hue is introduced.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+.form-action-row-auth:has(.btn-primary-auth.is-cta) {
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.form-action-row-auth .btn-primary-auth.is-cta {
+  flex: 1 0 100%;
+  width: 100%;
+  min-width: 0;
+  align-self: stretch;
+  height: 50px;
+  margin-top: 0.68rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  box-shadow: var(--auth-btn-shadow), 0 0 0 1px var(--glow-primary);
+}
+
+.form-action-row-auth .btn-primary-auth.is-cta:hover:not(:disabled) {
+  box-shadow: var(--auth-btn-hover-shadow), 0 0 0 1px var(--glow-strong);
+}
+
+.form-action-row-auth .btn-primary-auth.is-cta:active:not(:disabled) {
+  box-shadow: var(--auth-btn-active-shadow);
+}
+
+.form-action-row-auth .btn-primary-auth.is-cta:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

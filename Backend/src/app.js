@@ -14,8 +14,18 @@ const organizationsRoutes = require('./organizations/organizations.routes');
 const usersRoutes = require('./users/users.routes');
 const accountsRoutes = require('./accounts/accounts.routes');
 const journalsRoutes = require('./journals/journals.routes');
+const journalEntriesRoutes = require('./journals/journalEntries.routes');
 const taxesRoutes = require('./taxes/taxes.routes');
 const analyticsRoutes = require('./analytics/analytics.routes');
+const contactsRoutes = require('./contacts/contacts.routes');
+const productsRoutes = require('./products/products.routes');
+const productCategoriesRoutes = require('./product-categories/product-categories.routes');
+
+// Uploaded files (contact profile images) live outside src/ and are served
+// read-only from a fixed root. Filenames are random UUIDs chosen by the
+// server, so a path is unguessable, and the extension is decided by the
+// file's magic bytes rather than anything the uploader claimed.
+const { UPLOAD_ROOT, PUBLIC_PREFIX } = require('./shared/fileStorage');
 
 /**
  * Create and configure Express application.
@@ -65,12 +75,29 @@ app.use('/api/organizations', organizationsRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/accounts', accountsRoutes);
 app.use('/api/journals', journalsRoutes);
+app.use('/api/journal-entries', journalEntriesRoutes);
 app.use('/api/taxes', taxesRoutes);
 app.use('/api/analytic-accounts', analyticsRoutes);
-app.use('/api/analytics', analyticsRoutes);
+app.use('/api/contacts', contactsRoutes);
+app.use('/api/products', productsRoutes);
+app.use('/api/product-categories', productCategoriesRoutes);
+
+// ─── Uploaded Files ─────────────────────────────────────
+// `dotfiles: 'deny'` and an explicit Content-Type stop a stored file being
+// served back as anything a browser would execute.
+app.use(
+  PUBLIC_PREFIX,
+  express.static(UPLOAD_ROOT, {
+    dotfiles: 'deny',
+    index: false,
+    setHeaders: (res) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Disposition', 'inline');
+    },
+  })
+);
 
 // Future feature routes will be mounted here:
-// app.use('/api/users', userRoutes);
 // app.use('/api/orders', orderRoutes);
 // app.use('/api/payments', paymentRoutes);
 // app.use('/api/admin', adminRoutes);

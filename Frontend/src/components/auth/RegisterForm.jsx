@@ -5,20 +5,20 @@ import useFormDraft from '@/hooks/useFormDraft';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import api from '@/lib/api';
+import { formatChallenge, normalizeDigits } from '@/lib/captcha';
 
 export default function RegisterForm({ onSwitchToLogin, onSwitchToVerifyEmail }) {
   const t = useTranslations('auth');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorList, setErrorList] = useState([]);
-  const [captcha, setCaptcha] = useState({ captchaId: '', challenge: '', loading: true });
+  const [captcha, setCaptcha] = useState({ captchaId: '', challenge: '', operands: null, loading: true });
 
   // Retained across a locale switch (which remounts this tree). Both
   // password fields and the captcha answer are excluded — see useFormDraft.
   const [formData, setFormData, clearDraft] = useFormDraft(
     'auth:register',
     {
-      organizationName: '',
       fullName: '',
       email: '',
       password: '',
@@ -36,6 +36,7 @@ export default function RegisterForm({ onSwitchToLogin, onSwitchToVerifyEmail })
       if (res.success && res.data) {
         setCaptcha({
           captchaId: res.data.captchaId,
+          operands: res.data.operands || null,
           challenge: res.data.challenge,
           loading: false,
         });
@@ -53,6 +54,7 @@ export default function RegisterForm({ onSwitchToLogin, onSwitchToVerifyEmail })
         if (!ignore && res.success && res.data) {
           setCaptcha({
             captchaId: res.data.captchaId,
+          operands: res.data.operands || null,
             challenge: res.data.challenge,
             loading: false,
           });
@@ -73,7 +75,7 @@ export default function RegisterForm({ onSwitchToLogin, onSwitchToVerifyEmail })
     e.preventDefault();
     setErrorList([]);
 
-    if (!formData.organizationName.trim() || !formData.fullName.trim() || !formData.email.trim() || !formData.password) {
+    if (!formData.fullName.trim() || !formData.email.trim() || !formData.password) {
       setErrorList([t('errors.generic')]);
       return;
     }
@@ -100,9 +102,8 @@ export default function RegisterForm({ onSwitchToLogin, onSwitchToVerifyEmail })
         name: formData.fullName.trim(),
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
-        organizationName: formData.organizationName.trim(),
         captchaId: captcha.captchaId,
-        captchaAnswer: formData.captchaAnswer.trim(),
+        captchaAnswer: normalizeDigits(formData.captchaAnswer.trim()),
       };
 
       const res = await api.post('/auth/register', payload);
@@ -182,24 +183,6 @@ export default function RegisterForm({ onSwitchToLogin, onSwitchToVerifyEmail })
       )}
 
       <form className="login-form-auth" onSubmit={handleSubmit} noValidate>
-        {/* Organization Name */}
-        <div className="field-auth" style={{ marginBottom: '1rem' }}>
-          <label className="field-label-auth" htmlFor="reg-org">
-            {t('register.organizationLabel')}
-          </label>
-          <input
-            id="reg-org"
-            name="organizationName"
-            type="text"
-            placeholder={t('register.organizationPlaceholder')}
-            className="field-input-auth"
-            value={formData.organizationName}
-            onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })}
-            required
-            disabled={isSubmitting}
-          />
-        </div>
-
         {/* 2 by 2 Input Grid */}
         <div className="fields-grid-2x2-auth">
           {/* Full Name */}
@@ -319,7 +302,7 @@ export default function RegisterForm({ onSwitchToLogin, onSwitchToVerifyEmail })
           <div className="captcha-row-auth">
             <div className="captcha-challenge-box-auth">
               <span className="captcha-challenge-text-auth">
-                {captcha.loading ? t('captcha.loading') : captcha.challenge.replace(/^What is\s*/i, '')}
+                {captcha.loading ? t('captcha.loading') : formatChallenge(captcha)}
               </span>
               <button
                 type="button"
@@ -399,7 +382,7 @@ export default function RegisterForm({ onSwitchToLogin, onSwitchToVerifyEmail })
 
           <button
             type="submit"
-            className="btn-primary-auth"
+            className="btn-primary-auth is-cta"
             disabled={isSubmitting}
           >
             <span>{isSubmitting ? t('register.submittingButton') : t('register.submitButton')}</span>

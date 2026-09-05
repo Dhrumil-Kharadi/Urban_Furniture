@@ -98,18 +98,40 @@ const authRepository = {
 
   /**
    * List users with pagination (excluding password hash).
+   *
+   * MULTI-TENANCY: `organizationId` scopes the result to one tenant and is the
+   * normal case. Only the platform operator (super_admin), who belongs to no
+   * organization, may pass null and see across tenants. A business owner
+   * listing users must never see another organization's people.
+   *
    * @param {Object} [options]
    * @param {number} [options.limit=50]
    * @param {number} [options.offset=0]
+   * @param {string|null} [options.organizationId=null]
    * @returns {Promise<Array>}
    */
-  async listUsers({ limit = 50, offset = 0 } = {}) {
+  async listUsers({ limit = 50, offset = 0, organizationId = null } = {}) {
+    const params = [];
+    let whereClause = '';
+
+    if (organizationId) {
+      params.push(organizationId);
+      whereClause = `WHERE organization_id = $${params.length}`;
+    }
+
+    params.push(limit);
+    const limitIdx = params.length;
+    params.push(offset);
+    const offsetIdx = params.length;
+
     const result = await pool.query(
-      `SELECT id, name, email, role, email_verified, token_version, created_at, updated_at
+      `SELECT id, name, email, role, organization_id, email_verified,
+              token_version, created_at, updated_at
        FROM users
+       ${whereClause}
        ORDER BY created_at DESC
-       LIMIT $1 OFFSET $2`,
-      [limit, offset]
+       LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
+      params
     );
     return result.rows;
   },

@@ -1,245 +1,259 @@
-'use strict';
-
 const { pool } = require('../config/db');
-const { buildOrderBy, buildMeta } = require('../shared/pagination');
-
-const ALLOWED_SORT_COLUMNS = ['name', 'journal_type', 'sequence_prefix', 'status', 'created_at'];
+const { parse: parsePagination, buildSort, searchTerm, listResult } = require('../shared/listQuery');
 
 /**
- * Insert a new journal.
+ * Journals Repository
+ *
+ * Parameterised SQL only. Every statement is scoped by organization_id, and
+ * every single-row lookup matches on both id and organization_id.
  */
-async function createJournal(client, orgId, userId, data) {
-  const db = client || pool;
-  const sql = `
-    INSERT INTO journals (
-      organization_id, name, journal_type, sequence_prefix,
-      default_debit_account_id, default_credit_account_id, status,
-      created_by, updated_by
-    ) VALUES ($1, $2, $3, $4, $5, $6, 'active', $7, $7)
-    RETURNING id, organization_id, name, journal_type, sequence_prefix,
-              default_debit_account_id, default_credit_account_id, status,
-              created_at, updated_at
-  `;
-  const params = [
-    orgId,
-    data.name,
-    data.journal_type,
-    data.sequence_prefix,
-    data.default_debit_account_id,
-    data.default_credit_account_id,
-    userId,
-  ];
-  const res = await db.query(sql, params);
-  return res.rows[0];
-}
 
-/**
- * Find journal by ID within an organization with account details.
- */
-async function findJournalById(client, orgId, id) {
-  const db = client || pool;
-  const sql = `
-    SELECT j.id, j.organization_id, j.name, j.journal_type, j.sequence_prefix,
-           j.default_debit_account_id, j.default_credit_account_id, j.status,
-           j.created_at, j.updated_at,
-           da.name AS default_debit_account_name, da.code AS default_debit_account_code,
-           ca.name AS default_credit_account_name, ca.code AS default_credit_account_code
-    FROM journals j
-    LEFT JOIN accounts da ON j.default_debit_account_id = da.id AND da.organization_id = j.organization_id
-    LEFT JOIN accounts ca ON j.default_credit_account_id = ca.id AND ca.organization_id = j.organization_id
-    WHERE j.id = $1 AND j.organization_id = $2
-  `;
-  const res = await db.query(sql, [id, orgId]);
-  return res.rows[0] || null;
-}
+const ALLOWED_SORT_COLUMNS = ['name', 'journal_type', 'status', 'created_at', 'updated_at'];
 
-/**
- * Find journal by name within an organization.
- */
-async function findJournalByName(client, orgId, name) {
-  const db = client || pool;
-  const sql = `
-    SELECT id, organization_id, name, journal_type, status
-    FROM journals
-    WHERE organization_id = $1 AND LOWER(name) = LOWER($2)
-  `;
-  const res = await db.query(sql, [orgId, name]);
-  return res.rows[0] || null;
-}
+const SELECT_COLUMNS = `
+  j.id, j.organization_id, j.name, j.journal_type, j.sequence_prefix,
+  j.default_debit_account_id, j.default_credit_account_id, j.status,
+  j.created_by, j.updated_by, j.created_at, j.updated_at
+`;
 
-/**
- * List journals with pagination, filters, and safe allow-listed sorting.
- */
-async function listJournals(client, orgId, query = {}) {
-  const db = client || pool;
-  const {
-    page = 1,
-    limit = 25,
-    offset = 0,
-    search = '',
-    status = '',
-    journalType = '',
-    sortBy = 'name',
-    sortOrder = 'ASC',
-  } = query;
+/** Both default accounts are resolved in the same query, never per row. */
+const ACCOUNT_JOINS = `
+  LEFT JOIN accounts da
+         ON da.id = j.default_debit_account_id
+        AND da.organization_id = j.organization_id
+  LEFT JOIN accounts ca
+         ON ca.id = j.default_credit_account_id
+        AND ca.organization_id = j.organization_id
+`;
 
-  const conditions = ['j.organization_id = $1'];
-  const params = [orgId];
-  let paramIdx = 2;
+const ACCOUNT_NAMES = `
+  da.name AS default_debit_account_name,
+  da.code AS default_debit_account_code,
+  ca.name AS default_credit_account_name,
+  ca.code AS default_credit_account_code
+`;
 
-  if (status && status !== 'all') {
-    conditions.push(`j.status = $${paramIdx++}`);
-    params.push(status);
-  }
+const journalsRepository = {
+  /**
+   * @param {object|null} client
+   * @param {string} organizationId
+   * @param {object} [query]
+   * @returns {Promise<{ items: Array, pagination: object }>}
+   */
+  async list(client, organizationId, query = {}) {
+    const db = client || pool;
+    const { page, limit, offset } = parsePagination(query);
 
-  if (journalType && journalType !== 'all') {
-    conditions.push(`j.journal_type = $${paramIdx++}`);
-    params.push(journalType);
-  }
+    const conditions = ['j.organization_id = $1'];
+    const params = [organizationId];
 
-  if (search && search.trim()) {
-    conditions.push(`(j.name ILIKE $${paramIdx} OR j.sequence_prefix ILIKE $${paramIdx})`);
-    params.push(`%${search.trim()}%`);
-    paramIdx++;
-  }
-
-  const whereClause = conditions.join(' AND ');
-  const orderByClause = buildOrderBy(sortBy, ALLOWED_SORT_COLUMNS, 'name', sortOrder);
-
-  const countSql = `
-    SELECT COUNT(*)::int AS total
-    FROM journals j
-    WHERE ${whereClause}
-  `;
-  const countRes = await db.query(countSql, params);
-  const total = countRes.rows[0]?.total || 0;
-
-  const dataSql = `
-    SELECT j.id, j.organization_id, j.name, j.journal_type, j.sequence_prefix,
-           j.default_debit_account_id, j.default_credit_account_id, j.status,
-           j.created_at, j.updated_at,
-           da.name AS default_debit_account_name, da.code AS default_debit_account_code,
-           ca.name AS default_credit_account_name, ca.code AS default_credit_account_code
-    FROM journals j
-    LEFT JOIN accounts da ON j.default_debit_account_id = da.id AND da.organization_id = j.organization_id
-    LEFT JOIN accounts ca ON j.default_credit_account_id = ca.id AND ca.organization_id = j.organization_id
-    WHERE ${whereClause}
-    ORDER BY j.${orderByClause}
-    LIMIT $${paramIdx++} OFFSET $${paramIdx++}
-  `;
-  params.push(limit, offset);
-
-  const dataRes = await db.query(dataSql, params);
-  return {
-    items: dataRes.rows,
-    pagination: buildMeta(page, limit, total),
-  };
-}
-
-/**
- * Update an existing journal.
- */
-async function updateJournal(client, orgId, id, userId, data) {
-  const db = client || pool;
-  const setClauses = ['updated_at = NOW()'];
-  const params = [id, orgId];
-  let paramIdx = 3;
-
-  if (userId) {
-    setClauses.push(`updated_by = $${paramIdx++}`);
-    params.push(userId);
-  }
-
-  if (data.name !== undefined) {
-    setClauses.push(`name = $${paramIdx++}`);
-    params.push(data.name);
-  }
-  if (data.journal_type !== undefined) {
-    setClauses.push(`journal_type = $${paramIdx++}`);
-    params.push(data.journal_type);
-  }
-  if (data.sequence_prefix !== undefined) {
-    setClauses.push(`sequence_prefix = $${paramIdx++}`);
-    params.push(data.sequence_prefix);
-  }
-  if (data.default_debit_account_id !== undefined) {
-    setClauses.push(`default_debit_account_id = $${paramIdx++}`);
-    params.push(data.default_debit_account_id);
-  }
-  if (data.default_credit_account_id !== undefined) {
-    setClauses.push(`default_credit_account_id = $${paramIdx++}`);
-    params.push(data.default_credit_account_id);
-  }
-
-  const sql = `
-    UPDATE journals
-    SET ${setClauses.join(', ')}
-    WHERE id = $1 AND organization_id = $2
-    RETURNING id, organization_id, name, journal_type, sequence_prefix,
-              default_debit_account_id, default_credit_account_id, status,
-              created_at, updated_at
-  `;
-  const res = await db.query(sql, params);
-  return res.rows[0] || null;
-}
-
-/**
- * Archive a journal (sets status='archived').
- */
-async function archiveJournal(client, orgId, id, userId) {
-  const db = client || pool;
-  const sql = `
-    UPDATE journals
-    SET status = 'archived', updated_by = $3, updated_at = NOW()
-    WHERE id = $1 AND organization_id = $2
-    RETURNING id, organization_id, name, journal_type, status
-  `;
-  const res = await db.query(sql, [id, orgId, userId]);
-  return res.rows[0] || null;
-}
-
-/**
- * Unarchive a journal (sets status='active').
- */
-async function unarchiveJournal(client, orgId, id, userId) {
-  const db = client || pool;
-  const sql = `
-    UPDATE journals
-    SET status = 'active', updated_by = $3, updated_at = NOW()
-    WHERE id = $1 AND organization_id = $2
-    RETURNING id, organization_id, name, journal_type, status
-  `;
-  const res = await db.query(sql, [id, orgId, userId]);
-  return res.rows[0] || null;
-}
-
-/**
- * Check if a journal is referenced by posted journal entries.
- */
-async function checkJournalBlockers(client, orgId, id) {
-  const db = client || pool;
-  try {
-    const entryCheck = await db.query(
-      `SELECT COUNT(*)::int AS count FROM journal_entries WHERE journal_id = $1 AND organization_id = $2 LIMIT 1`,
-      [id, orgId]
-    );
-    if (entryCheck.rows[0]?.count > 0) {
-      return 'Referenced by existing journal entries';
+    if (query.status) {
+      params.push(query.status);
+      conditions.push(`j.status = $${params.length}`);
     }
-  } catch (err) {
-    // journal_entries table might not exist until Phase 7
-  }
-  return null;
-}
 
-module.exports = {
-  createJournal,
-  findJournalById,
-  findJournalByName,
-  listJournals,
-  updateJournal,
-  archiveJournal,
-  unarchiveJournal,
-  checkJournalBlockers,
-  ALLOWED_SORT_COLUMNS,
+    if (query.type) {
+      params.push(query.type);
+      conditions.push(`j.journal_type = $${params.length}`);
+    }
+
+    const search = searchTerm(query);
+    if (search) {
+      params.push(`%${search}%`);
+      const idx = params.length;
+      conditions.push(`(j.name ILIKE $${idx} OR j.sequence_prefix ILIKE $${idx})`);
+    }
+
+    const whereClause = `WHERE ${conditions.join(' AND ')}`;
+
+    const countRes = await db.query(
+      `SELECT COUNT(*)::integer AS total FROM journals j ${whereClause}`,
+      params
+    );
+    const total = countRes.rows[0]?.total || 0;
+
+    const orderBy = buildSort(query, ALLOWED_SORT_COLUMNS, 'name').replace(/^"/, 'j."');
+
+    params.push(limit);
+    const limitIdx = params.length;
+    params.push(offset);
+    const offsetIdx = params.length;
+
+    const dataRes = await db.query(
+      `SELECT ${SELECT_COLUMNS}, ${ACCOUNT_NAMES}
+         FROM journals j
+         ${ACCOUNT_JOINS}
+        ${whereClause}
+        ORDER BY ${orderBy}
+        LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
+      params
+    );
+
+    return listResult(dataRes.rows, page, limit, total);
+  },
+
+  /**
+   * @param {object|null} client
+   * @param {string} organizationId
+   * @param {string} journalId
+   * @returns {Promise<object|null>}
+   */
+  async findByIdAndOrg(client, organizationId, journalId) {
+    const db = client || pool;
+    const res = await db.query(
+      `SELECT ${SELECT_COLUMNS}, ${ACCOUNT_NAMES}
+         FROM journals j
+         ${ACCOUNT_JOINS}
+        WHERE j.id = $1 AND j.organization_id = $2`,
+      [journalId, organizationId]
+    );
+    return res.rows[0] || null;
+  },
+
+  /**
+   * @param {object|null} client
+   * @param {string} organizationId
+   * @param {string} name
+   * @param {string|null} [excludeId]
+   * @returns {Promise<object|null>}
+   */
+  async findByName(client, organizationId, name, excludeId = null) {
+    const db = client || pool;
+    const params = [organizationId, name];
+    let sql = `SELECT id, name FROM journals
+                WHERE organization_id = $1 AND lower(name) = lower($2)`;
+
+    if (excludeId) {
+      params.push(excludeId);
+      sql += ` AND id <> $${params.length}`;
+    }
+
+    const res = await db.query(`${sql} LIMIT 1`, params);
+    return res.rows[0] || null;
+  },
+
+  /**
+   * @param {object|null} client
+   * @param {object} payload
+   * @returns {Promise<object>}
+   */
+  async insert(client, payload) {
+    const db = client || pool;
+    const res = await db.query(
+      `INSERT INTO journals (
+         organization_id, name, journal_type, sequence_prefix,
+         default_debit_account_id, default_credit_account_id, created_by, updated_by
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+       RETURNING id`,
+      [
+        payload.organization_id,
+        payload.name,
+        payload.journal_type,
+        payload.sequence_prefix,
+        payload.default_debit_account_id,
+        payload.default_credit_account_id,
+        payload.actor_user_id,
+      ]
+    );
+
+    return journalsRepository.findByIdAndOrg(db, payload.organization_id, res.rows[0].id);
+  },
+
+  /**
+   * The SET list is built from a fixed whitelist of column names, so no
+   * request value ever reaches the SQL text.
+   *
+   * @param {object|null} client
+   * @param {string} organizationId
+   * @param {string} journalId
+   * @param {object} fields
+   * @param {string} actorUserId
+   * @returns {Promise<object|null>}
+   */
+  async update(client, organizationId, journalId, fields, actorUserId) {
+    const db = client || pool;
+    const editable = [
+      'name', 'journal_type', 'sequence_prefix',
+      'default_debit_account_id', 'default_credit_account_id',
+    ];
+
+    const assignments = [];
+    const params = [];
+
+    for (const column of editable) {
+      if (fields[column] !== undefined) {
+        params.push(fields[column]);
+        assignments.push(`${column} = $${params.length}`);
+      }
+    }
+
+    if (assignments.length === 0) {
+      return journalsRepository.findByIdAndOrg(db, organizationId, journalId);
+    }
+
+    params.push(actorUserId);
+    assignments.push(`updated_by = $${params.length}`);
+    assignments.push('updated_at = NOW()');
+
+    params.push(journalId);
+    const idIdx = params.length;
+    params.push(organizationId);
+    const orgIdx = params.length;
+
+    const res = await db.query(
+      `UPDATE journals
+          SET ${assignments.join(', ')}
+        WHERE id = $${idIdx} AND organization_id = $${orgIdx}
+        RETURNING id`,
+      params
+    );
+
+    if (res.rowCount === 0) return null;
+    return journalsRepository.findByIdAndOrg(db, organizationId, journalId);
+  },
+
+  /**
+   * @param {object|null} client
+   * @param {string} organizationId
+   * @param {string} journalId
+   * @param {string} status
+   * @param {string} actorUserId
+   * @returns {Promise<object|null>}
+   */
+  async setStatus(client, organizationId, journalId, status, actorUserId) {
+    const db = client || pool;
+    const res = await db.query(
+      `UPDATE journals
+          SET status = $1, updated_by = $2, updated_at = NOW()
+        WHERE id = $3 AND organization_id = $4
+        RETURNING id`,
+      [status, actorUserId, journalId, organizationId]
+    );
+
+    if (res.rowCount === 0) return null;
+    return journalsRepository.findByIdAndOrg(db, organizationId, journalId);
+  },
+
+  /**
+   * Count the active journals of a type, so the last one of a type the posting
+   * rules depend on cannot be archived out from under them.
+   *
+   * @param {object|null} client
+   * @param {string} organizationId
+   * @param {string} journalType
+   * @returns {Promise<number>}
+   */
+  async countActiveOfType(client, organizationId, journalType) {
+    const db = client || pool;
+    const res = await db.query(
+      `SELECT COUNT(*)::integer AS total
+         FROM journals
+        WHERE organization_id = $1 AND journal_type = $2 AND status = 'active'`,
+      [organizationId, journalType]
+    );
+    return res.rows[0]?.total || 0;
+  },
 };
+
+module.exports = journalsRepository;

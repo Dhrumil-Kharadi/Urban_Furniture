@@ -37,24 +37,28 @@ const CURRENCIES = Object.freeze(['INR']);
 
 // ─── Chart of Accounts ───────────────────────────────────────────────────────
 
-/** Top-level account categories (project.md §4.3 & technicalrequirement.md §4.1). */
+/**
+ * Top-level account categories.
+ *
+ * project.md §4.3 names five: Asset / Liability / Expense / Income / Capital.
+ * The stored value is 'capital', matching the CHECK constraint that migration
+ * 008 already put on accounts.account_type — not 'equity'.
+ */
 const ACCOUNT_TYPES = Object.freeze({
   ASSET: 'asset',
   LIABILITY: 'liability',
-  CAPITAL: 'capital',
-  EQUITY: 'capital', // Backward-compatibility alias for capital
-  INCOME: 'income',
   EXPENSE: 'expense',
+  INCOME: 'income',
+  CAPITAL: 'capital',
 });
 
+/** Master data is archived, never deleted (project.md §9.6). */
 const ACCOUNT_STATUS = Object.freeze({
   ACTIVE: 'active',
   ARCHIVED: 'archived',
-  INACTIVE: 'archived', // alias
 });
 
-// ─── Journals ────────────────────────────────────────────────────────────────
-
+/** Journal classification (project.md §4.4). */
 const JOURNAL_TYPES = Object.freeze({
   SALES: 'sales',
   PURCHASE: 'purchase',
@@ -63,28 +67,12 @@ const JOURNAL_TYPES = Object.freeze({
   GENERAL: 'general',
 });
 
-// ─── Tax ─────────────────────────────────────────────────────────────────────
-
-/** Which transactions a tax rate applies to (both = sales AND purchase). */
-const TAX_SCOPE = Object.freeze({
-  SALES: 'sales',
-  PURCHASE: 'purchase',
-  BOTH: 'both',
-});
-
-const TAX_COMPUTATION = Object.freeze({
-  PERCENTAGE: 'percentage',
-  FIXED: 'fixed',
-});
-
-const TAX_STATUS = Object.freeze({
+const JOURNAL_STATUS = Object.freeze({
   ACTIVE: 'active',
   ARCHIVED: 'archived',
-  INACTIVE: 'archived', // alias
 });
 
-// ─── Analytic Accounts ───────────────────────────────────────────────────────
-
+/** Analytic account classification (project.md §4.6). */
 const ANALYTIC_TYPES = Object.freeze({
   INCOME: 'income',
   EXPENSE: 'expense',
@@ -95,18 +83,68 @@ const ANALYTIC_STATUS = Object.freeze({
   ARCHIVED: 'archived',
 });
 
-// ─── Contacts ────────────────────────────────────────────────────────────────
+// ─── Tax ─────────────────────────────────────────────────────────────────────
 
-/** Contact classification (customer, supplier, or both). */
-const CONTACT_TYPE = Object.freeze({
-  CUSTOMER: 'customer',
-  SUPPLIER: 'supplier',
+/**
+ * Which transactions a tax rate applies to.
+ *
+ * Phase 0 Decision 4 puts tax on both sides, so 'both' is the default. The
+ * singular 'purchase' matches the CHECK constraint on taxes.tax_scope.
+ */
+const TAX_SCOPE = Object.freeze({
+  SALES: 'sales',
+  PURCHASE: 'purchase',
   BOTH: 'both',
 });
 
+const TAX_STATUS = Object.freeze({
+  ACTIVE: 'active',
+  ARCHIVED: 'archived',
+});
+
+// ─── Contacts ────────────────────────────────────────────────────────────────
+
+/**
+ * Contact classification (project.md §4.1: Customer / Vendor / Both).
+ * The spec says "vendor" throughout, so the stored value is 'vendor'.
+ */
+const CONTACT_TYPE = Object.freeze({
+  CUSTOMER: 'customer',
+  VENDOR: 'vendor',
+  BOTH: 'both',
+});
+
+/**
+ * Master-data lifecycle. project.md §9.6 forbids deleting a record that has
+ * transactions, so 'archived' — not 'deleted', not 'inactive' — is the
+ * terminal state for every master-data table.
+ */
 const CONTACT_STATUS = Object.freeze({
   ACTIVE: 'active',
-  INACTIVE: 'inactive',
+  ARCHIVED: 'archived',
+});
+
+// ─── Products ──────────────────────────────────────────────────────
+
+/**
+ * Product classification (project.md §4.2: Goods / Service / Combo).
+ * 'combo' is a LABEL ONLY in v1 — there is no components table and no line
+ * explosion on order. See AMBIGUITY A4.
+ */
+const PRODUCT_TYPE = Object.freeze({
+  GOODS: 'goods',
+  SERVICE: 'service',
+  COMBO: 'combo',
+});
+
+const PRODUCT_STATUS = Object.freeze({
+  ACTIVE: 'active',
+  ARCHIVED: 'archived',
+});
+
+const PRODUCT_CATEGORY_STATUS = Object.freeze({
+  ACTIVE: 'active',
+  ARCHIVED: 'archived',
 });
 
 // ─── Documents ───────────────────────────────────────────────────────────────
@@ -168,13 +206,16 @@ module.exports = {
   ACCOUNT_TYPES,
   ACCOUNT_STATUS,
   JOURNAL_TYPES,
-  TAX_SCOPE,
-  TAX_COMPUTATION,
-  TAX_STATUS,
+  JOURNAL_STATUS,
   ANALYTIC_TYPES,
   ANALYTIC_STATUS,
+  TAX_SCOPE,
+  TAX_STATUS,
   CONTACT_TYPE,
   CONTACT_STATUS,
+  PRODUCT_TYPE,
+  PRODUCT_STATUS,
+  PRODUCT_CATEGORY_STATUS,
   DOC_TYPES,
   DOC_STATUS,
   ENTRY_TYPE,
