@@ -442,7 +442,10 @@
       "taxes": "कर",
       "analyticAccounts": "विश्लेषणात्मक खाते",
       "journalEntries": "जर्नल प्रविष्टियाँ",
-      "auditLogs": "ऑडिट लॉग"
+      "auditLogs": "ऑडिट लॉग",
+      "receipts": "ग्राहक रसीदें",
+      "creditNotes": "क्रेडिट नोट",
+      "debitNotes": "डेबिट नोट"
     },
     "promo": {
       "title": "आपकी बहियाँ",

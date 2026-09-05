@@ -130,34 +130,35 @@ export default function PortalInvoicesPage() {
   return (
     <ProtectedRoute allowedRoles={['customer', 'vendor']}>
       <main className="portal-route">
-        {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
+        {/* Top Header Bar */}
+        <div className="portal-header-bar">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <Link
               href="/portal"
-              className="p-2 rounded-xl bg-[var(--card-bg,#181d28)] border border-[var(--border,#2b3245)] text-gray-400 hover:text-white transition-colors"
+              className="portal-back-link"
+              title="Back to portal"
             >
               <ArrowLeft size={18} />
             </Link>
             <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary,#4f46e5)]">
+              <span className="portal-header-badge">
                 {tPortal('badge')}
               </span>
-              <h1 className="text-2xl font-bold mt-0.5">
+              <h1 className="portal-header-title">
                 {t('title')}
               </h1>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="portal-header-subtitle">
                 {t('subtitle')}
               </p>
             </div>
           </div>
 
           {/* Status Filter */}
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3.5 py-2 rounded-xl bg-[var(--surface,#1f2637)] border border-[var(--border,#2b3245)] text-xs text-gray-200 focus:outline-none"
+              className="portal-filter-select"
             >
               <option value="">All Invoices</option>
               <option value="posted">Unpaid (Posted)</option>
@@ -168,16 +169,16 @@ export default function PortalInvoicesPage() {
           </div>
         </div>
 
-        {/* Invoices Table */}
-        <div className="bg-[var(--card-bg,#181d28)] border border-[var(--border,#2b3245)] rounded-2xl overflow-hidden shadow-sm">
+        {/* Invoices Table Card */}
+        <div className="portal-table-card">
           <DataTable
             columns={columns}
             rows={invoices}
             loading={loading}
             loadingLabel="Loading invoices…"
             emptyLabel={
-              <div className="py-12 text-center text-sm text-gray-400">
-                <Receipt size={28} className="mx-auto text-gray-500 mb-2 opacity-60" />
+              <div style={{ padding: '3rem 1rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                <Receipt size={28} style={{ margin: '0 auto 8px', opacity: 0.6 }} />
                 {t('empty')}
               </div>
             }

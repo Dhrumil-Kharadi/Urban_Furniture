@@ -442,7 +442,10 @@
       "taxes": "કર",
       "analyticAccounts": "વિશ્લેષણાત્મક ખાતાં",
       "journalEntries": "જર્નલ નોંધો",
-      "auditLogs": "ઓડિટ લોગ"
+      "auditLogs": "ઓડિટ લોગ",
+      "receipts": "ગ્રાહક રસીદો",
+      "creditNotes": "ક્રેડિટ નોટ્સ",
+      "debitNotes": "ડેબિટ નોટ્સ"
     },
     "promo": {
       "title": "તમારી ચોપડીઓ",

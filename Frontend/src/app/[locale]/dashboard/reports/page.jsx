@@ -10,7 +10,16 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { Scale, TrendingUp, BarChart2, ArrowRight } from 'lucide-react';
+import {
+  Scale,
+  TrendingUp,
+  BarChart2,
+  BookOpen,
+  FileSpreadsheet,
+  Clock,
+  Receipt,
+  ArrowRight,
+} from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 
 export default function ReportsHubPage() {
@@ -18,27 +27,51 @@ export default function ReportsHubPage() {
 
   const reportCards = [
     {
-      title: t('hub.balanceSheetTitle'),
-      desc: t('hub.balanceSheetDesc'),
+      title: t('hub.balanceSheetTitle') || 'Balance Sheet',
+      desc: t('hub.balanceSheetDesc') || 'Assets, liabilities and capital as of any date you choose.',
       href: '/dashboard/reports/balance-sheet',
-      icon: <Scale size={26} />,
+      icon: <Scale size={24} />,
     },
     {
-      title: t('hub.profitLossTitle'),
-      desc: t('hub.profitLossDesc'),
+      title: t('hub.profitLossTitle') || 'Profit & Loss',
+      desc: t('hub.profitLossDesc') || 'Income less purchases and operating expenses over a date range.',
       href: '/dashboard/reports/profit-loss',
-      icon: <TrendingUp size={26} />,
+      icon: <TrendingUp size={24} />,
     },
     {
-      title: t('hub.budgetReportTitle'),
-      desc: t('hub.budgetReportDesc'),
+      title: t('generalLedger.title') || 'General Ledger',
+      desc: t('generalLedger.subtitle') || 'Every posted journal line with a running account balance.',
+      href: '/dashboard/reports/general-ledger',
+      icon: <BookOpen size={24} />,
+    },
+    {
+      title: 'Trial Balance',
+      desc: 'Debit and credit balances for all chart of accounts verifying ledger equality.',
+      href: '/dashboard/reports/trial-balance',
+      icon: <FileSpreadsheet size={24} />,
+    },
+    {
+      title: t('hub.budgetReportTitle') || 'Budget Report',
+      desc: t('hub.budgetReportDesc') || 'Planned against actual spending per analytic account with variance.',
       href: '/dashboard/reports/budget-report',
-      icon: <BarChart2 size={26} />,
+      icon: <BarChart2 size={24} />,
+    },
+    {
+      title: 'Aged Receivables',
+      desc: 'Customer overdue balances grouped into 30, 60, 90, and 90+ day aging buckets.',
+      href: '/dashboard/reports/aged-receivables',
+      icon: <Clock size={24} />,
+    },
+    {
+      title: 'Aged Payables',
+      desc: 'Vendor payable obligations categorized by payment aging schedule.',
+      href: '/dashboard/reports/aged-payables',
+      icon: <Receipt size={24} />,
     },
   ];
 
   return (
-      <div className="report-container">
+    <div className="report-container">
       {/* Page Header */}
       <div className="report-header">
         <div className="report-header-content">
@@ -54,7 +87,7 @@ export default function ReportsHubPage() {
         </div>
       </div>
 
-      {/* Reports Grid */}
+      {/* Reports Multi-Column Horizontal Grid */}
       <div className="report-hub-grid">
         {reportCards.map((card) => (
           <Link key={card.href} href={card.href} className="report-hub-card">
@@ -71,12 +104,12 @@ export default function ReportsHubPage() {
             </div>
 
             <div className="report-hub-card-action">
-              <span>{t('hub.viewReport')}</span>
+              <span>{t('hub.viewReport') || 'Open report'}</span>
               <ArrowRight size={14} />
             </div>
           </Link>
         ))}
       </div>
-      </div>
+    </div>
   );
 }

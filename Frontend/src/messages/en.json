@@ -442,7 +442,10 @@
       "taxes": "Taxes",
       "analyticAccounts": "Analytic accounts",
       "journalEntries": "Journal entries",
-      "auditLogs": "Audit logs"
+      "auditLogs": "Audit logs",
+      "receipts": "Customer Receipts",
+      "creditNotes": "Credit Notes",
+      "debitNotes": "Debit Notes"
     },
     "promo": {
       "title": "Your books on",

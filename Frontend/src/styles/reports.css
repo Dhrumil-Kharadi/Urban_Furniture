@@ -443,3 +443,93 @@
   justify-content: space-between;
   margin-top: 4px;
 }
+
+/* ── Reports Hub Grid & Multi-Card Horizontal Rows ── */
+.report-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.report-hub-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 1.6rem;
+  text-decoration: none;
+  color: var(--text-primary);
+  box-shadow: 6px 6px 14px var(--nm-shadow-dark),
+              -3px -3px 8px var(--nm-shadow-light);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s ease,
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 210px;
+}
+
+.report-hub-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent-primary);
+  box-shadow: 8px 8px 22px var(--nm-shadow-dark),
+              -4px -4px 12px var(--nm-shadow-light);
+}
+
+.report-hub-icon-wrap {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: rgba(0, 0, 128, 0.08);
+  border: 1px solid var(--border-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-primary);
+  margin-bottom: 1.25rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.report-hub-card:hover .report-hub-icon-wrap {
+  background: var(--accent-primary);
+  color: #ffffff;
+}
+
+.report-hub-card-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem;
+}
+
+.report-hub-card-desc {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.report-hub-card-action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+  margin-top: 1.5rem;
+  transition: gap 0.2s ease;
+}
+
+.report-hub-card:hover .report-hub-card-action {
+  gap: 10px;
+}
+
+@media (max-width: 680px) {
+  .report-hub-grid {
+    grid-template-columns: 1fr;
+  }
+}

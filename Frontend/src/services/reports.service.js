@@ -30,6 +30,21 @@ export const reportsService = {
     return api.get(`/reports/general-ledger${qs}`);
   },
 
+  async getTrialBalance(params = {}) {
+    const qs = toQueryString(params);
+    return api.get(`/reports/trial-balance${qs}`);
+  },
+
+  async getAgedReceivables(params = {}) {
+    const qs = toQueryString(params);
+    return api.get(`/reports/aged-receivables${qs}`);
+  },
+
+  async getAgedPayables(params = {}) {
+    const qs = toQueryString(params);
+    return api.get(`/reports/aged-payables${qs}`);
+  },
+
   exportCsvUrl(type, params = {}) {
     const qs = toQueryString(params);
     return `${BASE_URL}/reports/${type}/export${qs}`;

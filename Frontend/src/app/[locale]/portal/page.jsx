@@ -126,109 +126,113 @@ export default function PortalPage() {
   ];
 
   return (
-    <ProtectedRoute allowedRoles={['customer']}>
+    <ProtectedRoute allowedRoles={['customer', 'vendor']}>
       <main className="portal-route">
-        {/* Portal Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-[var(--card-bg,#181d28)] p-6 rounded-2xl border border-[var(--border,#2b3245)] shadow-sm">
+        {/* Portal Header Card */}
+        <div className="portal-header-card">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary,#4f46e5)]">
+            <span className="portal-header-badge">
               {t('badge')}
             </span>
-            <h1 className="text-2xl font-bold mt-1">
+            <h1 className="portal-header-title">
               {user?.name ? t('welcome', { name: user.name }) : t('title')}
             </h1>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="portal-header-subtitle">
               {t('subtitle')}
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div>
             <Button variant="ghost" size="sm" onClick={logout} icon={<LogOut size={16} />}>
               {t('signOut')}
             </Button>
           </div>
         </div>
 
-        {/* Quick Navigation Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Link href="/portal/invoices" className="group block">
-            <div className="p-5 bg-[var(--card-bg,#181d28)] border border-[var(--border,#2b3245)] rounded-2xl hover:border-[var(--primary,#4f46e5)] transition-all flex items-center justify-between shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl">
-                  <Receipt size={24} />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold group-hover:text-[var(--primary,#4f46e5)] transition-colors">
-                    {t('tabs.invoices')}
-                  </h3>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    View all invoices and pay balances online
-                  </p>
-                </div>
+        {/* Quick Navigation Cards (Horizontal 2-Card Row) */}
+        <div className="portal-nav-grid">
+          <Link href="/portal/invoices" className="portal-nav-card">
+            <div className="portal-nav-card-left">
+              <div className="portal-nav-card-icon">
+                <Receipt size={22} />
               </div>
-              <ArrowRight size={18} className="text-gray-400 group-hover:translate-x-1 transition-transform" />
+              <div>
+                <h2 className="portal-nav-card-title">
+                  {t('tabs.invoices')}
+                </h2>
+                <p className="portal-nav-card-desc">
+                  View all customer invoices and pay balances online
+                </p>
+              </div>
             </div>
+            <ArrowRight size={18} className="portal-nav-arrow" />
           </Link>
 
-          <Link href="/portal/bills" className="group block">
-            <div className="p-5 bg-[var(--card-bg,#181d28)] border border-[var(--border,#2b3245)] rounded-2xl hover:border-[var(--primary,#4f46e5)] transition-all flex items-center justify-between shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl">
-                  <FileText size={24} />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold group-hover:text-emerald-400 transition-colors">
-                    {t('tabs.bills')}
-                  </h3>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    View vendor bills statement of account
-                  </p>
-                </div>
+          <Link href="/portal/bills" className="portal-nav-card">
+            <div className="portal-nav-card-left">
+              <div className="portal-nav-card-icon emerald">
+                <FileText size={22} />
               </div>
-              <ArrowRight size={18} className="text-gray-400 group-hover:translate-x-1 transition-transform" />
+              <div>
+                <h2 className="portal-nav-card-title">
+                  {t('tabs.bills')}
+                </h2>
+                <p className="portal-nav-card-desc">
+                  View vendor bills and statement of account
+                </p>
+              </div>
             </div>
+            <ArrowRight size={18} className="portal-nav-arrow" />
           </Link>
         </div>
 
-        {/* KPI Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* KPI Stats (Horizontal 3-Card Row) */}
+        <div className="portal-stat-grid">
           <StatCard
             title={t('kpi.outstanding')}
-            value={`₹${Number(summary?.total_outstanding || 0).toLocaleString()}`}
+            value={`₹${Number(summary?.total_outstanding || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`}
             icon={<DollarSign size={18} />}
             tone="deep"
           />
           <StatCard
             title={t('kpi.overdue')}
-            value={`₹${Number(summary?.total_overdue || 0).toLocaleString()}`}
-            icon={<Clock size={18} className="text-amber-400" />}
+            value={`₹${Number(summary?.total_overdue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`}
+            icon={<Clock size={18} />}
             tone="light"
           />
           <StatCard
             title={t('kpi.paidThisYear')}
-            value={`₹${Number(summary?.paid_this_year || 0).toLocaleString()}`}
-            icon={<ShieldCheck size={18} className="text-emerald-400" />}
+            value={`₹${Number(summary?.paid_this_year || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`}
+            icon={<ShieldCheck size={18} />}
             tone="light"
           />
         </div>
 
-        {/* Recent Invoices Table */}
-        <div className="bg-[var(--card-bg,#181d28)] border border-[var(--border,#2b3245)] rounded-2xl overflow-hidden shadow-sm">
-          <div className="p-5 border-b border-[var(--border,#2b3245)] flex items-center justify-between">
+        {/* Recent Invoices Table Card */}
+        <div className="portal-table-card">
+          <div className="portal-table-card-head">
             <div>
-              <h2 className="text-base font-bold text-gray-100">
+              <h2 className="portal-table-title">
                 Recent Invoices
               </h2>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="portal-table-subtitle">
                 Outstanding and recently settled invoices
               </p>
             </div>
             <Link
               href="/portal/invoices"
-              className="text-xs text-[var(--primary,#4f46e5)] hover:underline flex items-center gap-1 font-medium"
+              style={{
+                fontSize: '0.82rem',
+                color: 'var(--accent-primary)',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontWeight: 600,
+              }}
             >
               <span>View all</span>
-              <ArrowRight size={12} />
+              <ArrowRight size={13} />
             </Link>
           </div>
 
