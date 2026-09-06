@@ -81,6 +81,7 @@
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   scrollbar-width: thin;
 }
 
@@ -850,12 +851,17 @@
 
 .ui-stat-value {
   font-family: 'Orbitron', monospace;
-  font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+  font-size: clamp(0.92rem, 1.55vw, 1.35rem);
   font-weight: 900;
-  letter-spacing: -0.03em;
-  line-height: 1;
+  letter-spacing: 0;
+  line-height: 1.15;
   margin-bottom: 6px;
   color: var(--stat-num-color);
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ui-card-deep .ui-stat-value {

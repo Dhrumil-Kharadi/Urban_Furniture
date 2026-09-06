@@ -166,7 +166,7 @@ export default function BalanceSheetReportPage() {
             </div>
             <table className="report-table">
               <tbody>
-                {data.assets?.accounts?.map((acc) => (
+                {data.assets?.lines?.map((acc) => (
                   <tr key={acc.code}>
                     <td className="report-code-col">[{acc.code}]</td>
                     <td className="report-name-col">{acc.name}</td>
@@ -175,7 +175,7 @@ export default function BalanceSheetReportPage() {
                     </td>
                   </tr>
                 ))}
-                {(!data.assets?.accounts || data.assets.accounts.length === 0) && (
+                {(!data.assets?.lines || data.assets.lines.length === 0) && (
                   <tr>
                     <td colSpan={3} className="report-empty-cell">{t('noAssets')}</td>
                   </tr>
@@ -192,7 +192,7 @@ export default function BalanceSheetReportPage() {
             </div>
             <table className="report-table">
               <tbody>
-                {data.liabilities?.accounts?.map((acc) => (
+                {data.liabilities?.lines?.map((acc) => (
                   <tr key={acc.code}>
                     <td className="report-code-col">[{acc.code}]</td>
                     <td className="report-name-col">{acc.name}</td>
@@ -201,7 +201,7 @@ export default function BalanceSheetReportPage() {
                     </td>
                   </tr>
                 ))}
-                {(!data.liabilities?.accounts || data.liabilities.accounts.length === 0) && (
+                {(!data.liabilities?.lines || data.liabilities.lines.length === 0) && (
                   <tr>
                     <td colSpan={3} className="report-empty-cell">{t('noLiabilities')}</td>
                   </tr>
@@ -213,12 +213,12 @@ export default function BalanceSheetReportPage() {
             <div className="report-section-bar equity">
               <span>{t('equity')}</span>
               <span>
-                <MoneyText value={data.equity?.total} />
+                <MoneyText value={data.capital?.total} />
               </span>
             </div>
             <table className="report-table">
               <tbody>
-                {data.equity?.accounts?.map((acc) => (
+                {data.capital?.lines?.map((acc) => (
                   <tr key={acc.code}>
                     <td className="report-code-col">[{acc.code}]</td>
                     <td className="report-name-col">{acc.name}</td>
@@ -234,7 +234,7 @@ export default function BalanceSheetReportPage() {
                     {t('netProfit')}
                   </td>
                   <td className="report-amount-col" style={{ color: 'var(--accent-primary)' }}>
-                    <MoneyText value={data.currentPeriodNetProfit} />
+                    <MoneyText value={data.capital?.netProfit} />
                   </td>
                 </tr>
               </tbody>
