@@ -33,6 +33,7 @@ const dashboardRoutes = require('./dashboard/dashboard.routes');
 const notificationsRoutes = require('./notifications/notifications.routes');
 const attachmentsRoutes = require('./attachments/attachments.routes');
 const auditRoutes = require('./audit/audit.routes');
+const aiRoutes = require('./ai/ai.routes');
 
 // Uploaded files (contact profile images) live outside src/ and are served
 // read-only from a fixed root. Filenames are random UUIDs chosen by the
@@ -109,6 +110,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/attachments', attachmentsRoutes);
 app.use('/api/audit-logs', auditRoutes);
+app.use('/api/ai', aiRoutes);
 app.use('/api/webhooks/payments', (req, res, next) => {
   req.url = '/webhooks' + req.url;
   portalRoutes(req, res, next);

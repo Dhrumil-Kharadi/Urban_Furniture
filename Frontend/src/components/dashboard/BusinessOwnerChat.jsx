@@ -93,6 +93,7 @@ export default function BusinessOwnerChat() {
   const [messages, setMessages] = useState([initialMessage]);
   const [isSending, setIsSending] = useState(false);
   const [isCheckingMessage, setIsCheckingMessage] = useState(false);
+  const [messageSafetyError, setMessageSafetyError] = useState('');
   const inputRef = useRef(null);
   const messagesRef = useRef(null);
   const conversationIdRef = useRef(createConversationId());
@@ -119,12 +120,13 @@ export default function BusinessOwnerChat() {
     const content = message.trim();
     if (!content || isSending || isCheckingMessage) return;
 
-    setMessage('');
+    setMessageSafetyError('');
     setIsCheckingMessage(true);
 
     try {
       const moderation = await api.post('/ai/predict-comment', { comment: content });
-      if (moderation.is_toxic) {
+      const moderationResult = moderation.data || moderation;
+      if (moderationResult.is_toxic === true) {
         setMessages((current) => [
           ...current,
           {
@@ -136,6 +138,7 @@ export default function BusinessOwnerChat() {
         return;
       }
 
+      setMessage('');
       setMessages((current) => [
         ...current,
         { id: `${Date.now()}-user`, role: 'user', content },
@@ -154,6 +157,7 @@ export default function BusinessOwnerChat() {
         },
       ]);
     } catch (error) {
+      setMessageSafetyError(error?.message || 'Message safety check is unavailable. Try again.');
       setMessages((current) => [
         ...current,
         {
@@ -224,6 +228,11 @@ export default function BusinessOwnerChat() {
               <Send size={16} />
             </button>
           </form>
+          {messageSafetyError && (
+            <div className="owner-chat-input-error" role="alert">
+              {messageSafetyError}
+            </div>
+          )}
         </section>
       )}
 

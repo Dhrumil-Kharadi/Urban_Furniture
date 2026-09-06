@@ -12,6 +12,8 @@ const env = {
   // Server
   nodeEnv: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT, 10) || 5000,
+  aiBackendUrl: process.env.AI_BACKEND_URL || 'http://127.0.0.1:9000',
+  aiRequestTimeoutMs: parseInt(process.env.AI_REQUEST_TIMEOUT_MS, 10) || 15000,
   isProduction: process.env.NODE_ENV === 'production',
 
   // PostgreSQL
