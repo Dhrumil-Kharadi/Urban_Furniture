@@ -11,7 +11,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { FileText, Receipt, ArrowRight, DollarSign, Clock, ShieldCheck, LogOut } from 'lucide-react';
+import { ArrowRight, DollarSign, Clock, ShieldCheck, LogOut } from 'lucide-react';
 
 import { Link } from '@/i18n/navigation';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
@@ -147,43 +147,6 @@ export default function PortalPage() {
               {t('signOut')}
             </Button>
           </div>
-        </div>
-
-        {/* Quick Navigation Cards (Horizontal 2-Card Row) */}
-        <div className="portal-nav-grid">
-          <Link href="/portal/invoices" className="portal-nav-card">
-            <div className="portal-nav-card-left">
-              <div className="portal-nav-card-icon">
-                <Receipt size={22} />
-              </div>
-              <div>
-                <h2 className="portal-nav-card-title">
-                  {t('tabs.invoices')}
-                </h2>
-                <p className="portal-nav-card-desc">
-                  View all customer invoices and pay balances online
-                </p>
-              </div>
-            </div>
-            <ArrowRight size={18} className="portal-nav-arrow" />
-          </Link>
-
-          <Link href="/portal/bills" className="portal-nav-card">
-            <div className="portal-nav-card-left">
-              <div className="portal-nav-card-icon emerald">
-                <FileText size={22} />
-              </div>
-              <div>
-                <h2 className="portal-nav-card-title">
-                  {t('tabs.bills')}
-                </h2>
-                <p className="portal-nav-card-desc">
-                  View vendor bills and statement of account
-                </p>
-              </div>
-            </div>
-            <ArrowRight size={18} className="portal-nav-arrow" />
-          </Link>
         </div>
 
         {/* KPI Stats (Horizontal 3-Card Row) */}

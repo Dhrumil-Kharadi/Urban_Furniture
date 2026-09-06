@@ -14,6 +14,7 @@
   margin: 0 auto;
   padding: 1.5rem;
   box-sizing: border-box;
+  min-width: 0;
 }
 
 .fin-dash-header {
@@ -53,6 +54,7 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .fin-dash-subtitle {
@@ -75,6 +77,8 @@
   box-shadow: inset 2px 2px 5px var(--nm-inset-dark),
               inset -2px -2px 5px var(--nm-inset-light);
   gap: 4px;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .fin-dash-period-btn {
@@ -104,7 +108,8 @@
 /* ─── KPI Cards Grid ─────────────────────────────────────── */
 .fin-dash-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, auto));
   gap: 1.25rem;
   width: 100%;
 }
@@ -144,10 +149,13 @@
 
 .fin-dash-stat-val {
   font-family: 'Orbitron', monospace;
-  font-size: 1.5rem;
+  font-size: clamp(1rem, 2vw, 1.5rem);
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .fin-dash-stat-val.positive {
@@ -191,6 +199,7 @@
 
   .fin-dash-kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
   }
 
   .fin-dash-triple-grid {
@@ -214,6 +223,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  min-width: 0;
 }
 
 .fin-dash-chart-header {
@@ -228,6 +238,7 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 /* ─── Recent Activity Section ────────────────────────────── */
@@ -284,7 +295,7 @@
 
 .fin-dash-triple-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 1.5rem;
   width: 100%;
 }
@@ -312,6 +323,39 @@
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-primary);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .fin-dash-container {
+    gap: 1.15rem;
+    padding: 0.85rem;
+  }
+
+  .fin-dash-header,
+  .fin-dash-toolbar {
+    width: 100%;
+  }
+
+  .fin-dash-period-selector {
+    width: 100%;
+  }
+
+  .fin-dash-period-btn {
+    flex: 1 0 auto;
+    min-width: 0;
+    padding-inline: 0.65rem;
+    font-size: 0.64rem;
+  }
+
+  .fin-dash-chart-card {
+    padding: 1rem;
+  }
+
+  .fin-dash-activity-table {
+    min-width: 600px;
+  }
 }
 
 .fin-dash-cash-caption {
