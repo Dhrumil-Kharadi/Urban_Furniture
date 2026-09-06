@@ -15,6 +15,12 @@
   --bg-raised: #FFFFFF;
   --bg-card: #FFFFFF;
 
+   /* ── Searchable picker menus ── */
+   --picker-dropdown-bg: #FFFFFF;
+   --picker-dropdown-border: rgba(0, 0, 128, 0.16);
+   --picker-dropdown-shadow: 0 12px 28px rgba(0, 0, 40, 0.16);
+   --picker-item-hover-bg: #E8EEF4;
+
 
   /* ── Neumorphic shadows ── */
   --nm-shadow-dark: rgba(0, 0, 80, 0.08);

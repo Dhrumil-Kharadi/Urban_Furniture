@@ -450,6 +450,7 @@
 }
 
 .dash-user {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 9px;
@@ -459,6 +460,65 @@
   cursor: pointer;
   min-width: 0;
   text-align: left;
+}
+
+.dash-profile {
+  position: relative;
+}
+
+.dash-profile-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 120;
+  min-width: 210px;
+  padding: 8px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-medium);
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(0, 0, 40, 0.16);
+}
+
+.dash-profile-summary {
+  display: grid;
+  gap: 3px;
+  padding: 7px 9px 9px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.dash-profile-summary b {
+  color: var(--text-primary);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.76rem;
+}
+
+.dash-profile-summary span {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-family: 'Sora', sans-serif;
+  font-size: 0.66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-profile-logout {
+  width: 100%;
+  margin-top: 7px;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-primary);
+  font: 500 0.75rem 'Sora', sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dash-profile-logout:hover,
+.dash-profile-logout:focus-visible {
+  background: var(--dash-nav-hover-bg);
+  color: var(--accent-primary);
+  outline: none;
 }
 
 .dash-user-who {

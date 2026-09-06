@@ -17,7 +17,7 @@ import { ArrowLeft, Receipt, Send, XCircle, CheckCircle, Wallet, AlertTriangle }
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import {
-  StatusPill, ErrorState, ConfirmDialog, useToast, DocumentTotals,
+  StatusPill, ErrorState, ConfirmDialog, useToast,
 } from '@/components/shared';
 import CustomerInvoiceForm from '@/components/customer-invoices/CustomerInvoiceForm';
 import RegisterPaymentModal from '@/components/payments/RegisterPaymentModal';
@@ -192,14 +192,6 @@ export default function CustomerInvoiceDetailPage() {
       )}
 
       <CustomerInvoiceForm initialData={invoice} isReadOnly onSubmit={() => {}} onCancel={() => {}} />
-
-      <div className="doc-totals-right">
-        <DocumentTotals
-          untaxedAmount={invoice.untaxed_amount}
-          taxAmount={invoice.tax_amount}
-          totalAmount={invoice.total_amount}
-        />
-      </div>
 
       <ConfirmDialog
         isOpen={confirmAction === 'post'}

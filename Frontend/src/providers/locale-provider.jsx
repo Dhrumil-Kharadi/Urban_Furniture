@@ -18,6 +18,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { AuthProvider } from '@/context/AuthContext';
 import { ToastProvider } from '@/context/ToastContext';
+import { ToastProvider as SharedToastProvider } from '@/components/shared/ToastProvider';
 
 /**
  * @param {object} props
@@ -53,7 +54,7 @@ export default function LocaleProvider({
     >
       <AuthProvider>
         <ToastProvider>
-          {children}
+          <SharedToastProvider>{children}</SharedToastProvider>
         </ToastProvider>
       </AuthProvider>
     </NextIntlClientProvider>

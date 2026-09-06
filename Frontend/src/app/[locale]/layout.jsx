@@ -13,6 +13,7 @@ import { routing } from '@/i18n/routing';
 import { localeMetadata } from '@/i18n/metadata';
 import LocaleProvider from '@/providers/locale-provider';
 import { PageTransitionProvider, PageTransition } from '@/reusablefiles/pagetransition';
+import RouteStatusNotifier from '@/components/shared/RouteStatusNotifier';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -62,6 +63,7 @@ export default async function LocaleLayout({ children, params }) {
     <LocaleProvider locale={locale} messages={messages}>
       <PageTransitionProvider>
         <PageTransition />
+        <RouteStatusNotifier />
         <div id="site-root">{children}</div>
       </PageTransitionProvider>
     </LocaleProvider>

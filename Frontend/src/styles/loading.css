@@ -756,3 +756,23 @@
   .ribbon-loading { stroke-dashoffset: 0; }
   .bloom-ring-loading { opacity: 0.25; }
 }
+
+.route-loading-screen-loading {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: var(--bg-base);
+}
+
+.route-loading-spinner-loading {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border-medium);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: routeSpin-loading 0.75s linear infinite;
+}
+
+@keyframes routeSpin-loading {
+  to { transform: rotate(360deg); }
+}

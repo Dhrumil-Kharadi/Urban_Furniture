@@ -151,6 +151,8 @@ export default function DashboardFrame({
       ]}
       extras={<LanguageSwitcher />}
       user={user ? { name: user.name || '', email: user.email || '' } : null}
+      onLogout={logout}
+      logoutLabel={t('common.logout')}
     />
   );
 

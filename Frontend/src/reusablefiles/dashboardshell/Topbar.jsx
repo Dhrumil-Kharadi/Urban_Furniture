@@ -12,7 +12,7 @@
 // All copy is passed in translated.
 // ============================================================
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import InputBox from '@/reusablefiles/inputbox/InputBox';
 import Avatar from '@/reusablefiles/avatar/Avatar';
 
@@ -35,7 +35,28 @@ export default function Topbar({
   onMenuToggle,
   menuLabel,
   onUserClick,
+  onLogout,
+  logoutLabel = 'Log out',
 }) {
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    if (!profileOpen) return undefined;
+    const handleOutsideClick = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [profileOpen]);
+
+  const handleLogout = () => {
+    setProfileOpen(false);
+    onLogout?.();
+  };
+
   return (
     <header className="dash-topbar">
       <button
@@ -83,18 +104,36 @@ export default function Topbar({
         {extras}
 
         {user ? (
-          <button
-            type="button"
-            className="dash-user"
-            onClick={onUserClick}
-            aria-label={user.name}
-          >
-            <Avatar name={user.name} src={user.avatar} size="lg" ring />
-            <span className="dash-user-who">
-              <b>{user.name}</b>
-              <span>{user.email}</span>
-            </span>
-          </button>
+          <div className="dash-profile" ref={profileRef}>
+            <button
+              type="button"
+              className="dash-user"
+              onClick={() => {
+                setProfileOpen((open) => !open);
+                onUserClick?.();
+              }}
+              aria-label={user.name}
+              aria-expanded={profileOpen}
+              aria-haspopup="menu"
+            >
+              <Avatar name={user.name} src={user.avatar} size="lg" ring />
+              <span className="dash-user-who">
+                <b>{user.name}</b>
+                <span>{user.email}</span>
+              </span>
+            </button>
+            {profileOpen ? (
+              <div className="dash-profile-menu" role="menu">
+                <div className="dash-profile-summary">
+                  <b>{user.name}</b>
+                  <span>{user.email}</span>
+                </div>
+                <button type="button" className="dash-profile-logout" onClick={handleLogout} role="menuitem">
+                  {logoutLabel}
+                </button>
+              </div>
+            ) : null}
+          </div>
         ) : null}
       </div>
     </header>

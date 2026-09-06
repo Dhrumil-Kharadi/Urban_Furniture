@@ -347,6 +347,7 @@
       "thisYear": "इस वर्ष",
       "exportData": "डेटा निर्यात करें",
       "loadingDirectory": "उपयोगकर्ता लोड हो रहे हैं…",
+      "pageReady": "पृष्ठ लोड हो गया",
       "noUsers": "कोई खाता नहीं मिला",
       "overview": "अवलोकन",
       "collapseMenu": "मेनू संकुचित करें",
@@ -445,7 +446,8 @@
       "auditLogs": "ऑडिट लॉग",
       "receipts": "ग्राहक रसीदें",
       "creditNotes": "क्रेडिट नोट",
-      "debitNotes": "डेबिट नोट"
+      "debitNotes": "डेबिट नोट",
+      "invoice": "चालान बनाएं"
     },
     "promo": {
       "title": "आपकी बहियाँ",

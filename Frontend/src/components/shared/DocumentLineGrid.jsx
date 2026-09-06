@@ -144,164 +144,145 @@ export default function DocumentLineGrid({
 
   return (
     <div className="line-grid-container">
-      <div className="doc-table-wrap">
-        <table className="line-grid-table">
-          <thead>
-            <tr>
-              <th className="line-grid-th">#</th>
-              <th className="line-grid-th">{t('product')}</th>
-              <th className="line-grid-th">{t('description')}</th>
-              {showAccount && <th className="line-grid-th">Account</th>}
-              <th className="line-grid-th">{t('quantity')}</th>
-              <th className="line-grid-th">{t('unitPrice')}</th>
-              <th className="line-grid-th">{t('tax')}</th>
-              <th className="line-grid-th">{t('analytic')}</th>
-              <th className="line-grid-th">{t('subtotal')}</th>
-              {!readOnly && <th className="line-grid-th"></th>}
-            </tr>
-          </thead>
-          <tbody>
-            {lines.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={showAccount ? 10 : 9}
-                  className="doc-cell-muted"
-                >
-                  No items added yet. Click &quot;Add Line Item&quot; below to add products.
-                </td>
-              </tr>
-            ) : (
-              lines.map((line, idx) => (
-                <tr
-                  key={idx}
+      <div className="line-card-list">
+        {lines.length === 0 ? (
+          <div className="line-card-empty">
+            No items added yet. Click &quot;Add Line Item&quot; below to add products.
+          </div>
+        ) : (
+          lines.map((line, idx) => (
+            <article className="line-item-card" key={idx}>
+              <div className="line-item-card-head">
+                <span className="line-item-number">Line {idx + 1}</span>
+                {!readOnly && (
+                  <button
+                    type="button"
+                    className="line-item-delete"
+                    onClick={() => handleRemoveRow(idx)}
+                    title="Delete line"
+                    aria-label={`Delete line ${idx + 1}`}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
 
-                >
-                  <td className="line-grid-td">
-                    {idx + 1}
-                  </td>
-                  <td className="line-grid-td">
-                    {readOnly ? (
-                      <span >
-                        {line.product_name || line.description || 'Custom Item'}
-                      </span>
-                    ) : (
-                      <ProductPicker
-                        value={line.product_id}
-                        onChange={(item) => handleProductSelect(idx, item)}
-                        priceType={priceField}
-                        disabled={readOnly}
-                      />
-                    )}
-                  </td>
-                  <td className="line-grid-td">
-                    {readOnly ? (
-                      <span >{line.description}</span>
-                    ) : (
-                      <input
-                        type="text"
-                        placeholder="Item description…"
-                        value={line.description || ''}
-                        onChange={(e) => handleFieldChange(idx, 'description', e.target.value)}
-                        disabled={readOnly}
-                      />
-                    )}
-                  </td>
-                  {showAccount && (
-                    <td className="line-grid-td">
-                      {readOnly ? (
-                        <span className="doc-cell-muted">{line.account_name || '—'}</span>
-                      ) : (
-                        <AccountPicker
-                          value={line[accountField]}
-                          onChange={(acc) =>
-                            handleFieldChange(idx, accountField, acc ? acc.id : null)
-                          }
-                          type={priceField === 'costPrice' ? 'expense' : 'income'}
-                          disabled={readOnly}
-                        />
-                      )}
-                    </td>
+              <div className="line-item-card-grid">
+                <div className="line-item-field line-item-field-wide">
+                  <span className="line-item-label">{t('product')}</span>
+                  {readOnly ? (
+                    <span>{line.product_name || line.description || 'Custom Item'}</span>
+                  ) : (
+                    <ProductPicker
+                      value={line.product_id}
+                      onChange={(item) => handleProductSelect(idx, item)}
+                      priceType={priceField}
+                      disabled={readOnly}
+                    />
                   )}
-                  <td className="line-grid-td">
-                    {readOnly ? (
-                      <span className="doc-cell-code">{line.quantity}</span>
-                    ) : (
-                      <input
-                        type="number"
-                        min="0.0001"
-                        step="any"
-                        className="form-input line-grid-input"
-                        value={line.quantity || ''}
-                        onChange={(e) => handleFieldChange(idx, 'quantity', e.target.value)}
-                        disabled={readOnly}
-                      />
-                    )}
-                  </td>
-                  <td className="line-grid-td">
-                    {readOnly ? (
-                      <span className="doc-cell-code">
-                        {formatMoney(line.unit_price, locale)}
-                      </span>
-                    ) : (
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        className="form-input line-grid-input"
-                        value={line.unit_price || ''}
-                        onChange={(e) => handleFieldChange(idx, 'unit_price', e.target.value)}
-                        disabled={readOnly}
-                      />
-                    )}
-                  </td>
-                  <td className="line-grid-td">
-                    {readOnly ? (
-                      <span className="doc-cell-muted">
-                        {line.tax_rate ? `${line.tax_rate}%` : '0%'}
-                      </span>
-                    ) : (
-                      <TaxPicker
-                        value={line.tax_id}
-                        scope={taxScope}
-                        onChange={(tax) => handleTaxSelect(idx, tax)}
-                        disabled={readOnly}
-                      />
-                    )}
-                  </td>
-                  <td className="line-grid-td">
-                    {readOnly ? (
-                      <span className="doc-cell-muted">
-                        {line.analytic_account_name || '—'}
-                      </span>
-                    ) : (
-                      <AnalyticAccountPicker
-                        value={line.analytic_account_id}
-                        onChange={(an) =>
-                          handleFieldChange(idx, 'analytic_account_id', an ? an.id : null)
-                        }
-                        disabled={readOnly}
-                      />
-                    )}
-                  </td>
-                  <td className="line-grid-td">
-                    {formatMoney(line.untaxed_amount || 0, locale)}
-                  </td>
-                  {!readOnly && (
-                    <td className="line-grid-td">
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveRow(idx)}
-                        title="Delete line"
-                      >
-                        <Trash2  />
-                      </button>
-                    </td>
+                </div>
+
+                <div className="line-item-field line-item-field-wide">
+                  <span className="line-item-label">{t('description')}</span>
+                  {readOnly ? (
+                    <span>{line.description}</span>
+                  ) : (
+                    <input
+                      type="text"
+                      className="form-input line-grid-input"
+                      placeholder="Item description…"
+                      value={line.description || ''}
+                      onChange={(e) => handleFieldChange(idx, 'description', e.target.value)}
+                      disabled={readOnly}
+                    />
                   )}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                </div>
+
+                {showAccount && (
+                  <div className="line-item-field line-item-field-wide">
+                    <span className="line-item-label">Account</span>
+                    {readOnly ? (
+                      <span className="doc-cell-muted">{line.account_name || '—'}</span>
+                    ) : (
+                      <AccountPicker
+                        value={line[accountField]}
+                        onChange={(acc) => handleFieldChange(idx, accountField, acc ? acc.id : null)}
+                        type={priceField === 'costPrice' ? 'expense' : 'income'}
+                        disabled={readOnly}
+                      />
+                    )}
+                  </div>
+                )}
+
+                <div className="line-item-field">
+                  <span className="line-item-label">{t('quantity')}</span>
+                  {readOnly ? (
+                    <span className="doc-cell-code">{line.quantity}</span>
+                  ) : (
+                    <input
+                      type="number"
+                      min="0.0001"
+                      step="any"
+                      className="form-input line-grid-input"
+                      value={line.quantity || ''}
+                      onChange={(e) => handleFieldChange(idx, 'quantity', e.target.value)}
+                      disabled={readOnly}
+                    />
+                  )}
+                </div>
+
+                <div className="line-item-field">
+                  <span className="line-item-label">{t('unitPrice')}</span>
+                  {readOnly ? (
+                    <span className="doc-cell-code">{formatMoney(line.unit_price, locale)}</span>
+                  ) : (
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      className="form-input line-grid-input"
+                      value={line.unit_price || ''}
+                      onChange={(e) => handleFieldChange(idx, 'unit_price', e.target.value)}
+                      disabled={readOnly}
+                    />
+                  )}
+                </div>
+
+                <div className="line-item-field">
+                  <span className="line-item-label">{t('tax')}</span>
+                  {readOnly ? (
+                    <span className="doc-cell-muted">{line.tax_rate ? `${line.tax_rate}%` : '0%'}</span>
+                  ) : (
+                    <TaxPicker
+                      value={line.tax_id}
+                      scope={taxScope}
+                      onChange={(tax) => handleTaxSelect(idx, tax)}
+                      disabled={readOnly}
+                    />
+                  )}
+                </div>
+
+                <div className="line-item-field line-item-field-wide">
+                  <span className="line-item-label">{t('analytic')}</span>
+                  {readOnly ? (
+                    <span className="doc-cell-muted">{line.analytic_account_name || '—'}</span>
+                  ) : (
+                    <AnalyticAccountPicker
+                      value={line.analytic_account_id}
+                      onChange={(an) => handleFieldChange(idx, 'analytic_account_id', an ? an.id : null)}
+                      disabled={readOnly}
+                    />
+                  )}
+                </div>
+
+                <div className="line-item-subtotal">
+                  <span className="line-item-label">{t('subtotal')}</span>
+                  <strong>{formatMoney(line.untaxed_amount || 0, locale)}</strong>
+                </div>
+              </div>
+            </article>
+          ))
+        )}
       </div>
 
       {!readOnly && (

@@ -347,6 +347,7 @@
       "thisYear": "This year",
       "exportData": "Export data",
       "loadingDirectory": "Loading users…",
+      "pageReady": "Page loaded",
       "noUsers": "No accounts found",
       "overview": "Overview",
       "collapseMenu": "Collapse menu",
@@ -445,7 +446,8 @@
       "auditLogs": "Audit logs",
       "receipts": "Customer Receipts",
       "creditNotes": "Credit Notes",
-      "debitNotes": "Debit Notes"
+      "debitNotes": "Debit Notes",
+      "invoice": "Create Invoice"
     },
     "promo": {
       "title": "Your books on",

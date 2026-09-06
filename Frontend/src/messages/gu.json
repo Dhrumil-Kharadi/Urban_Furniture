@@ -347,6 +347,7 @@
       "thisYear": "આ વર્ષે",
       "exportData": "ડેટા નિકાસ કરો",
       "loadingDirectory": "વપરાશકર્તાઓ લોડ થઈ રહ્યા છે…",
+      "pageReady": "પૃષ્ઠ લોડ થયું",
       "noUsers": "કોઈ ખાતું મળ્યું નથી",
       "overview": "અવલોકન",
       "collapseMenu": "મેનુ સંકોચો",
@@ -445,7 +446,8 @@
       "auditLogs": "ઓડિટ લોગ",
       "receipts": "ગ્રાહક રસીદો",
       "creditNotes": "ક્રેડિટ નોટ્સ",
-      "debitNotes": "ડેબિટ નોટ્સ"
+      "debitNotes": "ડેબિટ નોટ્સ",
+      "invoice": "ઇન્વોઇસ બનાવો"
     },
     "promo": {
       "title": "તમારી ચોપડીઓ",

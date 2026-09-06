@@ -297,6 +297,7 @@
   border-radius: 8px;
   box-shadow: var(--picker-dropdown-shadow);
   padding: 0.4rem 0;
+  color-scheme: light;
 }
 
 .picker-option {
