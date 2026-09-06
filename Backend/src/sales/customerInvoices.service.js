@@ -67,6 +67,18 @@ const customerInvoicesService = {
   },
 
   /**
+   * Public retrieval of a published/posted invoice without org scoping context from auth.
+   *
+   * @param {string} invoiceId
+   * @returns {Promise<object>}
+   */
+  async getPublicCustomerInvoiceById(invoiceId) {
+    const invoice = await salesRepository.getPublicCustomerInvoiceById(null, invoiceId);
+    if (!invoice) fail('Invoice not found or is still a draft', 404);
+    return invoice;
+  },
+
+  /**
    * Create a draft invoice directly, without a sales order.
    *
    * @param {string} organizationId

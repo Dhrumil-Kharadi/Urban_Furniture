@@ -139,11 +139,13 @@ export async function apiFetch(endpoint, { method = 'GET', body, headers = {}, p
 
   const res = await fetch(`${BASE_URL}${buildUrl(endpoint, params)}`, config);
 
-  // Handle 401 with transparent refresh (once, unless this is already login/refresh/logout/retry)
+  // Handle 401 with transparent refresh (once, unless this is already login/refresh/logout/retry/public)
   const isAuthEndpoint =
     endpoint.startsWith('/auth/login') ||
     endpoint.startsWith('/auth/refresh') ||
-    endpoint.startsWith('/auth/logout');
+    endpoint.startsWith('/auth/logout') ||
+    endpoint.startsWith('/auth/me') ||
+    endpoint.includes('/public/');
 
   if (res.status === 401 && !_isRetry && !isAuthEndpoint) {
     const newToken = await performTokenRefresh();

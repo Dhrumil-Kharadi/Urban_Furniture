@@ -65,6 +65,25 @@ const gatewayRepository = {
   },
 
   /**
+   * Find an invoice for public payment without session org scoping.
+   *
+   * @param {object|null} client
+   * @param {string} invoiceId
+   * @returns {Promise<object|null>}
+   */
+  async findPublicPayableInvoice(client, invoiceId) {
+    const db = client || pool;
+    const res = await db.query(
+      `SELECT ci.id, ci.organization_id, ci.invoice_number, ci.customer_contact_id, ci.status,
+              ci.total_amount, ci.amount_due, ci.amount_paid
+         FROM customer_invoices ci
+        WHERE ci.id = $1`,
+      [invoiceId]
+    );
+    return res.rows[0] || null;
+  },
+
+  /**
    * A payment already recorded for this gateway payment id.
    *
    * The idempotency key. Razorpay retries, a user double-clicking, and a

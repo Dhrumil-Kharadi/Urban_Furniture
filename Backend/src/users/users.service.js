@@ -156,6 +156,13 @@ const usersService = {
       throw error;
     }
 
+    // Prevent deactivating business owner accounts
+    if (existing.role === 'business_owner' && status === 'inactive') {
+      const error = new Error('Cannot deactivate a business owner account');
+      error.statusCode = 400;
+      throw error;
+    }
+
     const updated = await usersRepository.updateStatus(null, organizationId, targetUserId, status);
     return updated;
   },

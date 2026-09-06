@@ -16,6 +16,9 @@ const router = express.Router();
  * admin-only because it reverses a posted ledger entry.
  */
 
+// Public invoice view endpoint (no auth required)
+router.get('/public/:id', salesController.getPublicCustomerInvoice);
+
 router.use(authMiddleware.authenticate, resolveTenant);
 
 router.get('/', authMiddleware.authorize('business_owner', 'accountant'), salesController.listCustomerInvoices);

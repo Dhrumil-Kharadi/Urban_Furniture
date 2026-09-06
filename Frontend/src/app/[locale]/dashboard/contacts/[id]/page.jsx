@@ -3,39 +3,38 @@
 // ============================================================
 // FILE: src/app/[locale]/dashboard/contacts/[id]/page.jsx
 //
-// Contact detail — Details / Invoices / Bills / Payments (phase.md Phase 6).
-//
-// The three transaction tabs exist and say what will fill them. They are
-// deliberately not wired to anything: sales, purchases and payments are
-// Phases 8 and 9, and an empty tab that explains itself is more honest than
-// one that is missing.
-//
-// Editing and archiving are admin-only (project.md §3 as finalised by §10
-// Decision 1). The controls are hidden from an accountant, and the server
-// refuses them regardless of what is rendered.
+// Contact detail — Details / Invoices / Bills / Payments.
+// Shows contact profile, connected customer invoices, vendor bills, and payments.
 // ============================================================
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { Plus } from 'lucide-react';
 
+import { Link } from '@/i18n/navigation';
 import MasterDataFrame from '@/components/masterdata/MasterDataFrame';
 import ContactForm from '@/components/contacts/ContactForm';
 import PortalAccessPanel from '@/components/contacts/PortalAccessPanel';
 import ProfileImagePanel from '@/components/contacts/ProfileImagePanel';
-import { Fact, StatusPill } from '@/components/masterdata/Cells';
+import { Fact, StatusPill, MoneyText } from '@/components/masterdata/Cells';
 import { ListState } from '@/components/masterdata/ListChrome';
 
 import Card, { CardBody } from '@/reusablefiles/card';
 import Button from '@/reusablefiles/button';
 import Pill from '@/reusablefiles/pill';
 import Skeleton from '@/reusablefiles/skeleton';
+import DataTable from '@/reusablefiles/datatable';
 import { PageHead } from '@/reusablefiles/dashboardshell';
 
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import useResourceRecord from '@/hooks/useResourceRecord';
 import { contactsService } from '@/services/masterdata.service';
+import { customerInvoicesService } from '@/services/sales.service';
+import { vendorBillsService } from '@/services/purchases.service';
+import { paymentsService } from '@/services/payments.service';
+import { formatDate } from '@/utils/format';
 
 const TABS = ['details', 'invoices', 'bills', 'payments'];
 
@@ -57,14 +56,67 @@ export default function ContactDetailPage() {
   const [serverErrors, setServerErrors] = useState([]);
   const [statusBusy, setStatusBusy] = useState(false);
 
+  // Transaction tab states
+  const [invoices, setInvoices] = useState([]);
+  const [invoicesLoading, setInvoicesLoading] = useState(false);
+
+  const [bills, setBills] = useState([]);
+  const [billsLoading, setBillsLoading] = useState(false);
+
+  const [payments, setPayments] = useState([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
+
+  const fetchInvoices = useCallback(async () => {
+    if (!id) return;
+    setInvoicesLoading(true);
+    try {
+      const res = await customerInvoicesService.list({ customer_contact_id: id, limit: 50 });
+      setInvoices(res?.items || []);
+    } catch {
+      setInvoices([]);
+    } finally {
+      setInvoicesLoading(false);
+    }
+  }, [id]);
+
+  const fetchBills = useCallback(async () => {
+    if (!id) return;
+    setBillsLoading(true);
+    try {
+      const res = await vendorBillsService.list({ vendor_contact_id: id, limit: 50 });
+      setBills(res?.items || []);
+    } catch {
+      setBills([]);
+    } finally {
+      setBillsLoading(false);
+    }
+  }, [id]);
+
+  const fetchPayments = useCallback(async () => {
+    if (!id) return;
+    setPaymentsLoading(true);
+    try {
+      const res = await paymentsService.list({ contact_id: id, limit: 50 });
+      setPayments(res?.items || []);
+    } catch {
+      setPayments([]);
+    } finally {
+      setPaymentsLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (tab === 'invoices') fetchInvoices();
+    else if (tab === 'bills') fetchBills();
+    else if (tab === 'payments') fetchPayments();
+  }, [tab, fetchInvoices, fetchBills, fetchPayments]);
+
   const handleSave = async (payload) => {
     setSubmitting(true);
     setServerErrors([]);
 
     try {
       await contactsService.update(id, payload);
-      // Re-fetch rather than trusting the PATCH response: the detail view
-      // carries the portal-user block, which the update endpoint does not.
       refetch();
       setEditing(false);
       toast.success(tShared('toast.updated'));
@@ -106,6 +158,180 @@ export default function ContactDetailPage() {
         </button>
       )),
     [tab, t],
+  );
+
+  const invoiceColumns = useMemo(
+    () => [
+      {
+        key: 'invoice_number',
+        header: 'Invoice #',
+        render: (row) => (
+          <Link
+            href={`/dashboard/customer-invoices/${row.id}`}
+            style={{ fontWeight: 600, color: 'var(--accent-primary)', textDecoration: 'none' }}
+          >
+            {row.invoice_number}
+          </Link>
+        ),
+      },
+      {
+        key: 'invoice_date',
+        header: 'Date',
+        render: (row) => formatDate(row.invoice_date),
+      },
+      {
+        key: 'due_date',
+        header: 'Due Date',
+        render: (row) => formatDate(row.due_date),
+      },
+      {
+        key: 'total_amount',
+        header: 'Total',
+        align: 'right',
+        render: (row) => <MoneyText value={row.total_amount} />,
+      },
+      {
+        key: 'amount_due',
+        header: 'Due',
+        align: 'right',
+        render: (row) => (
+          <span style={{ fontWeight: 600, color: Number(row.amount_due) > 0 ? '#ef4444' : '#10b981' }}>
+            <MoneyText value={row.amount_due} />
+          </span>
+        ),
+      },
+      {
+        key: 'status',
+        header: 'Status',
+        render: (row) => (
+          <Pill
+            tone={
+              row.status === 'paid'
+                ? 'strong'
+                : row.status === 'overdue' || row.is_overdue
+                ? 'danger'
+                : row.status === 'posted'
+                ? 'mid'
+                : 'soft'
+            }
+            size="sm"
+            dot
+          >
+            {row.is_overdue && row.status !== 'paid' ? 'overdue' : row.status}
+          </Pill>
+        ),
+      },
+    ],
+    [],
+  );
+
+  const billColumns = useMemo(
+    () => [
+      {
+        key: 'bill_number',
+        header: 'Bill #',
+        render: (row) => (
+          <Link
+            href={`/dashboard/vendor-bills/${row.id}`}
+            style={{ fontWeight: 600, color: 'var(--accent-primary)', textDecoration: 'none' }}
+          >
+            {row.bill_number}
+          </Link>
+        ),
+      },
+      {
+        key: 'bill_date',
+        header: 'Date',
+        render: (row) => formatDate(row.bill_date),
+      },
+      {
+        key: 'due_date',
+        header: 'Due Date',
+        render: (row) => formatDate(row.due_date),
+      },
+      {
+        key: 'total_amount',
+        header: 'Total',
+        align: 'right',
+        render: (row) => <MoneyText value={row.total_amount} />,
+      },
+      {
+        key: 'amount_due',
+        header: 'Due',
+        align: 'right',
+        render: (row) => (
+          <span style={{ fontWeight: 600, color: Number(row.amount_due) > 0 ? '#ef4444' : '#10b981' }}>
+            <MoneyText value={row.amount_due} />
+          </span>
+        ),
+      },
+      {
+        key: 'status',
+        header: 'Status',
+        render: (row) => (
+          <Pill
+            tone={row.status === 'paid' ? 'strong' : row.status === 'posted' ? 'mid' : 'soft'}
+            size="sm"
+            dot
+          >
+            {row.status}
+          </Pill>
+        ),
+      },
+    ],
+    [],
+  );
+
+  const paymentColumns = useMemo(
+    () => [
+      {
+        key: 'payment_number',
+        header: 'Payment #',
+        render: (row) => (
+          <Link
+            href={`/dashboard/payments/${row.id}`}
+            style={{ fontWeight: 600, color: 'var(--accent-primary)', textDecoration: 'none' }}
+          >
+            {row.payment_number}
+          </Link>
+        ),
+      },
+      {
+        key: 'payment_date',
+        header: 'Date',
+        render: (row) => formatDate(row.payment_date),
+      },
+      {
+        key: 'direction',
+        header: 'Direction',
+        render: (row) => (
+          <Pill tone={row.direction === 'inbound' ? 'strong' : 'mid'} size="sm">
+            {row.direction === 'inbound' ? 'Customer Payment' : 'Vendor Payment'}
+          </Pill>
+        ),
+      },
+      {
+        key: 'method',
+        header: 'Method',
+        render: (row) => <Pill tone="soft" size="sm">{row.method}</Pill>,
+      },
+      {
+        key: 'amount',
+        header: 'Amount',
+        align: 'right',
+        render: (row) => <MoneyText value={row.amount} />,
+      },
+      {
+        key: 'status',
+        header: 'Status',
+        render: (row) => (
+          <Pill tone={row.status === 'posted' ? 'strong' : 'soft'} size="sm" dot>
+            {row.status}
+          </Pill>
+        ),
+      },
+    ],
+    [],
   );
 
   if (loading) {
@@ -183,7 +409,7 @@ export default function ContactDetailPage() {
             <div className="md-tabs">{tabs}</div>
 
             <div className="md-panel-body">
-              {tab === 'details' ? (
+              {tab === 'details' && (
                 editing ? (
                   <ContactForm
                     contact={contact}
@@ -212,8 +438,89 @@ export default function ContactDetailPage() {
                     </Fact>
                   </div>
                 )
-              ) : (
-                <ListState title={t(`tabs.${tab}`)} body={t('comingSoon')} />
+              )}
+
+              {tab === 'invoices' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>Customer Invoices</h3>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+                        All sales invoices issued to {contact.name}
+                      </p>
+                    </div>
+                    {(contact.contact_type === 'customer' || contact.contact_type === 'both') && (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        icon={<Plus size={14} />}
+                        href={`/dashboard/customer-invoices/new?customer_id=${contact.id}`}
+                      >
+                        New Invoice
+                      </Button>
+                    )}
+                  </div>
+
+                  <DataTable
+                    columns={invoiceColumns}
+                    rows={invoices}
+                    loading={invoicesLoading}
+                    loadingLabel="Loading invoices…"
+                    emptyLabel="No customer invoices found for this contact."
+                  />
+                </div>
+              )}
+
+              {tab === 'bills' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>Vendor Bills</h3>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+                        All bills received from {contact.name}
+                      </p>
+                    </div>
+                    {(contact.contact_type === 'vendor' || contact.contact_type === 'both') && (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        icon={<Plus size={14} />}
+                        href={`/dashboard/vendor-bills/new?vendor_id=${contact.id}`}
+                      >
+                        New Bill
+                      </Button>
+                    )}
+                  </div>
+
+                  <DataTable
+                    columns={billColumns}
+                    rows={bills}
+                    loading={billsLoading}
+                    loadingLabel="Loading vendor bills…"
+                    emptyLabel="No vendor bills found for this contact."
+                  />
+                </div>
+              )}
+
+              {tab === 'payments' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>Payment Transactions</h3>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+                        All payment entries recorded with {contact.name}
+                      </p>
+                    </div>
+                  </div>
+
+                  <DataTable
+                    columns={paymentColumns}
+                    rows={payments}
+                    loading={paymentsLoading}
+                    loadingLabel="Loading payments…"
+                    emptyLabel="No payments recorded for this contact."
+                  />
+                </div>
               )}
             </div>
           </Card>
@@ -222,8 +529,6 @@ export default function ContactDetailPage() {
             <PortalAccessPanel
               contact={contact}
               canManage={canManage}
-              // The toggle returns the contact without its portal_user block,
-              // so merge rather than replace and let refetch fill the rest.
               onChange={(updated) => {
                 setRecord((current) => ({ ...current, ...updated }));
                 refetch();

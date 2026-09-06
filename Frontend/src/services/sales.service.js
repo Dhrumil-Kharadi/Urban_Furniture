@@ -88,6 +88,12 @@ export const customerInvoicesService = {
     return res.data;
   },
 
+  /** Public invoice view (no auth required) */
+  async getPublic(id, signal) {
+    const res = await api.get(`/customer-invoices/public/${id}`, { signal });
+    return res.data;
+  },
+
   async create(data) {
     const res = await api.post('/customer-invoices', data);
     return res.data;

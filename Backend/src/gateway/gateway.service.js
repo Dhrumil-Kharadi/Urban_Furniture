@@ -200,24 +200,8 @@ const gatewayService = {
         message: err?.error?.description || err?.message,
       });
 
-      if (env.razorpay.keyId.startsWith('rzp_test_')) {
-        const simOrderId = `order_test_${Date.now()}`;
-        order = {
-          id: simOrderId,
-          amount: amountPaise,
-          currency: env.razorpay.currency,
-          notes: {
-            organization_id: organizationId,
-            customer_invoice_id: invoice.id,
-            invoice_number: invoice.invoice_number,
-            contact_id: invoice.customer_contact_id,
-          },
-        };
-        simulatedOrders.set(simOrderId, order);
-      } else {
-        if (upstreamStatus === 401) fail('The payment gateway rejected our credentials', 401);
-        fail('The payment gateway could not create this order', 500);
-      }
+      if (upstreamStatus === 401) fail('The payment gateway rejected credentials. Please check your Razorpay API Key ID and Secret in .env', 401);
+      fail(err?.error?.description || err?.message || 'The payment gateway could not create this order', upstreamStatus || 500);
     }
 
     logger.info('Razorpay order created', {
@@ -257,12 +241,6 @@ const gatewayService = {
       .update(`${orderId}|${paymentId}`)
       .digest('hex');
 
-    if (env.razorpay.keyId.startsWith('rzp_test_')) {
-      if (signature === expected || (orderId && orderId.startsWith('order_test_'))) {
-        return { verified: true };
-      }
-    }
-
     const expectedBuffer = Buffer.from(expected, 'hex');
     const providedBuffer = Buffer.from(signature, 'hex');
 
@@ -271,10 +249,6 @@ const gatewayService = {
       crypto.timingSafeEqual(expectedBuffer, providedBuffer);
 
     if (!verified) {
-      // In test mode, if timing check failed, check if it's test key HMAC match
-      if (env.razorpay.keyId.startsWith('rzp_test_')) {
-        return { verified: true };
-      }
       logger.warn('Razorpay signature verification FAILED', { orderId, paymentId });
     }
 
@@ -313,41 +287,16 @@ const gatewayService = {
     //    prove what was captured — that has to be asked for.
     let gatewayPayment;
     let gatewayOrder;
-    if (orderId && orderId.startsWith('order_test_') && simulatedOrders.has(orderId)) {
-      gatewayOrder = simulatedOrders.get(orderId);
-      gatewayPayment = {
-        id: paymentId || `pay_test_${Date.now()}`,
-        order_id: orderId,
-        amount: gatewayOrder.amount,
-        status: 'captured',
-      };
-    } else {
-      const razorpay = getClient();
-      try {
-        gatewayPayment = await razorpay.payments.fetch(paymentId);
-        gatewayOrder = await razorpay.orders.fetch(orderId);
-      } catch (err) {
-        if (env.razorpay.keyId.startsWith('rzp_test_')) {
-          logger.info('Test key mode: simulated payment lookup', { orderId, paymentId });
-          try {
-            gatewayOrder = await razorpay.orders.fetch(orderId);
-          } catch (e) {
-            gatewayOrder = simulatedOrders.get(orderId) || { notes: { organization_id: organizationId } };
-          }
-          gatewayPayment = {
-            id: paymentId,
-            order_id: orderId,
-            amount: gatewayOrder?.amount || 10000,
-            status: 'captured',
-          };
-        } else {
-          logger.error('Razorpay lookup failed during verification', {
-            organizationId, orderId, paymentId,
-            message: err?.error?.description || err?.message,
-          });
-          fail('Could not confirm this payment with the gateway', 502);
-        }
-      }
+    const razorpay = getClient();
+    try {
+      gatewayPayment = await razorpay.payments.fetch(paymentId);
+      gatewayOrder = await razorpay.orders.fetch(orderId);
+    } catch (err) {
+      logger.error('Razorpay lookup failed during verification', {
+        organizationId, orderId, paymentId,
+        message: err?.error?.description || err?.message,
+      });
+      fail('Could not confirm this payment with the payment gateway: ' + (err?.error?.description || err?.message), 502);
     }
 
     // 3. A valid signature over a mismatched pair would otherwise let a
@@ -456,6 +405,107 @@ const gatewayService = {
     });
 
     return { verified: true, paymentId, recorded: true, payment };
+  },
+
+  /**
+   * Create a Razorpay order for an invoice publicly (without requiring login).
+   */
+  async createPublicOrder({ invoiceId }) {
+    if (!invoiceId) {
+      fail('An invoice is required — an online payment must settle a specific invoice', 400);
+    }
+
+    const invoice = await gatewayRepository.findPublicPayableInvoice(null, invoiceId);
+    if (!invoice) fail('Invoice not found', 404);
+
+    if (!['posted', 'partially_paid', 'overdue'].includes(invoice.status)) {
+      fail(`This invoice is ${invoice.status} and cannot be paid online`, 409);
+    }
+
+    const amountPaise = toPaise(invoice.amount_due);
+    if (amountPaise <= 0) {
+      fail('This invoice has nothing outstanding', 409);
+    }
+    if (amountPaise < 100) {
+      fail('The outstanding amount is below the minimum the gateway accepts', 409);
+    }
+    if (amountPaise > env.razorpay.maxOrderPaise) {
+      fail('The outstanding amount exceeds the maximum permitted for a single online payment', 409);
+    }
+
+    const razorpay = getClient();
+    let order;
+    try {
+      order = await razorpay.orders.create({
+        amount: amountPaise,
+        currency: env.razorpay.currency,
+        receipt: `inv-${invoice.invoice_number}`.slice(0, 40),
+        notes: {
+          organization_id: invoice.organization_id,
+          customer_invoice_id: invoice.id,
+          invoice_number: invoice.invoice_number,
+          contact_id: invoice.customer_contact_id,
+        },
+      });
+    } catch (err) {
+      const upstreamStatus = err?.statusCode || err?.status;
+      logger.error('Razorpay public order creation failed', {
+        organizationId: invoice.organization_id,
+        invoiceId: invoice.id,
+        upstreamStatus,
+        message: err?.error?.description || err?.message,
+      });
+
+      if (upstreamStatus === 401) fail('The payment gateway rejected credentials. Please check your Razorpay API Key ID and Secret in .env', 401);
+      fail(err?.error?.description || err?.message || 'The payment gateway could not create this order', upstreamStatus || 500);
+    }
+
+    logger.info('Razorpay public order created', {
+      organizationId: invoice.organization_id,
+      orderId: order.id,
+      invoiceId: invoice.id,
+      amountPaise,
+    });
+
+    return {
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      keyId: env.razorpay.keyId,
+      invoiceNumber: invoice.invoice_number,
+    };
+  },
+
+  /**
+   * Confirm and record a public payment.
+   */
+  async confirmPublicPayment({ orderId, paymentId, signature }) {
+    const { verified } = gatewayService.verifyPaymentSignature({ orderId, paymentId, signature });
+    if (!verified) {
+      fail('Payment signature verification failed', 400);
+    }
+
+    const razorpay = getClient();
+    let gatewayOrder;
+    try {
+      gatewayOrder = await razorpay.orders.fetch(orderId);
+    } catch (err) {
+      logger.error('Failed to fetch order from Razorpay', { orderId, error: err?.message });
+      fail('Could not fetch order from payment gateway: ' + (err?.error?.description || err?.message), 502);
+    }
+
+    const orgId = gatewayOrder?.notes?.organization_id;
+    if (!orgId) {
+      fail('Order is missing organization details and cannot be verified', 400);
+    }
+
+    return gatewayService.confirmPayment({
+      organizationId: orgId,
+      actorUserId: null,
+      orderId,
+      paymentId,
+      signature,
+    });
   },
 };
 
