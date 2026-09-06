@@ -84,6 +84,18 @@ export default function InputBox({
               </option>
             ))}
           </select>
+        ) : as === 'textarea' ? (
+          <textarea
+            id={id}
+            className={controlClass}
+            value={value}
+            onChange={handle}
+            placeholder={placeholder}
+            disabled={disabled}
+            rows={rest.rows || 3}
+            style={{ resize: 'vertical', minHeight: '80px', ...(rest.style || {}) }}
+            {...rest}
+          />
         ) : (
           <input
             id={id}

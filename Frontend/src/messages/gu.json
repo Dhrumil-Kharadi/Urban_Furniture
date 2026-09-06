@@ -803,6 +803,7 @@
     },
     "fields": {
       "name": "નામ",
+      "description": "વર્ણન",
       "sku": "એસકેયુ",
       "type": "પ્રકાર",
       "category": "શ્રેણી",
@@ -816,6 +817,7 @@
     },
     "placeholders": {
       "name": "લાકડાની ખુરશી",
+      "description": "ઉત્પાદનની વિગતવાર માહિતી...",
       "sku": "WC-001",
       "price": "0.00"
     },
@@ -1526,6 +1528,15 @@
     "entityId": "રેકોર્ડ આઈડી",
     "ipAddress": "આઈપી સરનામું",
     "changes": "ફેરફારો",
+    "columns": {
+      "timestamp": "સમય",
+      "actor": "કર્તા",
+      "action": "ક્રિયા",
+      "entityType": "રેકોર્ડ પ્રકાર",
+      "entityId": "રેકોર્ડ આઈડી",
+      "ipAddress": "આઈપી સરનામું",
+      "changes": "ફેરફારો"
+    },
     "viewDiff": "ફેરફારો જુઓ",
     "noLogs": "આ ફિલ્ટર સાથે મેળ ખાતી કોઈ ઓડિટ નોંધ નથી.",
     "loading": "ઓડિટ ટ્રેલ લોડ થઈ રહ્યું છે…",
@@ -1544,12 +1555,19 @@
     "entityTypes": {
       "customer_invoice": "ગ્રાહક ઇન્વોઇસ",
       "vendor_bill": "વિક્રેતા બિલ",
+      "purchase_order": "ખરીદ ઓર્ડર",
+      "sales_order": "વેચાણ ઓર્ડર",
       "payment": "ચુકવણી",
       "journal_entry": "જર્નલ નોંધ",
       "budget": "બજેટ",
       "product": "ઉત્પાદન",
+      "product_category": "ઉત્પાદન શ્રેણી",
       "contact": "સંપર્ક",
-      "user": "વપરાશકર્તા"
+      "user": "વપરાશકર્તા",
+      "tax": "ટેક્સ",
+      "journal": "જર્નલ",
+      "account": "ખાતું",
+      "analytic_account": "વિશ્લેષણાત્મક ખાતું"
     },
     "actions": {
       "create": "બનાવવું",
@@ -1558,6 +1576,17 @@
       "post": "ખાતાવહીમાં નોંધ",
       "reverse": "ઉલટાવવું",
       "cancel": "રદ",
+      "send": "ઇન્વોઇસ મોકલો",
+      "confirm": "પુષ્ટિ કરો",
+      "convert": "ઇન્વોઇસમાં રૂપાંતરિત કરો",
+      "archive": "આર્કાઇવ કરો",
+      "unarchive": "આર્કાઇવમાંથી કાઢો",
+      "create_bill_from_po": "PO માંથી બિલ બનાવો",
+      "portal_access_enabled": "પોર્ટલ પ્રવેશ સક્ષમ",
+      "portal_access_disabled": "પોર્ટલ પ્રવેશ અક્ષમ",
+      "PORTAL_CARD_PAYMENT": "પોર્ટલ કાર્ડ ચુકવણી",
+      "login": "લોગિન",
+      "logout": "લોગઆઉટ",
       "upload_attachment": "જોડાણ અપલોડ"
     }
   },

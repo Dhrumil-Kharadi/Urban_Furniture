@@ -28,8 +28,8 @@ const purchasesValidation = {
     if (body.lines && Array.isArray(body.lines)) {
       body.lines.forEach((line, i) => {
         const num = i + 1;
-        if (!line.description || typeof line.description !== 'string' || !line.description.trim()) {
-          errors.push(`Line ${num}: description is required`);
+        if (!line.product_id && (!line.description || typeof line.description !== 'string' || !line.description.trim())) {
+          errors.push(`Line ${num}: product or description is required`);
         }
         const qty = Number(line.quantity);
         if (!qty || qty <= 0) {
@@ -64,8 +64,8 @@ const purchasesValidation = {
       if (Array.isArray(body.lines)) {
         body.lines.forEach((line, i) => {
           const num = i + 1;
-          if (!line.description || typeof line.description !== 'string' || !line.description.trim()) {
-            errors.push(`Line ${num}: description is required`);
+          if (!line.product_id && (!line.description || typeof line.description !== 'string' || !line.description.trim())) {
+            errors.push(`Line ${num}: product or description is required`);
           }
           const qty = Number(line.quantity);
           if (!qty || qty <= 0) {
@@ -107,8 +107,8 @@ const purchasesValidation = {
     if (body.lines && Array.isArray(body.lines)) {
       body.lines.forEach((line, i) => {
         const num = i + 1;
-        if (!line.description || typeof line.description !== 'string' || !line.description.trim()) {
-          errors.push(`Line ${num}: description is required`);
+        if (!line.product_id && (!line.description || typeof line.description !== 'string' || !line.description.trim())) {
+          errors.push(`Line ${num}: product or description is required`);
         }
         const qty = Number(line.quantity);
         if (!qty || qty <= 0) {
@@ -146,8 +146,8 @@ const purchasesValidation = {
       if (Array.isArray(body.lines)) {
         body.lines.forEach((line, i) => {
           const num = i + 1;
-          if (!line.description || typeof line.description !== 'string' || !line.description.trim()) {
-            errors.push(`Line ${num}: description is required`);
+          if (!line.product_id && (!line.description || typeof line.description !== 'string' || !line.description.trim())) {
+            errors.push(`Line ${num}: product or description is required`);
           }
           const qty = Number(line.quantity);
           if (!qty || qty <= 0) {

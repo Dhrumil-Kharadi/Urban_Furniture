@@ -112,14 +112,21 @@ export default function DocumentLineGrid({
 
     const price = priceField === 'costPrice' ? (product.cost_price || 0) : (product.sales_price || 0);
     const defaultTaxId = priceField === 'costPrice' ? product.purchase_tax_id : product.sales_tax_id;
+    const defaultTaxRate = priceField === 'costPrice'
+      ? (product.purchase_tax_rate !== undefined && product.purchase_tax_rate !== null ? parseFloat(product.purchase_tax_rate) : undefined)
+      : (product.sales_tax_rate !== undefined && product.sales_tax_rate !== null ? parseFloat(product.sales_tax_rate) : undefined);
     const defaultAccount = priceField === 'costPrice' ? product.expense_account_id : product.income_account_id;
 
     const line = {
       ...lines[index],
       product_id: product.id,
-      description: lines[index].description || product.name,
+      product_name: product.name,
+      product_type: product.product_type,
+      available_qty: product.available_qty !== undefined ? Number(product.available_qty) : undefined,
+      description: lines[index].description?.trim() ? lines[index].description : (product.description || product.name || ''),
       unit_price: parseFloat(price) || 0,
-      tax_id: defaultTaxId || lines[index].tax_id,
+      tax_id: defaultTaxId !== undefined ? defaultTaxId : lines[index].tax_id,
+      tax_rate: defaultTaxRate !== undefined ? defaultTaxRate : (lines[index].tax_rate || 0),
       [accountField]: defaultAccount || lines[index][accountField],
     };
 
@@ -150,88 +157,141 @@ export default function DocumentLineGrid({
             No items added yet. Click &quot;Add Line Item&quot; below to add products.
           </div>
         ) : (
-          lines.map((line, idx) => (
-            <article className="line-item-card" key={idx}>
-              <div className="line-item-card-head">
-                <span className="line-item-number">Line {idx + 1}</span>
-                {!readOnly && (
-                  <button
-                    type="button"
-                    className="line-item-delete"
-                    onClick={() => handleRemoveRow(idx)}
-                    title="Delete line"
-                    aria-label={`Delete line ${idx + 1}`}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
-              </div>
+          lines.map((line, idx) => {
+            const isGoods = line.product_type === 'goods';
+            const hasStock = line.available_qty !== undefined && line.available_qty !== null;
+            const stock = hasStock ? Number(line.available_qty) : null;
+            const qty = parseFloat(line.quantity) || 0;
+            const isOverStock = priceField === 'salesPrice' && isGoods && hasStock && qty > stock;
+            const isZeroStock = priceField === 'salesPrice' && isGoods && hasStock && stock <= 0;
 
-              <div className="line-item-card-grid">
-                <div className="line-item-field line-item-field-wide">
-                  <span className="line-item-label">{t('product')}</span>
-                  {readOnly ? (
-                    <span>{line.product_name || line.description || 'Custom Item'}</span>
-                  ) : (
-                    <ProductPicker
-                      value={line.product_id}
-                      onChange={(item) => handleProductSelect(idx, item)}
-                      priceType={priceField}
-                      disabled={readOnly}
-                    />
+            return (
+              <article className="line-item-card" key={idx}>
+                <div className="line-item-card-head">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                    <span className="line-item-number">Line {idx + 1}</span>
+                    {hasStock && isGoods && (
+                      <span
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          padding: '0.1rem 0.4rem',
+                          borderRadius: '4px',
+                          background: isZeroStock ? 'rgba(239, 68, 68, 0.15)' : stock <= 5 ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                          color: isZeroStock ? '#ef4444' : stock <= 5 ? '#f59e0b' : '#10b981',
+                        }}
+                      >
+                        {isZeroStock ? '⚠️ Out of Stock (0)' : `Stock Available: ${stock}`}
+                      </span>
+                    )}
+                  </div>
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      className="line-item-delete"
+                      onClick={() => handleRemoveRow(idx)}
+                      title="Delete line"
+                      aria-label={`Delete line ${idx + 1}`}
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   )}
                 </div>
 
-                <div className="line-item-field line-item-field-wide">
-                  <span className="line-item-label">{t('description')}</span>
-                  {readOnly ? (
-                    <span>{line.description}</span>
-                  ) : (
-                    <input
-                      type="text"
-                      className="form-input line-grid-input"
-                      placeholder="Item description…"
-                      value={line.description || ''}
-                      onChange={(e) => handleFieldChange(idx, 'description', e.target.value)}
-                      disabled={readOnly}
-                    />
-                  )}
-                </div>
-
-                {showAccount && (
-                  <div className="line-item-field line-item-field-wide">
-                    <span className="line-item-label">Account</span>
+                <div className="line-item-card-grid">
+                  {/* Row 1: Product + Account */}
+                  <div className={`line-item-field ${showAccount ? 'line-item-field--half' : 'line-item-field--half'}`}>
+                    <span className="line-item-label">{t('product')}</span>
                     {readOnly ? (
-                      <span className="doc-cell-muted">{line.account_name || '—'}</span>
+                      <span className="doc-cell-muted">{line.product_name || line.description || 'Custom Item'}</span>
                     ) : (
-                      <AccountPicker
-                        value={line[accountField]}
-                        onChange={(acc) => handleFieldChange(idx, accountField, acc ? acc.id : null)}
-                        type={priceField === 'costPrice' ? 'expense' : 'income'}
+                      <ProductPicker
+                        value={line.product_id}
+                        onChange={(item) => handleProductSelect(idx, item)}
+                        priceType={priceField}
                         disabled={readOnly}
                       />
                     )}
                   </div>
-                )}
 
-                <div className="line-item-field">
-                  <span className="line-item-label">{t('quantity')}</span>
-                  {readOnly ? (
-                    <span className="doc-cell-code">{line.quantity}</span>
-                  ) : (
-                    <input
-                      type="number"
-                      min="0.0001"
-                      step="any"
-                      className="form-input line-grid-input"
-                      value={line.quantity || ''}
-                      onChange={(e) => handleFieldChange(idx, 'quantity', e.target.value)}
-                      disabled={readOnly}
-                    />
+                  {showAccount && (
+                    <div className="line-item-field line-item-field--half">
+                      <span className="line-item-label">Account</span>
+                      {readOnly ? (
+                        <span className="doc-cell-muted">{line.account_name || '—'}</span>
+                      ) : (
+                        <AccountPicker
+                          value={line[accountField]}
+                          onChange={(acc) => handleFieldChange(idx, accountField, acc ? acc.id : null)}
+                          type={priceField === 'costPrice' ? 'expense' : 'income'}
+                          disabled={readOnly}
+                        />
+                      )}
+                    </div>
                   )}
-                </div>
 
-                <div className="line-item-field">
+                  {/* Row 2: Description + Cost Centre */}
+                  <div className={`line-item-field ${showAccount ? 'line-item-field--desc' : 'line-item-field--half'}`}>
+                    <span className="line-item-label">{t('description')}</span>
+                    {readOnly ? (
+                      <span>{line.description}</span>
+                    ) : (
+                      <input
+                        type="text"
+                        className="form-input line-grid-input"
+                        placeholder="Item description…"
+                        value={line.description || ''}
+                        onChange={(e) => handleFieldChange(idx, 'description', e.target.value)}
+                        disabled={readOnly}
+                      />
+                    )}
+                  </div>
+
+                  <div className={`line-item-field ${showAccount ? 'line-item-field--analytic' : 'line-item-field--half'}`}>
+                    <span className="line-item-label">{t('analytic')}</span>
+                    {readOnly ? (
+                      <span className="doc-cell-muted">{line.analytic_account_name || '—'}</span>
+                    ) : (
+                      <AnalyticAccountPicker
+                        value={line.analytic_account_id}
+                        onChange={(an) => handleFieldChange(idx, 'analytic_account_id', an ? an.id : null)}
+                        disabled={readOnly}
+                      />
+                    )}
+                  </div>
+
+                  {/* Row 3: Qty, Unit Price, Tax, Subtotal */}
+                  <div className="line-item-field line-item-field--quarter">
+                    <span className="line-item-label">{t('quantity')}</span>
+                    {readOnly ? (
+                      <span className="doc-cell-code">{line.quantity}</span>
+                    ) : (
+                      <div>
+                        <input
+                          type="number"
+                          min="0.0001"
+                          step="any"
+                          className={`form-input line-grid-input ${isOverStock || isZeroStock ? 'is-invalid' : ''}`}
+                          style={isOverStock || isZeroStock ? { borderColor: '#ef4444' } : {}}
+                          value={line.quantity || ''}
+                          onChange={(e) => handleFieldChange(idx, 'quantity', e.target.value)}
+                          disabled={readOnly}
+                        />
+                        {isZeroStock && (
+                          <div style={{ color: '#ef4444', fontSize: '0.7rem', marginTop: '0.2rem', fontWeight: 600 }}>
+                            ⚠️ Out of stock!
+                          </div>
+                        )}
+                        {isOverStock && !isZeroStock && (
+                          <div style={{ color: '#ef4444', fontSize: '0.7rem', marginTop: '0.2rem', fontWeight: 600 }}>
+                            ⚠️ Max: {stock}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                <div className="line-item-field line-item-field--quarter">
                   <span className="line-item-label">{t('unitPrice')}</span>
                   {readOnly ? (
                     <span className="doc-cell-code">{formatMoney(line.unit_price, locale)}</span>
@@ -248,7 +308,7 @@ export default function DocumentLineGrid({
                   )}
                 </div>
 
-                <div className="line-item-field">
+                <div className="line-item-field line-item-field--quarter">
                   <span className="line-item-label">{t('tax')}</span>
                   {readOnly ? (
                     <span className="doc-cell-muted">{line.tax_rate ? `${line.tax_rate}%` : '0%'}</span>
@@ -262,28 +322,16 @@ export default function DocumentLineGrid({
                   )}
                 </div>
 
-                <div className="line-item-field line-item-field-wide">
-                  <span className="line-item-label">{t('analytic')}</span>
-                  {readOnly ? (
-                    <span className="doc-cell-muted">{line.analytic_account_name || '—'}</span>
-                  ) : (
-                    <AnalyticAccountPicker
-                      value={line.analytic_account_id}
-                      onChange={(an) => handleFieldChange(idx, 'analytic_account_id', an ? an.id : null)}
-                      disabled={readOnly}
-                    />
-                  )}
-                </div>
-
-                <div className="line-item-subtotal">
+                <div className="line-item-subtotal line-item-field--quarter">
                   <span className="line-item-label">{t('subtotal')}</span>
                   <strong>{formatMoney(line.untaxed_amount || 0, locale)}</strong>
                 </div>
               </div>
             </article>
-          ))
-        )}
-      </div>
+          );
+        })
+      )}
+    </div>
 
       {!readOnly && (
         <div className="line-grid-actions">

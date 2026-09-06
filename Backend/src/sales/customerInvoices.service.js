@@ -29,6 +29,7 @@ const accountingService = require('../accounting/accounting.service');
 const notificationsService = require('../notifications/notifications.service');
 const logger = require('../utils/logger');
 const salesRepository = require('./sales.repository');
+const productsRepository = require('../products/products.repository');
 const { computeSalesLines } = require('./salesOrders.service');
 
 /** @private */
@@ -36,6 +37,39 @@ function fail(message, statusCode = 400) {
   const error = new Error(message);
   error.statusCode = statusCode;
   throw error;
+}
+
+/**
+ * Verify that products have sufficient available stock for goods.
+ * @private
+ */
+async function checkStockAvailability(client, organizationId, lines) {
+  const productIds = [...new Set(lines.map((l) => l.product_id).filter(Boolean))];
+  if (productIds.length === 0) return;
+
+  const res = await client.query(
+    `SELECT id, name, product_type, available_qty
+       FROM products
+      WHERE id = ANY($1::uuid[]) AND organization_id = $2`,
+    [productIds, organizationId]
+  );
+  const pMap = {};
+  for (const p of res.rows) pMap[p.id] = p;
+
+  for (const line of lines) {
+    if (!line.product_id) continue;
+    const p = pMap[line.product_id];
+    if (p && p.product_type === 'goods') {
+      const available = Number(p.available_qty || 0);
+      const requested = Number(line.quantity || 0);
+      if (requested > available) {
+        fail(
+          `Product "${p.name}" has only ${available} available in stock (requested: ${requested}). Please restock product quantity.`,
+          400
+        );
+      }
+    }
+  }
 }
 
 /**
@@ -98,6 +132,8 @@ const customerInvoicesService = {
     if (!journal) fail('A sales journal is required and must be active', 400);
 
     return withTransaction(async (client) => {
+      await checkStockAvailability(client, organizationId, data.lines);
+
       const { computedLines, untaxed_amount, tax_amount, total_amount } =
         await computeSalesLines(client, organizationId, data.lines);
 
@@ -366,6 +402,17 @@ const customerInvoicesService = {
         actorUserId,
       });
 
+      // If this is a direct/standalone invoice (not raised from an already-deducted SO),
+      // verify stock and deduct from available quantity
+      if (!invoice.sales_order_id) {
+        await checkStockAvailability(client, organizationId, computedLines);
+        for (const line of computedLines) {
+          if (line.product_id) {
+            await productsRepository.adjustStock(client, organizationId, line.product_id, -Number(line.quantity));
+          }
+        }
+      }
+
       // 8.
       await salesRepository.updateInvoiceStatus(client, organizationId, invoiceId, {
         status: 'posted',
@@ -450,6 +497,15 @@ const customerInvoicesService = {
           `Cancellation of Customer Invoice ${invoice.invoice_number}`,
           { organizationId, actorUserId }
         );
+      }
+
+      // Restore stock for direct posted invoices
+      if (!invoice.sales_order_id && invoice.status === 'posted' && invoice.lines) {
+        for (const line of invoice.lines) {
+          if (line.product_id) {
+            await productsRepository.adjustStock(client, organizationId, line.product_id, Number(line.quantity));
+          }
+        }
       }
 
       // A cancelled invoice releases its sales order back to 'confirmed' so

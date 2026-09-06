@@ -57,6 +57,8 @@ const migrations = [
   require('./027_create_notifications'),
   require('./028_ledger_integrity_triggers'),
   require('./029_rename_roles'),
+  require('./030_add_product_description'),
+  require('./031_add_product_available_qty'),
 ];
 
 /**

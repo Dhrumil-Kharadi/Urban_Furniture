@@ -803,6 +803,7 @@
     },
     "fields": {
       "name": "नाम",
+      "description": "विवरण",
       "sku": "एसकेयू",
       "type": "प्रकार",
       "category": "श्रेणी",
@@ -816,6 +817,7 @@
     },
     "placeholders": {
       "name": "लकड़ी की कुर्सी",
+      "description": "उत्पाद का विस्तृत विवरण...",
       "sku": "WC-001",
       "price": "0.00"
     },
@@ -1526,6 +1528,15 @@
     "entityId": "रिकॉर्ड आईडी",
     "ipAddress": "आईपी पता",
     "changes": "परिवर्तन",
+    "columns": {
+      "timestamp": "समय",
+      "actor": "कर्ता",
+      "action": "क्रिया",
+      "entityType": "रिकॉर्ड प्रकार",
+      "entityId": "रिकॉर्ड आईडी",
+      "ipAddress": "आईपी पता",
+      "changes": "परिवर्तन"
+    },
     "viewDiff": "परिवर्तन देखें",
     "noLogs": "इन फ़िल्टरों से मेल खाती कोई ऑडिट प्रविष्टि नहीं।",
     "loading": "ऑडिट ट्रेल लोड हो रहा है…",
@@ -1544,12 +1555,19 @@
     "entityTypes": {
       "customer_invoice": "ग्राहक चालान",
       "vendor_bill": "विक्रेता बिल",
+      "purchase_order": "खरीद आदेश",
+      "sales_order": "बिक्री आदेश",
       "payment": "भुगतान",
       "journal_entry": "जर्नल प्रविष्टि",
       "budget": "बजट",
       "product": "उत्पाद",
+      "product_category": "उत्पाद श्रेणी",
       "contact": "संपर्क",
-      "user": "उपयोगकर्ता"
+      "user": "उपयोगकर्ता",
+      "tax": "कर",
+      "journal": "जर्नल",
+      "account": "खाता",
+      "analytic_account": "विश्लेषणात्मक खाता"
     },
     "actions": {
       "create": "बनाना",
@@ -1558,6 +1576,17 @@
       "post": "बहीखाते में दर्ज",
       "reverse": "प्रतिवर्तन",
       "cancel": "रद्द",
+      "send": "चालान भेजें",
+      "confirm": "पुष्टि करें",
+      "convert": "चालान में बदलें",
+      "archive": "पुरालेख",
+      "unarchive": "पुरालेख से निकालें",
+      "create_bill_from_po": "PO से बिल बनाएं",
+      "portal_access_enabled": "पोर्टल पहुँच सक्षम",
+      "portal_access_disabled": "पोर्टल पहुँच अक्षम",
+      "PORTAL_CARD_PAYMENT": "पोर्टल कार्ड भुगतान",
+      "login": "लॉग इन",
+      "logout": "लॉग आउट",
       "upload_attachment": "संलग्नक अपलोड"
     }
   },

@@ -21,6 +21,17 @@ nav {
   color: var(--text-primary);
   letter-spacing: 0.08em;
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-brand-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .nav-logo span {

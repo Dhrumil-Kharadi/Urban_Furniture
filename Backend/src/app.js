@@ -94,6 +94,7 @@ app.use('/api/taxes', taxesRoutes);
 app.use('/api/analytic-accounts', analyticsRoutes);
 app.use('/api/contacts', contactsRoutes);
 app.use('/api/gateway', gatewayRoutes);
+app.use('/api/analytics', analyticsRoutes);
 app.use('/api/sales-orders', salesOrdersRoutes);
 app.use('/api/customer-invoices', customerInvoicesRoutes);
 app.use('/api/payments', paymentsRoutes);

@@ -280,7 +280,6 @@ export default function BudgetsPage() {
           />
         </div>
 
-        <div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -288,10 +287,9 @@ export default function BudgetsPage() {
           >
             <option value="">All Statuses</option>
             <option value="active">Active</option>
-            <option value="draft">Draft</option>
+            <option value="closed">Closed</option>
             <option value="archived">Archived</option>
           </select>
-        </div>
       </div>
 
       {/* Budgets Table */}

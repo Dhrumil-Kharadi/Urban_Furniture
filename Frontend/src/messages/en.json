@@ -803,6 +803,7 @@
     },
     "fields": {
       "name": "Name",
+      "description": "Description",
       "sku": "SKU",
       "type": "Type",
       "category": "Category",
@@ -816,6 +817,7 @@
     },
     "placeholders": {
       "name": "Wooden Chair",
+      "description": "Detailed description of product or item...",
       "sku": "WC-001",
       "price": "0.00"
     },
@@ -1526,6 +1528,15 @@
     "entityId": "Record ID",
     "ipAddress": "IP address",
     "changes": "Changes",
+    "columns": {
+      "timestamp": "Timestamp",
+      "actor": "Actor",
+      "action": "Action",
+      "entityType": "Record type",
+      "entityId": "Record ID",
+      "ipAddress": "IP address",
+      "changes": "Changes"
+    },
     "viewDiff": "View changes",
     "noLogs": "No audit entries match these filters yet.",
     "loading": "Loading audit trail…",
@@ -1544,12 +1555,19 @@
     "entityTypes": {
       "customer_invoice": "Customer invoice",
       "vendor_bill": "Vendor bill",
+      "purchase_order": "Purchase order",
+      "sales_order": "Sales order",
       "payment": "Payment",
       "journal_entry": "Journal entry",
       "budget": "Budget",
       "product": "Product",
+      "product_category": "Product category",
       "contact": "Contact",
-      "user": "User"
+      "user": "User",
+      "tax": "Tax",
+      "journal": "Journal",
+      "account": "Chart of account",
+      "analytic_account": "Analytic account"
     },
     "actions": {
       "create": "Create",
@@ -1558,6 +1576,17 @@
       "post": "Post to ledger",
       "reverse": "Reverse",
       "cancel": "Cancel",
+      "send": "Send invoice",
+      "confirm": "Confirm",
+      "convert": "Convert to invoice",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "create_bill_from_po": "Create bill from PO",
+      "portal_access_enabled": "Enable portal access",
+      "portal_access_disabled": "Disable portal access",
+      "PORTAL_CARD_PAYMENT": "Portal card payment",
+      "login": "Login",
+      "logout": "Logout",
       "upload_attachment": "Upload attachment"
     }
   },

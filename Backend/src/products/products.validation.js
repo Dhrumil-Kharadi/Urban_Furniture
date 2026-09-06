@@ -121,6 +121,25 @@ function checkFields(body, errors, partial) {
     }
   }
 
+  // ── description ── optional
+  if (body.description !== undefined) {
+    data.description = optionalText(body.description);
+  }
+
+  // ── available_qty ── optional, defaults to 0
+  if (body.available_qty !== undefined) {
+    if (body.available_qty === null || body.available_qty === '') {
+      data.available_qty = '0';
+    } else {
+      const val = Number(body.available_qty);
+      if (Number.isNaN(val) || val < 0) {
+        errors.push('Available quantity must be a non-negative number');
+      } else {
+        data.available_qty = String(val);
+      }
+    }
+  }
+
   checkPrice('sales_price', 'Sales price', body.sales_price, errors, data);
   checkPrice('cost_price', 'Cost price', body.cost_price, errors, data);
 
@@ -156,6 +175,8 @@ const productsValidation = {
         product_type: data.product_type,
         sku: data.sku ?? null,
         category_id: data.category_id ?? null,
+        description: data.description ?? null,
+        available_qty: data.available_qty ?? '0',
         sales_price: data.sales_price ?? '0.00',
         cost_price: data.cost_price ?? '0.00',
         sales_tax_id: data.sales_tax_id ?? null,

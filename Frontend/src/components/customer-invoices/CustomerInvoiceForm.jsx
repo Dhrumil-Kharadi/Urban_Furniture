@@ -1,22 +1,21 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { UserCheck, Layers, Calculator } from 'lucide-react';
 import ContactPicker from '@/components/pickers/ContactPicker';
 import JournalPicker from '@/components/pickers/JournalPicker';
-import { DocumentLineGrid, DocumentTotals, FormField, FormActions } from '@/components/shared';
+import { DocumentLineGrid, FormField, FormActions } from '@/components/shared';
+import { formatMoney } from '@/utils/format';
+import '@/styles/transactions.css';
 
 /**
  * CustomerInvoiceForm
  *
- * SPECIFICATION (Doc/project.md §5.2, Doc/phase.md Phase 9):
- * - Customer, invoice date, due date, sales journal, and lines.
- * - `showAccount` is TRUE here and false on the sales order: an invoice line
- *   must name the income account it will credit, because posting it writes to
- *   the ledger. A quote need not.
- *
- * REUSE: the same line grid, totals and field/action wrappers as Phase 8's
- * vendor bill — configured for the sales side rather than duplicated.
+ * SPECIFICATION:
+ * - 2 side-by-side grid cards (Customer details & Invoice lines)
+ * - Prominent totals summary card below them (Untaxed Subtotal, Taxes & GST, Total)
+ * - double-entry income account tracking on invoice lines
  */
 export default function CustomerInvoiceForm({
   initialData = null,
@@ -27,6 +26,7 @@ export default function CustomerInvoiceForm({
 }) {
   const t = useTranslations('customerInvoices');
   const tc = useTranslations('common');
+  const locale = useLocale();
 
   // Lazily initialised for the same reason as the sales order form: the detail
   // page mounts this only after the record has loaded.
@@ -123,91 +123,123 @@ export default function CustomerInvoiceForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="app-form doc-form-stack" noValidate>
-      <div className="app-form-grid">
-        <FormField label={t('fields.customer')} required error={errors.customer_contact_id}>
-          <ContactPicker
-            value={formData.customer_contact_id}
-            onChange={(contact) =>
-              setFormData((prev) => ({ ...prev, customer_contact_id: contact ? contact.id : '' }))
-            }
-            type="customer"
-            disabled={isReadOnly}
-          />
-        </FormField>
+    <form onSubmit={handleSubmit} className="inv-form-container" noValidate>
+      {/* ── 2 Cards Side-by-Side Grid ── */}
+      <div className="inv-cards-split-grid">
+        {/* Card 1: Customer Details & Invoice Settings */}
+        <div className="inv-card-panel">
+          <div className="inv-card-head">
+            <h3 className="inv-card-title">
+              <UserCheck className="inv-card-title-icon" />
+              Customer Details
+            </h3>
+          </div>
 
-        <FormField label={t('fields.journal')} required error={errors.journal_id}>
-          <JournalPicker
-            value={formData.journal_id}
-            onChange={(journal) =>
-              setFormData((prev) => ({ ...prev, journal_id: journal ? journal.id : '' }))
-            }
-            type="sales"
-            disabled={isReadOnly}
-          />
-        </FormField>
+          <div className="inv-fields-grid">
+            <div className="inv-field-full">
+              <FormField label={t('fields.customer')} required error={errors.customer_contact_id}>
+                <ContactPicker
+                  value={formData.customer_contact_id}
+                  onChange={(contact) =>
+                    setFormData((prev) => ({ ...prev, customer_contact_id: contact ? contact.id : '' }))
+                  }
+                  type="customer"
+                  disabled={isReadOnly}
+                />
+              </FormField>
+            </div>
 
-        <FormField label={t('fields.invoiceDate')} required error={errors.invoice_date}>
-          <input
-            type="date"
-            className="form-input"
-            value={formData.invoice_date}
-            onChange={(e) => setFormData((prev) => ({ ...prev, invoice_date: e.target.value }))}
-            disabled={isReadOnly}
-          />
-        </FormField>
+            <div className="inv-field-full">
+              <FormField label={t('fields.journal')} required error={errors.journal_id}>
+                <JournalPicker
+                  value={formData.journal_id}
+                  onChange={(journal) =>
+                    setFormData((prev) => ({ ...prev, journal_id: journal ? journal.id : '' }))
+                  }
+                  type="sales"
+                  disabled={isReadOnly}
+                />
+              </FormField>
+            </div>
 
-        <FormField label={t('fields.dueDate')} error={errors.due_date}>
-          <input
-            type="date"
-            className="form-input"
-            value={formData.due_date}
-            onChange={(e) => setFormData((prev) => ({ ...prev, due_date: e.target.value }))}
-            disabled={isReadOnly}
-          />
-        </FormField>
+            <FormField label={t('fields.invoiceDate')} required error={errors.invoice_date}>
+              <input
+                type="date"
+                className="form-input"
+                value={formData.invoice_date}
+                onChange={(e) => setFormData((prev) => ({ ...prev, invoice_date: e.target.value }))}
+                disabled={isReadOnly}
+              />
+            </FormField>
 
-        <div className="is-full">
-          <FormField label={t('fields.notes')}>
-            <textarea
-              rows={2}
-              className="form-textarea"
-              value={formData.notes}
-              onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
-              disabled={isReadOnly}
-            />
-          </FormField>
+            <FormField label={t('fields.dueDate')} error={errors.due_date}>
+              <input
+                type="date"
+                className="form-input"
+                value={formData.due_date}
+                onChange={(e) => setFormData((prev) => ({ ...prev, due_date: e.target.value }))}
+                disabled={isReadOnly}
+              />
+            </FormField>
+
+            <div className="inv-field-full">
+              <FormField label={t('fields.notes')}>
+                <textarea
+                  rows={3}
+                  className="form-textarea"
+                  placeholder="Terms, payment instructions, or customer notes…"
+                  value={formData.notes}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
+                  disabled={isReadOnly}
+                />
+              </FormField>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Invoice Line Items */}
+        <div className="inv-card-panel">
+          <div className="inv-card-head">
+            <h3 className="inv-card-title">
+              <Layers className="inv-card-title-icon" />
+              {t('linesTitle')}
+            </h3>
+            {errors.lines && <span className="doc-section-error">{errors.lines}</span>}
+          </div>
+
+          <DocumentLineGrid
+            lines={formData.lines}
+            onChange={(newLines) => setFormData((prev) => ({ ...prev, lines: newLines }))}
+            config={{
+              priceField: 'salesPrice',
+              taxScope: 'sales',
+              showAccount: true,
+              accountField: 'income_account_id',
+              readOnly: isReadOnly,
+            }}
+          />
         </div>
       </div>
 
-      <div>
-        <div className="doc-section-head">
-          <h3 className="doc-section-title">{t('linesTitle')}</h3>
-          {errors.lines && <span className="doc-section-error">{errors.lines}</span>}
+      {/* ── Card 3: Untaxed Subtotal, Taxes & GST, Total Summary (Below Both Cards) ── */}
+      <div className="inv-totals-card">
+        <div className="inv-total-tile">
+          <span className="inv-total-tile-label">Untaxed Subtotal:</span>
+          <span className="inv-total-tile-value">{formatMoney(untaxedTotal, locale)}</span>
         </div>
 
-        <DocumentLineGrid
-          lines={formData.lines}
-          onChange={(newLines) => setFormData((prev) => ({ ...prev, lines: newLines }))}
-          config={{
-            priceField: 'salesPrice',
-            taxScope: 'sales',
-            // An invoice posts, so each line must name the account it credits.
-            showAccount: true,
-            accountField: 'income_account_id',
-            readOnly: isReadOnly,
-          }}
-        />
+        <div className="inv-total-tile">
+          <span className="inv-total-tile-label">Taxes & GST:</span>
+          <span className="inv-total-tile-value">{formatMoney(taxTotal, locale)}</span>
+        </div>
 
-        <div className="doc-totals-right">
-          <DocumentTotals
-            untaxedAmount={untaxedTotal}
-            taxAmount={taxTotal}
-            totalAmount={grandTotal}
-          />
+        <div className="inv-total-tile inv-total-tile--grand">
+          <span className="inv-total-tile-label">Total:</span>
+          <span className="inv-total-tile-value inv-total-tile-value--accent">{formatMoney(grandTotal, locale)}</span>
         </div>
       </div>
 
+      {/* ── Action Buttons ── */}
       {!isReadOnly && (
         <FormActions
           onCancel={onCancel}

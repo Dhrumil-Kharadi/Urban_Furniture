@@ -13,14 +13,24 @@ const { parse: parsePagination, buildSort, searchTerm, listResult } = require('.
  */
 
 const ALLOWED_SORT_COLUMNS = [
-  'created_at', 'updated_at', 'name', 'sku', 'product_type', 'sales_price', 'cost_price', 'status',
+  'created_at', 'updated_at', 'name', 'sku', 'product_type', 'description', 'available_qty', 'sales_price', 'cost_price', 'status',
 ];
 
 const SELECT_COLUMNS = `
   p.id, p.organization_id, p.name, p.sku, p.product_type, p.category_id,
+  p.description, p.available_qty,
   p.sales_price, p.cost_price, p.sales_tax_id, p.purchase_tax_id,
   p.income_account_id, p.expense_account_id, p.status,
   p.created_by, p.updated_by, p.created_at, p.updated_at
+`;
+
+const EXTENDED_COLUMNS = `
+  ${SELECT_COLUMNS},
+  c.name AS category_name,
+  st.name AS sales_tax_name,
+  st.rate AS sales_tax_rate,
+  pt.name AS purchase_tax_name,
+  pt.rate AS purchase_tax_rate
 `;
 
 const productsRepository = {
@@ -56,7 +66,7 @@ const productsRepository = {
     if (search) {
       params.push(`%${search}%`);
       const idx = params.length;
-      conditions.push(`(p.name ILIKE $${idx} OR p.sku ILIKE $${idx})`);
+      conditions.push(`(p.name ILIKE $${idx} OR p.sku ILIKE $${idx} OR p.description ILIKE $${idx})`);
     }
 
     const whereClause = `WHERE ${conditions.join(' AND ')}`;
@@ -77,11 +87,17 @@ const productsRepository = {
     const offsetIdx = params.length;
 
     const dataRes = await db.query(
-      `SELECT ${SELECT_COLUMNS}, c.name AS category_name
+      `SELECT ${EXTENDED_COLUMNS}
          FROM products p
          LEFT JOIN product_categories c
                 ON c.id = p.category_id
                AND c.organization_id = p.organization_id
+         LEFT JOIN taxes st
+                ON st.id = p.sales_tax_id
+               AND st.organization_id = p.organization_id
+         LEFT JOIN taxes pt
+                ON pt.id = p.purchase_tax_id
+               AND pt.organization_id = p.organization_id
         ${whereClause}
         ORDER BY ${orderBy}
         LIMIT $${limitIdx} OFFSET $${offsetIdx}`,
@@ -100,11 +116,17 @@ const productsRepository = {
   async findByIdAndOrg(client, organizationId, productId) {
     const db = client || pool;
     const res = await db.query(
-      `SELECT ${SELECT_COLUMNS}, c.name AS category_name
+      `SELECT ${EXTENDED_COLUMNS}
          FROM products p
          LEFT JOIN product_categories c
                 ON c.id = p.category_id
                AND c.organization_id = p.organization_id
+         LEFT JOIN taxes st
+                ON st.id = p.sales_tax_id
+               AND st.organization_id = p.organization_id
+         LEFT JOIN taxes pt
+                ON pt.id = p.purchase_tax_id
+               AND pt.organization_id = p.organization_id
         WHERE p.id = $1 AND p.organization_id = $2`,
       [productId, organizationId]
     );
@@ -173,10 +195,11 @@ const productsRepository = {
     const res = await db.query(
       `INSERT INTO products (
          organization_id, name, sku, product_type, category_id,
+         description, available_qty,
          sales_price, cost_price, sales_tax_id, purchase_tax_id,
          income_account_id, expense_account_id, created_by, updated_by
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $12)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $14)
        RETURNING id`,
       [
         payload.organization_id,
@@ -184,10 +207,12 @@ const productsRepository = {
         payload.sku,
         payload.product_type,
         payload.category_id,
+        payload.description || null,
+        payload.available_qty ?? 0,
         payload.sales_price,
         payload.cost_price,
-        payload.sales_tax_id,
-        payload.purchase_tax_id,
+        payload.sales_tax_id || null,
+        payload.purchase_tax_id || null,
         payload.income_account_id,
         payload.expense_account_id,
         payload.actor_user_id,
@@ -213,8 +238,8 @@ const productsRepository = {
   async update(client, organizationId, productId, fields, actorUserId) {
     const db = client || pool;
     const editable = [
-      'name', 'sku', 'product_type', 'category_id',
-      'sales_price', 'cost_price', 'sales_tax_id', 'purchase_tax_id',
+      'name', 'sku', 'product_type', 'category_id', 'description',
+      'available_qty', 'sales_price', 'cost_price', 'sales_tax_id', 'purchase_tax_id',
       'income_account_id', 'expense_account_id',
     ];
 
@@ -251,6 +276,29 @@ const productsRepository = {
 
     if (res.rowCount === 0) return null;
     return productsRepository.findByIdAndOrg(db, organizationId, productId);
+  },
+
+  /**
+   * Atomically adjust available stock for a product.
+   * delta can be positive (purchase/restock/cancel) or negative (sale).
+   *
+   * @param {object|null} client
+   * @param {string} organizationId
+   * @param {string} productId
+   * @param {number|string} delta
+   * @returns {Promise<object|null>}
+   */
+  async adjustStock(client, organizationId, productId, delta) {
+    const db = client || pool;
+    const res = await db.query(
+      `UPDATE products
+          SET available_qty = GREATEST(0, available_qty + $1::numeric),
+              updated_at = NOW()
+        WHERE id = $2 AND organization_id = $3
+        RETURNING id, name, available_qty`,
+      [delta, productId, organizationId]
+    );
+    return res.rows[0] || null;
   },
 
   /**

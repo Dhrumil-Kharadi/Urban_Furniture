@@ -19,6 +19,7 @@ import { useTranslations } from 'next-intl';
 
 import InputBox from '@/reusablefiles/inputbox';
 import FormShell from '@/components/masterdata/FormShell';
+import TaxPicker from '@/components/pickers/TaxPicker';
 import { productCategoriesService } from '@/services/masterdata.service';
 import { getCachedRequest } from '@/lib/requestCache';
 
@@ -49,8 +50,12 @@ export default function ProductForm({
     sku: product?.sku ?? '',
     product_type: product?.product_type ?? 'goods',
     category_id: product?.category_id ?? '',
+    description: product?.description ?? '',
+    available_qty: product?.available_qty !== undefined ? String(product.available_qty) : '0',
     sales_price: product?.sales_price ?? '0.00',
     cost_price: product?.cost_price ?? '0.00',
+    sales_tax_id: product?.sales_tax_id ?? null,
+    purchase_tax_id: product?.purchase_tax_id ?? null,
   });
   const [localErrors, setLocalErrors] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -112,6 +117,13 @@ export default function ProductForm({
       if (value && !PRICE_PATTERN.test(value)) errors.push(label);
     }
 
+    if (form.available_qty !== '') {
+      const num = Number(form.available_qty);
+      if (Number.isNaN(num) || num < 0) {
+        errors.push('Available quantity must be a non-negative number');
+      }
+    }
+
     setLocalErrors(errors);
     return errors.length === 0;
   };
@@ -124,8 +136,12 @@ export default function ProductForm({
       sku: form.sku.trim() || null,
       product_type: form.product_type,
       category_id: form.category_id || null,
+      description: form.description.trim() || null,
+      available_qty: String(form.available_qty).trim() || '0',
       sales_price: String(form.sales_price).trim() || '0',
       cost_price: String(form.cost_price).trim() || '0',
+      sales_tax_id: form.sales_tax_id || null,
+      purchase_tax_id: form.purchase_tax_id || null,
     });
   };
 
@@ -148,6 +164,17 @@ export default function ProductForm({
             placeholder={t('placeholders.name')}
             invalid={localErrors.length > 0 && !form.name.trim()}
             required
+          />
+        </div>
+
+        <div className="is-full">
+          <InputBox
+            as="textarea"
+            label={t('fields.description')}
+            value={form.description}
+            onChange={set('description')}
+            placeholder={t('placeholders.description')}
+            rows={2}
           />
         </div>
 
@@ -174,7 +201,15 @@ export default function ProductForm({
           options={categoryOptions}
         />
 
-        <div />
+        <InputBox
+          label="Available Quantity (Stock)"
+          value={form.available_qty}
+          onChange={set('available_qty')}
+          placeholder="0"
+          type="number"
+          min="0"
+          step="any"
+        />
 
         <InputBox
           label={t('fields.salesPrice')}
@@ -191,6 +226,28 @@ export default function ProductForm({
           placeholder={t('placeholders.price')}
           inputMode="decimal"
         />
+
+        <div>
+          <label className="ui-field-label" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.82rem', fontWeight: 600 }}>
+            {t('fields.salesTax')} (Customer Invoices)
+          </label>
+          <TaxPicker
+            value={form.sales_tax_id}
+            onChange={(tax) => set('sales_tax_id')(tax ? tax.id : null)}
+            scope="sales"
+          />
+        </div>
+
+        <div>
+          <label className="ui-field-label" style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.82rem', fontWeight: 600 }}>
+            {t('fields.purchaseTax')} (Vendor Bills)
+          </label>
+          <TaxPicker
+            value={form.purchase_tax_id}
+            onChange={(tax) => set('purchase_tax_id')(tax ? tax.id : null)}
+            scope="purchase"
+          />
+        </div>
       </div>
 
       <p className="md-form-hint">{t('priceNote')}</p>

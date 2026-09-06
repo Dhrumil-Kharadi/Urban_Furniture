@@ -178,11 +178,29 @@ export default function ProductDetailPage() {
                     <Pill tone="mid" size="sm">{t(`types.${product.product_type}`)}</Pill>
                   </Fact>
                   <Fact label={t('fields.category')}>{product.category_name}</Fact>
+                  {product.description ? (
+                    <Fact label={t('fields.description')}>{product.description}</Fact>
+                  ) : null}
+                  <Fact label="Available Stock">
+                    {Number(product.available_qty || 0) <= 0 ? (
+                      <Pill tone="crit" size="sm">⚠️ Out of Stock (0 units)</Pill>
+                    ) : Number(product.available_qty || 0) <= 5 ? (
+                      <Pill tone="warn" size="sm">⚠️ Low Stock ({product.available_qty} units)</Pill>
+                    ) : (
+                      <Pill tone="good" size="sm">✅ In Stock ({product.available_qty} units)</Pill>
+                    )}
+                  </Fact>
                   <Fact label={t('fields.salesPrice')} money>
                     <MoneyText value={product.sales_price} />
                   </Fact>
                   <Fact label={t('fields.costPrice')} money>
                     <MoneyText value={product.cost_price} />
+                  </Fact>
+                  <Fact label={t('fields.salesTax')}>
+                    {product.sales_tax_name ? `${product.sales_tax_name} (${product.sales_tax_rate}%)` : 'None'}
+                  </Fact>
+                  <Fact label={t('fields.purchaseTax')}>
+                    {product.purchase_tax_name ? `${product.purchase_tax_name} (${product.purchase_tax_rate}%)` : 'None'}
                   </Fact>
                   <Fact label={t('fields.status')}>
                     <StatusPill

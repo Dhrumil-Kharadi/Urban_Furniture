@@ -243,9 +243,9 @@ export default function BudgetDrawer({
                 className="budget-select"
                 style={{ width: '100%' }}
               >
-                <option value="draft">{t('status.draft')}</option>
-                <option value="active">{t('status.active')}</option>
-                <option value="archived">{t('status.archived')}</option>
+                <option value="active">{t('status.active') || 'Active'}</option>
+                <option value="closed">{t('status.closed') || 'Closed'}</option>
+                <option value="archived">{t('status.archived') || 'Archived'}</option>
               </select>
             </div>
           </div>

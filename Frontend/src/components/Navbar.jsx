@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { Link, usePathname } from '@/i18n/navigation';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { usePageTransition } from '@/reusablefiles/pagetransition';
 import { useAuth } from '@/context/AuthContext';
+import logoImg from '@/assets/logo.png';
 import '@/styles/navbar.css';
 
 /**
@@ -50,7 +52,15 @@ export default function Navbar({ hideCta = false }) {
   return (
     <nav className={isAuthPage || isDashboardPage ? 'nav-auth-page' : ''}>
       <Link href="/" className="nav-logo">
-        Furn<span>o</span>va
+        <Image
+          src={logoImg}
+          alt="Furnova Logo"
+          width={32}
+          height={32}
+          className="nav-brand-img"
+          priority
+        />
+        <span>Furn<span>o</span>va</span>
       </Link>
 
       <div className="nav-links">

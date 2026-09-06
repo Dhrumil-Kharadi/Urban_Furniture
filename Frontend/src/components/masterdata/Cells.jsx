@@ -30,7 +30,9 @@ export function MoneyText({ value, currency = 'INR' }) {
 
   if (value === null || value === undefined || value === '') return <span>—</span>;
 
-  const formatted = new Intl.NumberFormat(locale, {
+  const bcpLocale = locale === 'hi' ? 'hi-IN' : locale === 'gu' ? 'gu-IN' : 'en-IN';
+
+  const formatted = new Intl.NumberFormat(bcpLocale, {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,

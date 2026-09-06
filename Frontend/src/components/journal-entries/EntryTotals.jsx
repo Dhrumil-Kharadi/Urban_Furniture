@@ -32,8 +32,10 @@ export default function EntryTotals({ totalDebitMinor, totalCreditMinor, showSta
   const differenceMinor = totalDebitMinor - totalCreditMinor;
   const balanced = differenceMinor === 0;
 
+  const bcpLocale = locale === 'hi' ? 'hi-IN' : locale === 'gu' ? 'gu-IN' : 'en-IN';
+
   const format = (minor) =>
-    new Intl.NumberFormat(locale, {
+    new Intl.NumberFormat(bcpLocale, {
       style: 'currency',
       currency: 'INR',
       minimumFractionDigits: 2,

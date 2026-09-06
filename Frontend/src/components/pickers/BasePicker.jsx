@@ -160,6 +160,11 @@ export default function BasePicker({
           justifyContent: 'space-between',
           cursor: disabled ? 'not-allowed' : 'pointer',
           paddingRight: '0.6rem',
+          width: '100%',
+          minWidth: 0,
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          overflow: 'hidden',
         }}
       >
         <span
@@ -168,6 +173,8 @@ export default function BasePicker({
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
+            flex: 1,
+            minWidth: 0,
           }}
         >
           {currentLabel || placeholder}

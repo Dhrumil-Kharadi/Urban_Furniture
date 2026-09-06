@@ -82,9 +82,7 @@ export default function Topbar({
             aria-label={searchPlaceholder}
           />
         </div>
-      ) : (
-        <span className="dash-search" />
-      )}
+      ) : null}
 
       <div className="dash-top-actions">
         {actions.map((action) => (

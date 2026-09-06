@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import Navbar from '@/components/Navbar';
 import { usePageTransition } from '@/reusablefiles/pagetransition';
+import logoImg from '@/assets/logo.png';
 import AuthMeshArt from './AuthMeshArt';
 
 /**
@@ -46,23 +48,15 @@ export default function AuthLayout({
             <div className="form-wrap-auth">
               {/* Brand Header */}
               <Link href="/" className="brand-auth" aria-label={t('brandName')}>
-                <svg className="brand-mark-auth" viewBox="0 0 32 32" aria-hidden="true">
-                  <polygon
-                    points="16,2 30,11 30,23 16,30 2,23 2,11"
-                    fill="none"
-                    stroke="url(#brandGradAuth)"
-                    strokeWidth="2"
-                  />
-                  <polygon points="16,2 30,11 16,16" fill="url(#brandGradAuth)" opacity="0.9" />
-                  <polygon points="16,16 30,11 30,23 16,30" fill="url(#brandGradAuth)" opacity="0.55" />
-                  <polygon points="16,16 2,11 2,23 16,30" fill="url(#brandGradAuth)" opacity="0.3" />
-                  <defs>
-                    <linearGradient id="brandGradAuth" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#000080" />
-                      <stop offset="100%" stopColor="#22a8e0" />
-                    </linearGradient>
-                  </defs>
-                </svg>
+                <Image
+                  src={logoImg}
+                  alt={t('brandName')}
+                  width={28}
+                  height={28}
+                  className="brand-mark-auth"
+                  style={{ objectFit: 'contain', borderRadius: '5px' }}
+                  priority
+                />
                 <span className="brand-name-auth">{t('brandName')}</span>
               </Link>
 

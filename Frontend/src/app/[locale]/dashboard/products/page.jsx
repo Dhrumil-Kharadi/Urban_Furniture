@@ -61,6 +61,21 @@ export default function ProductsPage() {
         render: (row) => <MoneyText value={row.cost_price} />,
       },
       {
+        key: 'available_qty',
+        header: 'Available Stock',
+        align: 'right',
+        render: (row) => {
+          if (row.product_type !== 'goods') return <span className="md-cell-muted">—</span>;
+          const qty = Number(row.available_qty || 0);
+          const tone = qty === 0 ? 'critical' : qty <= 5 ? 'warn' : 'accent';
+          return (
+            <Pill tone={tone} size="sm">
+              {qty === 0 ? 'Out of stock (0)' : `${qty} units`}
+            </Pill>
+          );
+        },
+      },
+      {
         key: 'status',
         header: t('table.status'),
         render: (row) => (

@@ -41,7 +41,29 @@ const analyticsService = {
    * @returns {Promise<{ items: Array, pagination: object }>}
    */
   async listAnalyticAccounts(organizationId, query) {
-    return analyticsRepository.list(null, organizationId, query);
+    const res = await analyticsRepository.list(null, organizationId, query);
+    if (res.items.length === 0 && (!query || !query.search) && res.pagination?.total === 0) {
+      const defaults = [
+        { code: 'CC-SALES', name: 'Sales & Marketing', analytic_type: 'income', department: 'Sales' },
+        { code: 'CC-RETAIL', name: 'Retail Showroom', analytic_type: 'income', department: 'Showroom' },
+        { code: 'CC-OPS', name: 'General Operations', analytic_type: 'expense', department: 'Operations' },
+        { code: 'CC-PROD', name: 'Manufacturing & Workshop', analytic_type: 'expense', department: 'Production' },
+        { code: 'CC-LOG', name: 'Logistics & Warehousing', analytic_type: 'expense', department: 'Logistics' },
+      ];
+      for (const a of defaults) {
+        try {
+          await analyticsRepository.insert(null, {
+            organization_id: organizationId,
+            actor_user_id: null,
+            ...a,
+          });
+        } catch {
+          // ignore potential duplicate
+        }
+      }
+      return analyticsRepository.list(null, organizationId, query);
+    }
+    return res;
   },
 
   /**

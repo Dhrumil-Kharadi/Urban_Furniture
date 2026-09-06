@@ -19,7 +19,7 @@ export default function AnalyticAccountPicker({
 }) {
   return (
     <BasePicker
-      endpoint="/analytics"
+      endpoint="/analytic-accounts"
       value={value}
       onChange={onChange}
       placeholder="Select analytic account / cost center…"

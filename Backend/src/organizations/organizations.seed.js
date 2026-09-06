@@ -125,10 +125,30 @@ async function seedOrganizationMasterData(client, organizationId, userId = null,
     );
   }
 
+  // 4. Insert Default Analytic Accounts (Cost Centres)
+  const analyticAccountsToSeed = [
+    { code: 'CC-SALES', name: 'Sales & Marketing', analytic_type: 'income', department: 'Sales' },
+    { code: 'CC-RETAIL', name: 'Retail Showroom', analytic_type: 'income', department: 'Showroom' },
+    { code: 'CC-OPS', name: 'General Operations', analytic_type: 'expense', department: 'Operations' },
+    { code: 'CC-PROD', name: 'Manufacturing & Workshop', analytic_type: 'expense', department: 'Production' },
+    { code: 'CC-LOG', name: 'Logistics & Warehousing', analytic_type: 'expense', department: 'Logistics' },
+  ];
+
+  for (const a of analyticAccountsToSeed) {
+    await client.query(
+      `INSERT INTO analytic_accounts (
+        organization_id, code, name, analytic_type, department, status, created_by, updated_by
+      ) VALUES ($1, $2, $3, $4, $5, 'active', $6, $6)
+      ON CONFLICT DO NOTHING`,
+      [organizationId, a.code, a.name, a.analytic_type, a.department, userId]
+    );
+  }
+
   return {
     accountsCount: accountsToSeed.length,
     journalsCount: journalsToSeed.length,
     sequencesCount: sequencesToSeed.length,
+    analyticAccountsCount: analyticAccountsToSeed.length,
   };
 }
 

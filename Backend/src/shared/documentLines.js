@@ -127,7 +127,7 @@ async function resolveAndComputeLines(client, organizationId, rawLines, config) 
   const productMap = {};
   if (productIds.length > 0) {
     const res = await db.query(
-      `SELECT id, name, ${config.priceField}, ${config.taxField}, ${config.productAccountField}
+      `SELECT id, name, description, ${config.priceField}, ${config.taxField}, ${config.productAccountField}
          FROM products
         WHERE id = ANY($1::uuid[]) AND organization_id = $2`,
       [productIds, organizationId]
@@ -180,7 +180,7 @@ async function resolveAndComputeLines(client, organizationId, rawLines, config) 
       unit_price: hasExplicitPrice ? line.unit_price : (product?.[config.priceField] ?? 0),
       [config.accountField]:
         line[config.accountField] || product?.[config.productAccountField] || null,
-      description: line.description || product?.name || '',
+      description: (line.description || product?.description || product?.name || '').trim(),
     };
   });
 

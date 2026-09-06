@@ -156,8 +156,8 @@ export default function BudgetForm({
             onChange={(val) => setFormData((prev) => ({ ...prev, status: val }))}
             options={[
               { value: 'active', label: 'Active' },
-              { value: 'draft', label: 'Draft' },
               { value: 'closed', label: 'Closed' },
+              { value: 'archived', label: 'Archived' },
             ]}
             disabled={isReadOnly}
           />

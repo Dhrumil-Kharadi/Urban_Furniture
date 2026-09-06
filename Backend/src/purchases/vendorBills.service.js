@@ -24,6 +24,7 @@ const sequenceService = require('../shared/sequence.service');
 const auditService = require('../shared/audit.service');
 const accountingService = require('../accounting/accounting.service');
 const purchasesRepository = require('./purchases.repository');
+const productsRepository = require('../products/products.repository');
 const { computeLineTotals, resolveAndComputeLines } = require('./purchaseOrders.service');
 const notificationsService = require('../notifications/notifications.service');
 const logger = require('../utils/logger');
@@ -329,6 +330,13 @@ const vendorBillsService = {
         );
       }
 
+      // Increase stock for purchased goods
+      for (const line of computedLines) {
+        if (line.product_id) {
+          await productsRepository.adjustStock(client, organizationId, line.product_id, Number(line.quantity));
+        }
+      }
+
       // 10. Audit log
       await auditService.recordAudit(client, {
         organizationId,
@@ -389,6 +397,15 @@ const vendorBillsService = {
           `Cancellation of Vendor Bill ${bill.bill_number}`,
           { organizationId, actorUserId }
         );
+
+        // Reverse stock increase for cancelled goods
+        if (bill.lines) {
+          for (const line of bill.lines) {
+            if (line.product_id) {
+              await productsRepository.adjustStock(client, organizationId, line.product_id, -Number(line.quantity));
+            }
+          }
+        }
       }
 
       // If linked to a PO, revert PO status to confirmed

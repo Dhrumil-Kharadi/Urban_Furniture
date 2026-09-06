@@ -18,12 +18,46 @@ const sequenceService = require('../shared/sequence.service');
 const auditService = require('../shared/audit.service');
 const { resolveAndComputeLines, SALES_CONFIG } = require('../shared/documentLines');
 const salesRepository = require('./sales.repository');
+const productsRepository = require('../products/products.repository');
 
 /** @private */
 function fail(message, statusCode = 400) {
   const error = new Error(message);
   error.statusCode = statusCode;
   throw error;
+}
+
+/**
+ * Verify that products have sufficient available stock for goods.
+ * @private
+ */
+async function checkStockAvailability(client, organizationId, lines) {
+  const productIds = [...new Set(lines.map((l) => l.product_id).filter(Boolean))];
+  if (productIds.length === 0) return;
+
+  const res = await client.query(
+    `SELECT id, name, product_type, available_qty
+       FROM products
+      WHERE id = ANY($1::uuid[]) AND organization_id = $2`,
+    [productIds, organizationId]
+  );
+  const pMap = {};
+  for (const p of res.rows) pMap[p.id] = p;
+
+  for (const line of lines) {
+    if (!line.product_id) continue;
+    const p = pMap[line.product_id];
+    if (p && p.product_type === 'goods') {
+      const available = Number(p.available_qty || 0);
+      const requested = Number(line.quantity || 0);
+      if (requested > available) {
+        fail(
+          `Product "${p.name}" has only ${available} available in stock (requested: ${requested}). Please restock product quantity.`,
+          400
+        );
+      }
+    }
+  }
 }
 
 /**
@@ -73,6 +107,8 @@ const salesOrdersService = {
     if (!customer) fail('Customer not found, inactive, or not a customer contact', 400);
 
     return withTransaction(async (client) => {
+      await checkStockAvailability(client, organizationId, data.lines);
+
       const { computedLines, untaxed_amount, tax_amount, total_amount } =
         await computeSalesLines(client, organizationId, data.lines);
 
@@ -190,6 +226,9 @@ const salesOrdersService = {
         fail('Sales order total must be greater than zero', 400);
       }
 
+      // Verify stock availability before confirming
+      await checkStockAvailability(client, organizationId, salesOrder.lines);
+
       // Consumed on the shared client, so a rollback releases the row lock and
       // the number is never burned.
       const fiscalYear = String(new Date(salesOrder.order_date).getFullYear());
@@ -203,6 +242,13 @@ const salesOrdersService = {
           WHERE id = $3 AND organization_id = $4`,
         [soNumber, actorUserId, soId, organizationId]
       );
+
+      // Deduct stock for confirmed goods
+      for (const line of salesOrder.lines) {
+        if (line.product_id) {
+          await productsRepository.adjustStock(client, organizationId, line.product_id, -Number(line.quantity));
+        }
+      }
 
       await auditService.recordAudit(client, {
         organizationId,
@@ -327,6 +373,15 @@ const salesOrdersService = {
       }
 
       await salesRepository.updateSOStatus(client, organizationId, soId, 'cancelled', actorUserId);
+
+      // Restore stock if the order was confirmed
+      if (salesOrder.status === 'confirmed' && salesOrder.lines) {
+        for (const line of salesOrder.lines) {
+          if (line.product_id) {
+            await productsRepository.adjustStock(client, organizationId, line.product_id, Number(line.quantity));
+          }
+        }
+      }
 
       await auditService.recordAudit(client, {
         organizationId,
