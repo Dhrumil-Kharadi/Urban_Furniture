@@ -10,6 +10,7 @@
 
 import { Scale, Zap, ShieldCheck, BarChart3 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import DemoAnimation from './DemoAnimation';
 
 const FEATURE_KEYS = [
   { key: 'multiAgent',      icon: <Scale size={20} />,      delay: '' },
@@ -27,22 +28,8 @@ export default function FeaturesSection() {
   return (
     <section className="features-section" id="features">
       <div className="section-container">
-        <div className="feature-visual">
-          <img
-            className="feature-main-img"
-            src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=700&q=80"
-            alt={t('eyebrow')}
-          />
-          <img
-            className="feature-secondary-img"
-            src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80"
-            alt={t('eyebrow')}
-          />
-          <div className="feature-badge-card">
-            <div className="fbc-icon"><Scale size={28} /></div>
-            <span className="fbc-val">{tBadge('value')}</span>
-            <span className="fbc-label">{tBadge('label')}</span>
-          </div>
+        <div className="feature-visual" style={{ width: '100%' }}>
+          <DemoAnimation />
         </div>
 
         <div>

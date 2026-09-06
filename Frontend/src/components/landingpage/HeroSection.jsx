@@ -110,13 +110,13 @@ export default function HeroSection() {
 
     const NP = {
       seed: [0.500, 0.000],
-      ph: [0.500, 0.320],
-      sm: [0.220, 0.520],
-      n: [0.780, 0.520],
-      p: [0.130, 0.440],
-      k: [0.370, 0.440],
-      st: [0.630, 0.440],
-      at: [0.870, 0.440],
+      ph: [0.500, 0.280],
+      sm: [0.230, 0.550],
+      n: [0.770, 0.550],
+      p: [0.090, 0.420],
+      k: [0.380, 0.420],
+      st: [0.620, 0.420],
+      at: [0.910, 0.420],
       hum: [0.500, 0.720],
       lux: [0.500, 0.880],
     };
@@ -153,22 +153,22 @@ export default function HeroSection() {
 
     function defineBranches() {
       return [
-        { d: 0, delay: 600, dur: 900, pts: [NP.seed, [0.500, 0.100], [0.500, 0.210], NP.ph] },
-        { d: 0, delay: 600, dur: 1050, pts: [NP.seed, [0.440, 0.060], [0.340, 0.200], [0.270, 0.340], [0.230, 0.430], NP.sm] },
-        { d: 0, delay: 600, dur: 1050, pts: [NP.seed, [0.560, 0.060], [0.660, 0.200], [0.730, 0.340], [0.770, 0.430], NP.n] },
-        { d: 1, delay: 900, dur: 900, pts: [NP.seed, [0.390, 0.050], [0.270, 0.150], [0.190, 0.290], [0.150, 0.370], NP.p] },
-        { d: 1, delay: 900, dur: 900, pts: [NP.seed, [0.610, 0.050], [0.730, 0.150], [0.810, 0.290], [0.850, 0.370], NP.at] },
-        { d: 1, delay: 1100, dur: 700, pts: [NP.ph, [0.450, 0.360], [0.410, 0.420], NP.k] },
-        { d: 1, delay: 1100, dur: 700, pts: [NP.ph, [0.550, 0.360], [0.590, 0.420], NP.st] },
-        { d: 2, delay: 1400, dur: 600, pts: [NP.p, [0.175, 0.460], [0.200, 0.480], NP.sm] },
-        { d: 2, delay: 1450, dur: 580, pts: [NP.sm, [0.295, 0.480], [0.335, 0.455], NP.k] },
-        { d: 2, delay: 1500, dur: 500, pts: [NP.k, [0.440, 0.400], NP.ph] },
-        { d: 2, delay: 1500, dur: 500, pts: [NP.st, [0.560, 0.400], NP.ph] },
-        { d: 2, delay: 1450, dur: 580, pts: [NP.st, [0.665, 0.455], [0.705, 0.480], NP.n] },
-        { d: 2, delay: 1400, dur: 600, pts: [NP.n, [0.800, 0.480], [0.825, 0.460], NP.at] },
-        { d: 1, delay: 1300, dur: 950, pts: [NP.ph, [0.500, 0.420], [0.500, 0.550], [0.500, 0.640], NP.hum] },
-        { d: 2, delay: 1600, dur: 750, pts: [NP.sm, [0.380, 0.580], [0.440, 0.660], NP.hum] },
-        { d: 2, delay: 1600, dur: 750, pts: [NP.n, [0.620, 0.580], [0.560, 0.660], NP.hum] },
+        { d: 0, delay: 600, dur: 900, pts: [NP.seed, [0.500, 0.090], [0.500, 0.190], NP.ph] },
+        { d: 0, delay: 600, dur: 1050, pts: [NP.seed, [0.440, 0.060], [0.340, 0.200], [0.270, 0.360], [0.240, 0.460], NP.sm] },
+        { d: 0, delay: 600, dur: 1050, pts: [NP.seed, [0.560, 0.060], [0.660, 0.200], [0.730, 0.360], [0.760, 0.460], NP.n] },
+        { d: 1, delay: 900, dur: 900, pts: [NP.seed, [0.390, 0.050], [0.250, 0.150], [0.160, 0.280], [0.110, 0.360], NP.p] },
+        { d: 1, delay: 900, dur: 900, pts: [NP.seed, [0.610, 0.050], [0.750, 0.150], [0.840, 0.280], [0.890, 0.360], NP.at] },
+        { d: 1, delay: 1100, dur: 700, pts: [NP.ph, [0.450, 0.340], [0.410, 0.390], NP.k] },
+        { d: 1, delay: 1100, dur: 700, pts: [NP.ph, [0.550, 0.340], [0.590, 0.390], NP.st] },
+        { d: 2, delay: 1400, dur: 600, pts: [NP.p, [0.140, 0.460], [0.190, 0.510], NP.sm] },
+        { d: 2, delay: 1450, dur: 580, pts: [NP.sm, [0.290, 0.510], [0.340, 0.460], NP.k] },
+        { d: 2, delay: 1500, dur: 500, pts: [NP.k, [0.440, 0.360], NP.ph] },
+        { d: 2, delay: 1500, dur: 500, pts: [NP.st, [0.560, 0.360], NP.ph] },
+        { d: 2, delay: 1450, dur: 580, pts: [NP.st, [0.660, 0.460], [0.710, 0.510], NP.n] },
+        { d: 2, delay: 1400, dur: 600, pts: [NP.n, [0.810, 0.510], [0.860, 0.460], NP.at] },
+        { d: 1, delay: 1300, dur: 950, pts: [NP.ph, [0.500, 0.400], [0.500, 0.540], [0.500, 0.640], NP.hum] },
+        { d: 2, delay: 1600, dur: 750, pts: [NP.sm, [0.360, 0.610], [0.430, 0.670], NP.hum] },
+        { d: 2, delay: 1600, dur: 750, pts: [NP.n, [0.640, 0.610], [0.570, 0.670], NP.hum] },
         { d: 1, delay: 1900, dur: 850, pts: [NP.hum, [0.500, 0.790], [0.500, 0.840], NP.lux] },
         { d: 3, delay: 2100, dur: 600, pts: [NP.lux, [0.430, 0.910], [0.370, 0.950]] },
         { d: 3, delay: 2150, dur: 580, pts: [NP.lux, [0.455, 0.920], [0.410, 0.962]] },
@@ -176,16 +176,16 @@ export default function HeroSection() {
         { d: 3, delay: 2150, dur: 580, pts: [NP.lux, [0.545, 0.920], [0.590, 0.962]] },
         { d: 3, delay: 2000, dur: 550, pts: [NP.hum, [0.400, 0.750], [0.340, 0.800]] },
         { d: 3, delay: 2050, dur: 530, pts: [NP.hum, [0.600, 0.750], [0.660, 0.800]] },
-        { d: 3, delay: 1900, dur: 580, pts: [NP.sm, [0.155, 0.600], [0.110, 0.660]] },
-        { d: 3, delay: 1950, dur: 560, pts: [NP.sm, [0.200, 0.610], [0.180, 0.680]] },
-        { d: 3, delay: 1900, dur: 580, pts: [NP.sm, [0.240, 0.590], [0.230, 0.660]] },
-        { d: 3, delay: 1900, dur: 580, pts: [NP.n, [0.845, 0.600], [0.890, 0.660]] },
-        { d: 3, delay: 1950, dur: 560, pts: [NP.n, [0.800, 0.610], [0.820, 0.680]] },
-        { d: 3, delay: 1900, dur: 580, pts: [NP.n, [0.760, 0.590], [0.770, 0.660]] },
-        { d: 3, delay: 1800, dur: 550, pts: [NP.p, [0.080, 0.480], [0.050, 0.540]] },
-        { d: 3, delay: 1850, dur: 530, pts: [NP.p, [0.110, 0.500], [0.090, 0.570]] },
-        { d: 3, delay: 1800, dur: 550, pts: [NP.at, [0.920, 0.480], [0.950, 0.540]] },
-        { d: 3, delay: 1850, dur: 530, pts: [NP.at, [0.890, 0.500], [0.910, 0.570]] },
+        { d: 3, delay: 1900, dur: 580, pts: [NP.sm, [0.170, 0.620], [0.120, 0.680]] },
+        { d: 3, delay: 1950, dur: 560, pts: [NP.sm, [0.210, 0.630], [0.190, 0.700]] },
+        { d: 3, delay: 1900, dur: 580, pts: [NP.sm, [0.250, 0.620], [0.240, 0.690]] },
+        { d: 3, delay: 1900, dur: 580, pts: [NP.n, [0.830, 0.620], [0.880, 0.680]] },
+        { d: 3, delay: 1950, dur: 560, pts: [NP.n, [0.790, 0.630], [0.810, 0.700]] },
+        { d: 3, delay: 1900, dur: 580, pts: [NP.n, [0.750, 0.620], [0.760, 0.690]] },
+        { d: 3, delay: 1800, dur: 550, pts: [NP.p, [0.060, 0.470], [0.030, 0.530]] },
+        { d: 3, delay: 1850, dur: 530, pts: [NP.p, [0.080, 0.490], [0.060, 0.560]] },
+        { d: 3, delay: 1800, dur: 550, pts: [NP.at, [0.940, 0.470], [0.970, 0.530]] },
+        { d: 3, delay: 1850, dur: 530, pts: [NP.at, [0.920, 0.490], [0.940, 0.560]] },
         { d: 3, delay: 2200, dur: 500, pts: [NP.lux, [0.500, 0.930], [0.500, 0.980]] },
         { d: 3, delay: 2200, dur: 500, pts: [NP.lux, [0.478, 0.935], [0.465, 0.988]] },
         { d: 3, delay: 2200, dur: 500, pts: [NP.lux, [0.522, 0.935], [0.535, 0.988]] },
@@ -414,53 +414,52 @@ export default function HeroSection() {
         <canvas id="rootCanvas"></canvas>
 
         {/* Ledger account nodes — the root canvas reads as the chart of
-            accounts tree. Numeric balances are sample data, not copy, so
-            they are not translated. Labels are. */}
-        <div className="snode lg" id="sn-ph" data-x="0.50" data-y="0.32">
-          <span className="snode-sym">AR</span>
+            accounts tree. Full account names in rounded corner rectangles. */}
+        <div className="snode lg" id="sn-ph" data-x="0.50" data-y="0.28">
+          <span className="snode-sym">Accounts Receivable</span>
           <span className="snode-val">₹12.4L</span>
           <span className="snode-lbl">{tSensors('debtors')}</span>
           <div className="snode-dot"></div>
         </div>
-        <div className="snode lg" id="sn-sm" data-x="0.22" data-y="0.52">
-          <span className="snode-sym">AP</span>
+        <div className="snode lg" id="sn-sm" data-x="0.23" data-y="0.55">
+          <span className="snode-sym">Accounts Payable</span>
           <span className="snode-val">₹8.2L</span>
           <span className="snode-lbl">{tSensors('creditors')}</span>
           <div className="snode-dot"></div>
         </div>
-        <div className="snode lg" id="sn-n" data-x="0.78" data-y="0.52">
-          <span className="snode-sym">IN</span>
+        <div className="snode lg" id="sn-n" data-x="0.77" data-y="0.55">
+          <span className="snode-sym">Sales Income</span>
           <span className="snode-val">₹24.6L</span>
           <span className="snode-lbl">{tSensors('salesIncome')}</span>
           <div className="snode-dot"></div>
         </div>
-        <div className="snode md" id="sn-p" data-x="0.13" data-y="0.44">
-          <span className="snode-sym">EX</span>
+        <div className="snode md" id="sn-p" data-x="0.09" data-y="0.42">
+          <span className="snode-sym">Purchase Expense</span>
           <span className="snode-val">₹9.8L</span>
           <span className="snode-lbl">{tSensors('purchaseExpense')}</span>
         </div>
-        <div className="snode md" id="sn-k" data-x="0.37" data-y="0.44">
-          <span className="snode-sym">CA</span>
+        <div className="snode md" id="sn-k" data-x="0.38" data-y="0.42">
+          <span className="snode-sym">Cash Account</span>
           <span className="snode-val">₹3.1L</span>
           <span className="snode-lbl">{tSensors('cash')}</span>
         </div>
-        <div className="snode md" id="sn-st" data-x="0.63" data-y="0.44">
-          <span className="snode-sym">BK</span>
+        <div className="snode md" id="sn-st" data-x="0.62" data-y="0.42">
+          <span className="snode-sym">Bank Account</span>
           <span className="snode-val">₹15.7L</span>
           <span className="snode-lbl">{tSensors('bank')}</span>
         </div>
-        <div className="snode md" id="sn-at" data-x="0.87" data-y="0.44">
-          <span className="snode-sym">TX</span>
+        <div className="snode md" id="sn-at" data-x="0.91" data-y="0.42">
+          <span className="snode-sym">Output GST Tax</span>
           <span className="snode-val">18%</span>
           <span className="snode-lbl">{tSensors('outputTax')}</span>
         </div>
         <div className="snode sm" id="sn-hum" data-x="0.50" data-y="0.72">
-          <span className="snode-sym">EQ</span>
-          <span className="snode-val">₹22L</span>
+          <span className="snode-sym">Capital & Equity</span>
+          <span className="snode-val">₹22.0L</span>
           <span className="snode-lbl">{tSensors('capital')}</span>
         </div>
         <div className="snode sm" id="sn-lux" data-x="0.50" data-y="0.88">
-          <span className="snode-sym"><Scale size={14} /></span>
+          <span className="snode-sym"><Scale size={13} /> Balanced</span>
           <span className="snode-val">0.00</span>
           <span className="snode-lbl">{tSensors('variance')}</span>
         </div>

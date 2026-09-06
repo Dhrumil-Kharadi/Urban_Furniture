@@ -17,7 +17,6 @@ import AgentsSection from '@/components/landingpage/AgentsSection';
 import FeaturesSection from '@/components/landingpage/FeaturesSection';
 import HowItWorksSection from '@/components/landingpage/HowItWorksSection';
 import TechSection from '@/components/landingpage/TechSection';
-import ChipSceneSection from '@/components/landingpage/ChipSceneSection';
 import CTASection from '@/components/landingpage/CTASection';
 import Footer from '@/components/Footer';
 
@@ -46,7 +45,6 @@ export default function LandingPage() {
       <FeaturesSection />
       <HowItWorksSection />
       <TechSection />
-      <ChipSceneSection />
       <CTASection />
       <Footer />
     </>
