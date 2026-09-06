@@ -309,6 +309,7 @@ export default function BusinessOwnerDashboard() {
         </Card>
       </div>
       )}
+
     </DashboardFrame>
   );
 }

@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+langchain-groq
+langgraph
+langchain-core
+httpx
+pydantic-settings
+python-dotenv
+pandas
+joblib
+scikit-learn
+numpy
