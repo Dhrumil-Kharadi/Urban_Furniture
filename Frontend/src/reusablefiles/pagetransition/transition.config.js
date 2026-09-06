@@ -5,26 +5,26 @@
 
 export const TRANSITION_CONFIG = {
   // Duration for the panels to glide down and cover the viewport (ms)
-  enterDuration: 2600,
+  enterDuration: 700,
 
   // Stagger delays for panels during entry (ms)
   enterStagger: {
     center: 0,
-    right: 200,
-    left: 400,
+    right: 80,
+    left: 150,
   },
 
   // Minimal buffer once fully covered to ensure destination route DOM is rendered underneath (ms)
-  loadingDuration: 350,
+  loadingDuration: 250,
 
   // Duration for the panels to glide up and reveal the destination (ms)
-  exitDuration: 2600,
+  exitDuration: 700,
 
   // Stagger delays for panels during exit (ms)
   exitStagger: {
     center: 0,
-    left: 200,
-    right: 380,
+    left: 80,
+    right: 150,
   },
 
   // Default title and subtitle text shown during the transition

@@ -652,6 +652,50 @@ const salesRepository = {
     );
     return res.rows[0] || null;
   },
+
+  /**
+   * Find a published customer invoice by ID (public view, no org scope required beforehand).
+   *
+   * @param {object|null} client
+   * @param {string} invoiceId
+   * @returns {Promise<object|null>}
+   */
+  async getPublicCustomerInvoiceById(client, invoiceId) {
+    const db = client || pool;
+    const invRes = await db.query(
+      `SELECT ci.id, ci.organization_id, ci.invoice_number, ci.invoice_date, ci.due_date, ci.status,
+              ci.untaxed_amount, ci.tax_amount, ci.total_amount, ci.amount_due, ci.amount_paid,
+              ci.notes, ci.created_at, ci.posted_at,
+              c.name AS customer_name, c.email AS customer_email, c.mobile AS customer_mobile,
+              c.city AS customer_city, c.state AS customer_state, c.pincode AS customer_pincode,
+              o.name AS organization_name, o.currency_code AS organization_currency,
+              ${IS_OVERDUE_SQL} AS is_overdue
+         FROM customer_invoices ci
+         LEFT JOIN contacts c
+                ON c.id = ci.customer_contact_id
+               AND c.organization_id = ci.organization_id
+         LEFT JOIN organizations o
+                ON o.id = ci.organization_id
+        WHERE ci.id = $1 AND ci.status != 'draft'`,
+      [invoiceId]
+    );
+    if (invRes.rows.length === 0) return null;
+
+    const invoice = invRes.rows[0];
+    const linesRes = await db.query(
+      `SELECT cil.id, cil.line_no, cil.description, cil.quantity, cil.unit_price,
+              cil.tax_rate, cil.untaxed_amount, cil.tax_amount, cil.total_amount,
+              p.name AS product_name, p.sku AS product_sku
+         FROM customer_invoice_lines cil
+         LEFT JOIN products p ON p.id = cil.product_id
+        WHERE cil.customer_invoice_id = $1
+        ORDER BY cil.line_no`,
+      [invoiceId]
+    );
+
+    invoice.lines = linesRes.rows;
+    return invoice;
+  },
 };
 
 module.exports = salesRepository;

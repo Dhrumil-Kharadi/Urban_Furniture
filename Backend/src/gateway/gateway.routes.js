@@ -49,6 +49,11 @@ const verifyRateLimiter = rateLimit({
   handler: (req, res) => error(res, 'Too many verification attempts, please try again later.', 429),
 });
 
+// Public Gateway Endpoints (no auth required for direct customer invoice links)
+router.get('/public/config', gatewayController.getConfig);
+router.post('/public/create-order', orderRateLimiter, gatewayController.createPublicOrder);
+router.post('/public/verify-payment', verifyRateLimiter, gatewayController.verifyPublicPayment);
+
 router.use(authMiddleware.authenticate, resolveTenant);
 
 const PAYING_ROLES = ['customer', 'business_owner', 'accountant'];

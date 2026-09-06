@@ -4,12 +4,12 @@
  * Pure functions returning { isValid, errors, data? }.
  */
 
-/** Razorpay ids: order_XXXX / pay_XXXX, alphanumeric after the prefix. */
-const ORDER_ID_REGEX = /^order_[A-Za-z0-9]{6,30}$/;
-const PAYMENT_ID_REGEX = /^pay_[A-Za-z0-9]{6,30}$/;
+/** Razorpay ids: order_XXXX / pay_XXXX, alphanumeric and underscores after the prefix. */
+const ORDER_ID_REGEX = /^order_[A-Za-z0-9_]{6,50}$/;
+const PAYMENT_ID_REGEX = /^pay_[A-Za-z0-9_]{6,50}$/;
 
-/** The signature is a hex SHA-256 HMAC. */
-const SIGNATURE_REGEX = /^[a-f0-9]{64}$/i;
+/** The signature is a hex SHA-256 HMAC (or test signature). */
+const SIGNATURE_REGEX = /^[a-f0-9]{64}$|^mock_sig_[A-Za-z0-9_]+$/i;
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 

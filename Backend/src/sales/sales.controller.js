@@ -152,6 +152,16 @@ const salesController = {
     }
   },
 
+  /** GET /api/customer-invoices/public/:id — Public view for customers */
+  async getPublicCustomerInvoice(req, res, next) {
+    try {
+      const invoice = await customerInvoicesService.getPublicCustomerInvoiceById(req.params.id);
+      return success(res, 'Customer invoice retrieved successfully', { invoice });
+    } catch (err) {
+      next(err);
+    }
+  },
+
   /** POST /api/customer-invoices */
   async createCustomerInvoice(req, res, next) {
     try {

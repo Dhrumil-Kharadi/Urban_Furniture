@@ -50,7 +50,6 @@ export default function UsersManagementPage() {
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviting, setInviting] = useState(false);
-  const [busyId, setBusyId] = useState(null);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -96,20 +95,6 @@ export default function UsersManagementPage() {
     }
   };
 
-  const handleToggleStatus = async (user) => {
-    const nextStatus = user.status === 'active' ? 'inactive' : 'active';
-    setBusyId(user.id);
-    try {
-      await api.patch(`/users/${user.id}/status`, { status: nextStatus });
-      toast.success(t('statusUpdated'));
-      fetchUsers();
-    } catch (err) {
-      toast.error(err?.message || t('statusFailed'));
-    } finally {
-      setBusyId(null);
-    }
-  };
-
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return users;
@@ -145,31 +130,8 @@ export default function UsersManagementPage() {
         header: t('table.joined'),
         render: (u) => (u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'),
       },
-      {
-        key: 'actions',
-        header: t('table.actions'),
-        align: 'right',
-        render: (u) =>
-          // The owner's own account has no deactivate path — locking yourself
-          // out of the organization you own is not a state worth reaching.
-          u.role === 'business_owner' ? (
-            <span className="users-locked-note">{t('ownerLocked')}</span>
-          ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              loading={busyId === u.id}
-              disabled={busyId === u.id}
-              onClick={() => handleToggleStatus(u)}
-            >
-              {u.status === 'active' ? t('deactivate') : t('activate')}
-            </Button>
-          ),
-      },
     ],
-    // handleToggleStatus is stable enough for this list; it only closes over
-    // setters and fetchUsers.
-    [t, tDash, busyId], // eslint-disable-line react-hooks/exhaustive-deps
+    [t, tDash],
   );
 
   return (

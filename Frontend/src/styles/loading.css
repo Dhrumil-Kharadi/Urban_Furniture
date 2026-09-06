@@ -125,15 +125,15 @@
 }
 
 .stage-entering-loading .panel-center-loading {
-  animation: panelSlideDown-loading 2.6s cubic-bezier(0.22, 1, 0.36, 1) 0s both;
+  animation: panelSlideDown-loading 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0s both;
 }
 
 .stage-entering-loading .panel-right-loading {
-  animation: panelSlideDown-loading 2.6s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+  animation: panelSlideDown-loading 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
 }
 
 .stage-entering-loading .panel-left-loading {
-  animation: panelSlideDown-loading 2.6s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+  animation: panelSlideDown-loading 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
 }
 
 /* Covered State & Exiting Base State (Panels are solidly locked at 0% covering the viewport) */
@@ -142,17 +142,17 @@
   transform: translateY(0%);
 }
 
-/* Staggered Exit Animation (Panels retract back to Top) — 2.6s cinematic glide */
+/* Staggered Exit Animation (Panels retract back to Top) — 0.7s cinematic glide */
 .stage-exiting-loading .panel-center-loading {
-  animation: panelSlideUp-loading 2.6s cubic-bezier(0.65, 0, 0.35, 1) 0s both;
+  animation: panelSlideUp-loading 0.7s cubic-bezier(0.65, 0, 0.35, 1) 0s both;
 }
 
 .stage-exiting-loading .panel-left-loading {
-  animation: panelSlideUp-loading 2.6s cubic-bezier(0.65, 0, 0.35, 1) 0.2s both;
+  animation: panelSlideUp-loading 0.7s cubic-bezier(0.65, 0, 0.35, 1) 0.08s both;
 }
 
 .stage-exiting-loading .panel-right-loading {
-  animation: panelSlideUp-loading 2.6s cubic-bezier(0.65, 0, 0.35, 1) 0.38s both;
+  animation: panelSlideUp-loading 0.7s cubic-bezier(0.65, 0, 0.35, 1) 0.15s both;
 }
 
 /* Subtle background geometric grid in overlay */

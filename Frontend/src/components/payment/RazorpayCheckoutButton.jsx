@@ -38,16 +38,22 @@ import gatewayService, { loadCheckoutScript } from '@/services/gateway.service';
 
 /**
  * @param {object}   props
- * @param {string}   props.invoiceId - The only input. The server prices it.
- * @param {Function} [props.onPaid]  - Called with the verified, RECORDED result.
+ * @param {string}   props.invoiceId     - The only input. The server prices it.
+ * @param {Function} [props.onPaid]      - Called with the verified, RECORDED result.
  * @param {boolean}  [props.disabled]
  * @param {string}   [props.label]       - Overrides the default button text.
+ * @param {boolean}  [props.isPublic]    - True when paying from public/guest link.
+ * @param {string}   [props.customerName]
+ * @param {string}   [props.customerEmail]
  */
 export default function RazorpayCheckoutButton({
   invoiceId,
   onPaid,
   disabled = false,
   label,
+  isPublic = false,
+  customerName = '',
+  customerEmail = '',
 }) {
   const t = useTranslations('payment');
   const toast = useToast();
@@ -62,7 +68,9 @@ export default function RazorpayCheckoutButton({
       // The script is fetched only when someone actually intends to pay.
       await loadCheckoutScript();
 
-      const order = await gatewayService.createOrder(invoiceId);
+      const order = isPublic
+        ? await gatewayService.createPublicOrder(invoiceId)
+        : await gatewayService.createOrder(invoiceId);
 
       const checkout = new window.Razorpay({
         key: order.keyId,
@@ -72,8 +80,8 @@ export default function RazorpayCheckoutButton({
         name: 'Urban Furniture',
         description: t('description'),
         prefill: {
-          name: user?.name || '',
-          email: user?.email || '',
+          name: customerName || user?.name || '',
+          email: customerEmail || user?.email || '',
         },
 
         /** Razorpay calls this after a successful charge. */
@@ -81,11 +89,17 @@ export default function RazorpayCheckoutButton({
           try {
             // Nothing is treated as paid until the SERVER says the signature
             // holds. A response object is not proof.
-            const result = await gatewayService.verifyPayment({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            });
+            const result = isPublic
+              ? await gatewayService.verifyPublicPayment({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                })
+              : await gatewayService.verifyPayment({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                });
 
             // `duplicate` means a retry or a webhook already recorded it —
             // still a success for the payer, and still only credited once.
