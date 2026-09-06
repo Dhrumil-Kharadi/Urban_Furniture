@@ -26,6 +26,7 @@ import sidebarArt from '@/assets/STaCOFXUuo.gif';
 
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import BusinessOwnerChat from '@/components/dashboard/BusinessOwnerChat';
 import { useAuth } from '@/context/AuthContext';
 import { DASHBOARD_NAV, GENERAL_NAV, ICON } from '@/config/dashboard.config';
 import {
@@ -161,6 +162,7 @@ export default function DashboardFrame({
       <DashboardShell sidebar={sidebar} topbar={topbar}>
         {children}
       </DashboardShell>
+      <BusinessOwnerChat />
     </ProtectedRoute>
   );
 }
